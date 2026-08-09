@@ -17,10 +17,7 @@
 
     <section class="panel" aria-labelledby="counter-title">
       <div class="panel-head">
-        <div>
-          <p class="panel-kicker">INTERACTIVE TEST</p>
-          <h2 id="counter-title">Counter</h2>
-        </div>
+        <div><p class="panel-kicker">INTERACTIVE TEST</p><h2 id="counter-title">Counter</h2></div>
         <span id="stateBadge" class="badge">READY</span>
       </div>
 
@@ -33,25 +30,27 @@
         <button id="reset" class="btn btn-danger" type="button">RESET</button>
       </div>
 
+      <div class="step-tool" aria-labelledby="step-title">
+        <div><span class="tool-label" id="step-title">CUSTOM STEP</span><strong id="stepValue">5</strong></div>
+        <input id="stepRange" type="range" min="1" max="25" value="5" aria-label="カスタム増減値">
+        <div class="step-actions">
+          <button id="subtractStep" class="btn btn-small" type="button">− STEP</button>
+          <button id="addStep" class="btn btn-small" type="button">+ STEP</button>
+        </div>
+      </div>
+
       <div class="stats" aria-label="操作統計">
         <div><span>操作回数</span><strong id="actionCount">0</strong></div>
         <div><span>最大値</span><strong id="maxCount">0</strong></div>
       </div>
 
       <div class="history-wrap">
-        <div class="history-head">
-          <h3>History</h3>
-          <button id="clearHistory" class="text-btn" type="button">履歴を消す</button>
-        </div>
-        <ol id="history" class="history">
-          <li>まだ操作はありません</li>
-        </ol>
+        <div class="history-head"><h3>History</h3><button id="clearHistory" class="text-btn" type="button">履歴を消す</button></div>
+        <ol id="history" class="history"><li>まだ操作はありません</li></ol>
       </div>
     </section>
 
-    <footer>
-      <p>Repository: yusosha-usage-test</p>
-    </footer>
+    <footer><p>Repository: yusosha-usage-test</p></footer>
   </main>
   <script src="js/main.js"></script>
 </body>
