@@ -25,7 +25,28 @@
     state.history = state.history.slice(0, 8);
   }
 
-  function setBadge(text) { els.stateBadge.textContent = text; }
+  function setBadge(text) {
+    els.stateBadge.textContent = text;
+  }
+
+  function renderHistory() {
+    els.history.replaceChildren();
+
+    if (state.history.length === 0) {
+      const item = document.createElement('li');
+      item.textContent = 'まだ操作はありません';
+      els.history.append(item);
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    state.history.forEach(entry => {
+      const item = document.createElement('li');
+      item.textContent = entry;
+      fragment.append(item);
+    });
+    els.history.append(fragment);
+  }
 
   function render() {
     els.count.textContent = String(state.count);
@@ -34,12 +55,7 @@
     els.stepValue.textContent = String(state.step);
     els.addStep.textContent = `+${state.step}`;
     els.subtractStep.textContent = `−${state.step}`;
-
-    if (state.history.length === 0) {
-      els.history.innerHTML = '<li>まだ操作はありません</li>';
-      return;
-    }
-    els.history.innerHTML = state.history.map(item => `<li>${item}</li>`).join('');
+    renderHistory();
   }
 
   function changeCount(delta, label) {
