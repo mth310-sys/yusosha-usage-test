@@ -36,15 +36,11 @@
   <pattern id="carbon" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#080a0c"/><rect width="3" height="8" fill="#171a1d"/></pattern>
   <filter id="glow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="3.6" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
 </defs>
-
-<!-- structural dark body -->
 <path d="M15 3H375L390 28V572L368 599H22L0 572V28Z" fill="url(#armor)"/>
 <path d="M0 28L33 5L66 24L62 571L39 598L0 575Z" fill="url(#chrome)" stroke="#111" stroke-width="2"/>
 <path d="M390 28L357 5L324 24L328 571L351 598L390 575Z" fill="url(#chrome)" stroke="#111" stroke-width="2"/>
 <path d="M7 35L28 18L55 31L52 558L34 580L8 563Z" fill="url(#carbon)"/>
 <path d="M383 35L362 18L335 31L338 558L356 580L382 563Z" fill="url(#carbon)"/>
-
-<!-- chrome fins -->
 <g class="fins" fill="url(#chrome)" stroke="#15181b" stroke-width="1.4">
 <path d="M1 45L57 19L49 48L9 69Z"/><path d="M389 45L333 19L341 48L381 69Z"/>
 <path d="M1 126L57 100L49 129L9 150Z"/><path d="M389 126L333 100L341 129L381 150Z"/>
@@ -54,8 +50,6 @@
 <path d="M1 450L57 424L49 453L9 474Z"/><path d="M389 450L333 424L341 453L381 474Z"/>
 <path d="M1 531L57 505L49 534L9 555Z"/><path d="M389 531L333 505L341 534L381 555Z"/>
 </g>
-
-<!-- jewel optics -->
 <g class="jewels" fill="url(#crystal)" stroke="#fff0a0" stroke-width="1.5" filter="url(#glow)">
 <polygon points="13,60 36,42 58,57 55,116 35,135 11,116"/><polygon points="377,60 354,42 332,57 335,116 355,135 379,116"/>
 <polygon points="9,139 34,124 58,141 56,199 33,217 7,196"/><polygon points="381,139 356,124 332,141 334,199 357,217 383,196"/>
@@ -64,74 +58,32 @@
 <polygon points="7,382 34,366 58,386 56,443 32,463 5,439"/><polygon points="383,382 356,366 332,386 334,443 358,463 385,439"/>
 <polygon points="10,464 37,448 60,469 56,529 34,548 8,524"/><polygon points="380,464 353,448 330,469 334,529 356,548 382,524"/>
 </g>
-
-<!-- visible point LED sources behind optics -->
 <g class="led-sources" fill="url(#led)" filter="url(#glow)">
-<circle cx="31" cy="71" r="5"/><circle cx="43" cy="89" r="5"/><circle cx="30" cy="107" r="5"/>
-<circle cx="359" cy="71" r="5"/><circle cx="347" cy="89" r="5"/><circle cx="360" cy="107" r="5"/>
-<circle cx="29" cy="152" r="5"/><circle cx="42" cy="170" r="5"/><circle cx="29" cy="188" r="5"/>
-<circle cx="361" cy="152" r="5"/><circle cx="348" cy="170" r="5"/><circle cx="361" cy="188" r="5"/>
-<circle cx="29" cy="232" r="5"/><circle cx="42" cy="250" r="5"/><circle cx="29" cy="268" r="5"/>
-<circle cx="361" cy="232" r="5"/><circle cx="348" cy="250" r="5"/><circle cx="361" cy="268" r="5"/>
-<circle cx="29" cy="313" r="5"/><circle cx="42" cy="331" r="5"/><circle cx="29" cy="349" r="5"/>
-<circle cx="361" cy="313" r="5"/><circle cx="348" cy="331" r="5"/><circle cx="361" cy="349" r="5"/>
-<circle cx="29" cy="395" r="5"/><circle cx="42" cy="413" r="5"/><circle cx="29" cy="431" r="5"/>
-<circle cx="361" cy="395" r="5"/><circle cx="348" cy="413" r="5"/><circle cx="361" cy="431" r="5"/>
-<circle cx="30" cy="478" r="5"/><circle cx="43" cy="496" r="5"/><circle cx="30" cy="514" r="5"/>
-<circle cx="360" cy="478" r="5"/><circle cx="347" cy="496" r="5"/><circle cx="360" cy="514" r="5"/>
+<circle cx="31" cy="71" r="5"/><circle cx="43" cy="89" r="5"/><circle cx="30" cy="107" r="5"/><circle cx="359" cy="71" r="5"/><circle cx="347" cy="89" r="5"/><circle cx="360" cy="107" r="5"/>
+<circle cx="29" cy="152" r="5"/><circle cx="42" cy="170" r="5"/><circle cx="29" cy="188" r="5"/><circle cx="361" cy="152" r="5"/><circle cx="348" cy="170" r="5"/><circle cx="361" cy="188" r="5"/>
+<circle cx="29" cy="232" r="5"/><circle cx="42" cy="250" r="5"/><circle cx="29" cy="268" r="5"/><circle cx="361" cy="232" r="5"/><circle cx="348" cy="250" r="5"/><circle cx="361" cy="268" r="5"/>
+<circle cx="29" cy="313" r="5"/><circle cx="42" cy="331" r="5"/><circle cx="29" cy="349" r="5"/><circle cx="361" cy="313" r="5"/><circle cx="348" cy="331" r="5"/><circle cx="361" cy="349" r="5"/>
+<circle cx="29" cy="395" r="5"/><circle cx="42" cy="413" r="5"/><circle cx="29" cy="431" r="5"/><circle cx="361" cy="395" r="5"/><circle cx="348" cy="413" r="5"/><circle cx="361" cy="431" r="5"/>
+<circle cx="30" cy="478" r="5"/><circle cx="43" cy="496" r="5"/><circle cx="30" cy="514" r="5"/><circle cx="360" cy="478" r="5"/><circle cx="347" cy="496" r="5"/><circle cx="360" cy="514" r="5"/>
 </g>
-
-<!-- crown / lower armor -->
-<path d="M55 4H144L157 35L65 50L49 30Z" fill="url(#crystal)" stroke="#fff0a0"/>
-<path d="M335 4H246L233 35L325 50L341 30Z" fill="url(#crystal)" stroke="#fff0a0"/>
+<path d="M55 4H144L157 35L65 50L49 30Z" fill="url(#crystal)" stroke="#fff0a0"/><path d="M335 4H246L233 35L325 50L341 30Z" fill="url(#crystal)" stroke="#fff0a0"/>
 <g fill="url(#chrome)" stroke="#171a1d"><path d="M135 43L152 3L170 40Z"/><path d="M151 42L174 0L187 41Z"/><path d="M171 41L195 0L219 41Z"/><path d="M203 41L216 0L239 42Z"/><path d="M220 40L238 3L255 43Z"/></g>
-<path d="M43 571L121 548L154 579L132 600H51L31 588Z" fill="url(#crystal)" stroke="#fff0a0"/>
-<path d="M347 571L269 548L236 579L258 600H339L359 588Z" fill="url(#crystal)" stroke="#fff0a0"/>
-<path d="M149 577L173 552H217L241 577L222 600H168Z" fill="url(#crystal)" stroke="#fff0a0"/>
-
-<!-- borders around functional openings -->
-<g fill="none" stroke="url(#chrome)" stroke-width="6">
-<rect x="64" y="58" width="262" height="165" rx="4"/><rect x="78" y="238" width="234" height="92" rx="3"/><rect x="78" y="340" width="234" height="30" rx="2"/><rect x="70" y="382" width="250" height="30" rx="2"/><rect x="70" y="422" width="250" height="40" rx="3"/><rect x="64" y="474" width="262" height="98" rx="3"/>
-</g>
+<path d="M43 571L121 548L154 579L132 600H51L31 588Z" fill="url(#crystal)" stroke="#fff0a0"/><path d="M347 571L269 548L236 579L258 600H339L359 588Z" fill="url(#crystal)" stroke="#fff0a0"/><path d="M149 577L173 552H217L241 577L222 600H168Z" fill="url(#crystal)" stroke="#fff0a0"/>
+<g fill="none" stroke="url(#chrome)" stroke-width="6"><rect x="64" y="58" width="262" height="165" rx="4"/><rect x="78" y="238" width="234" height="92" rx="3"/><rect x="78" y="340" width="234" height="30" rx="2"/><rect x="70" y="382" width="250" height="30" rx="2"/><rect x="70" y="422" width="250" height="40" rx="3"/><rect x="64" y="474" width="262" height="98" rx="3"/></g>
 <path d="M18 4H372L388 30V570L366 597H24L2 570V30Z" fill="none" stroke="url(#chrome)" stroke-width="4"/>
 </svg>
 
-<!-- functional content -->
-<div class="display-window">
-  <div class="display-grid"></div><div id="displayText" class="display-text">F7<br><span>PERFORMANCE TEST</span></div>
-</div>
-
-<div class="reel-window" aria-label="3リール">
-  <div class="reel" data-reel="0"><div class="strip">7<br>BAR<br>◆<br>CHERRY<br>REPLAY<br>7<br>BAR<br>◆<br>CHERRY<br>REPLAY</div></div>
-  <div class="reel" data-reel="1"><div class="strip">BAR<br>◆<br>7<br>REPLAY<br>CHERRY<br>BAR<br>◆<br>7<br>REPLAY<br>CHERRY</div></div>
-  <div class="reel" data-reel="2"><div class="strip">◆<br>CHERRY<br>BAR<br>7<br>REPLAY<br>◆<br>CHERRY<br>BAR<br>7<br>REPLAY</div></div>
-</div>
-
+<div class="display-window"><div class="display-grid"></div><div id="displayText" class="display-text">F7<br><span>PERFORMANCE TEST</span></div><div id="bonusMeter" class="bonus-meter" hidden><b>BONUS</b><span><strong id="bonusGet">0</strong> / 240</span></div></div>
+<div class="reel-window" aria-label="3リール"><div class="payline"></div><div class="reel" data-reel="0"></div><div class="reel" data-reel="1"></div><div class="reel" data-reel="2"></div></div>
 <div id="message" class="message">READY</div>
-<div class="bet-row"><span>BET</span><strong id="bet">0</strong><button id="maxBet" type="button">MAX BET</button><span>CREDIT</span><strong id="credit">99</strong></div>
-<div class="control-row">
-  <button id="start" class="start" type="button">START</button>
-  <button class="stop" data-stop="0" type="button">STOP</button>
-  <button class="stop" data-stop="1" type="button">STOP</button>
-  <button class="stop" data-stop="2" type="button">STOP</button>
-</div>
+<div class="bet-row"><span>BET</span><strong id="bet">0</strong><button id="maxBet" type="button">MAX BET</button><span>PAY</span><strong id="payout">0</strong><span>CREDIT</span><strong id="credit">99</strong></div>
+<div class="control-row"><button id="start" class="start" type="button">START</button><button class="stop" data-stop="0" type="button">STOP</button><button class="stop" data-stop="1" type="button">STOP</button><button class="stop" data-stop="2" type="button">STOP</button></div>
 <div class="lower-panel"><div class="lower-core">F7<br><span>HIGH DETAIL / FULL LED</span></div></div>
-
-<!-- LED systems beyond jewels -->
-<div class="edge-led edge-left"></div><div class="edge-led edge-right"></div>
-<div class="bezel-led display-led"></div><div class="bezel-led reel-led"></div>
-<div class="deck-led"></div><div class="bottom-led"></div>
+<div class="edge-led edge-left"></div><div class="edge-led edge-right"></div><div class="bezel-led display-led"></div><div class="bezel-led reel-led"></div><div class="deck-led"></div><div class="bottom-led"></div>
 </div>
 </section>
-
-<section class="test-controls">
-  <button id="ledToggle" type="button">LED ON/OFF</button>
-  <button id="displayLoad" type="button">DISPLAY LOAD</button>
-  <button id="reelLoad" type="button">REELS LOAD</button>
-  <button id="resetTest" type="button">RESET</button>
-</section>
-
-<p class="note">FULL LOAD = 3リール回転 + 液晶アニメーション + 全LED + Glow + 入力監視を同時実行。</p>
+<section class="test-controls"><button id="ledToggle" type="button">LED ON/OFF</button><button id="displayLoad" type="button">DISPLAY LOAD</button><button id="reelLoad" type="button">REELS LOAD</button><button id="resetTest" type="button">RESET</button></section>
+<p class="note">通常小役は払い出し0枚。7・7・7でBONUS。BONUS中は入賞ごとに3枚、獲得240枚で終了。FULL LOADは描画負荷試験を継続。</p>
 </main>
 <script src="main.js"></script>
 </body>
