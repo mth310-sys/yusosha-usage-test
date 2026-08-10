@@ -74,6 +74,8 @@
     if(typeof isSpinning!=='undefined'&&isSpinning)bits.push('REELS');
     if(typeof ledOn!=='undefined')bits.push(ledOn?'LED':'LED-OFF');
     if(typeof displayHeavy!=='undefined'&&displayHeavy)bits.push('DISPLAY');
+    if(typeof window.motionMode!=='undefined'&&window.motionMode===1)bits.push('MOTION1');
+    if(typeof window.motionMode!=='undefined'&&window.motionMode===2)bits.push('MOTION2');
     return bits.join('+');
   }
 
