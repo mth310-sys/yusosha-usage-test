@@ -20,6 +20,7 @@ export class GameLogger {
       r.transitionSource ? `TRANSITION_SRC ${r.transitionSource}` : '',
       r.pendingReward ? `PENDING ${r.pendingReward.type}` : '',
       r.cz ? `CZ ${r.cz.type} ${r.cz.state} RESULT_${r.cz.result} SCN_${r.cz.scenario} G${r.cz.gameCount}/${r.cz.totalGames} REM${r.cz.remainingGames}` : '',
+      r.rize ? `RIZE ${r.rize.variant} ${r.rize.state} BG_${r.rize.background} CONF_${r.rize.backgroundConfidence}% RESULT_${r.rize.result}` : '',
       r.event ? `EVENT ${r.event}` : '',
       r.wantedEntrySource ? `WANTED_SRC ${r.wantedEntrySource}` : '',
       `ROLE ${r.role}`,
