@@ -32,6 +32,8 @@ export function renderState(core, logger) {
   document.getElementById('wanted').textContent = String(s.normal.wantedCount);
   document.getElementById('wantedTarget').textContent = `${s.normal.wantedTargetZone.min}-${s.normal.wantedTargetZone.max}G`;
   document.getElementById('wantedState').textContent = s.normal.wantedState;
+  document.getElementById('wantedChanceGames').textContent = String(s.normal.wantedChanceGameCount);
+  document.getElementById('holdCapacity').textContent = s.normal.holdCapacity == null ? '---' : String(s.normal.holdCapacity);
   document.getElementById('credit').textContent = String(s.credit);
   document.getElementById('bet').textContent = String(s.bet);
   document.getElementById('payout').textContent = String(s.payout);
