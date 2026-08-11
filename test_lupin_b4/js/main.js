@@ -1,11 +1,40 @@
-import { GameCore } from './game-core.js?v=step6o';
-import { GameLogger } from './logger.js?v=step6o';
-import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step6o';
-import { runFastSimulation, formatSimulationReport, runRaiunCycleSimulation, formatRaiunCycleReport, runRaiunArtSimulation, formatRaiunArtReport, runShinRaiunLegendGateSimulation, formatShinRaiunLegendGateReport } from './simulator.js?v=step6o';
+import { GameCore } from './game-core.js?v=step6p';
+import { GameLogger } from './logger.js?v=step6p';
+import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step6p';
+import { runFastSimulation, formatSimulationReport, runRaiunCycleSimulation, formatRaiunCycleReport, runRaiunArtSimulation, formatRaiunArtReport, runShinRaiunLegendGateSimulation, formatShinRaiunLegendGateReport } from './simulator.js?v=step6p';
 
 const core=new GameCore({setting:1});const logger=new GameLogger();
 const $=id=>document.getElementById(id);
 const betButton=$('betButton'),leverButton=$('leverButton'),stopButtons=[...document.querySelectorAll('[data-stop]')],settingSelect=$('settingSelect'),wantedSeek=$('wantedSeek'),holdTypeSelect=$('holdTypeSelect'),holdInject=$('holdInject'),czSuccess=$('czSuccess'),czFail=$('czFail'),rizeEnter=$('rizeEnter'),shinRizeEnter=$('shinRizeEnter'),rizeBackgroundSelect=$('rizeBackgroundSelect'),rizeBackgroundSet=$('rizeBackgroundSet'),rizeSuccess=$('rizeSuccess'),rizeFail=$('rizeFail'),raiunLevelSelect=$('raiunLevelSelect'),raiunSeek=$('raiunSeek'),raiunEnter=$('raiunEnter'),shinRaiunEnter=$('shinRaiunEnter'),raiunSuccess=$('raiunSuccess'),raiunFail=$('raiunFail'),legendGateEnter=$('legendGateEnter'),legendGateMedalSelect=$('legendGateMedalSelect'),legendGateMedalSet=$('legendGateMedalSet'),goldenTimeEnter=$('goldenTimeEnter'),goldenTimePendingStart=$('goldenTimePendingStart'),goldenTimeStockSelect=$('goldenTimeStockSelect'),goldenTimeStockAdd=$('goldenTimeStockAdd'),goldenTimeTreasureSelect=$('goldenTimeTreasureSelect'),goldenTimeTreasureSet=$('goldenTimeTreasureSet'),lupinRushTypeSelect=$('lupinRushTypeSelect'),lupinRushApplyAverage=$('lupinRushApplyAverage'),gtStageSelect=$('gtStageSelect'),gtStageSet=$('gtStageSet'),goldChanceAddedSelect=$('goldChanceAddedSelect'),goldChanceApply=$('goldChanceApply'),extraBonusStart=$('extraBonusStart'),extraSevenForce=$('extraSevenForce'),revengeStart=$('revengeStart'),revengeSkip=$('revengeSkip'),revengeLb=$('revengeLb'),revengeArt=$('revengeArt'),lupinBonusEnter=$('lupinBonusEnter'),lupinBonusEarlyWin=$('lupinBonusEarlyWin'),lupinBonusTypewriterWin=$('lupinBonusTypewriterWin'),simButton=$('simButton'),simLog=$('simLog'),raiunSimButton=$('raiunSimButton'),raiunSimLog=$('raiunSimLog'),raiunArtSimButton=$('raiunArtSimButton'),raiunArtSimLog=$('raiunArtSimLog'),shinLegendSimButton=$('shinLegendSimButton'),shinLegendSimLog=$('shinLegendSimLog');
+
+function installNormalHitRouter(){
+  const gameLog=$('log')?.closest('.panel');
+  if(!gameLog||$('normalHitRouter'))return;
+  const panel=document.createElement('section');panel.className='panel';panel.id='normalHitRouter';
+  panel.innerHTML='<h2>NORMAL HIT ROUTER / STEP 6P</h2><p class="note">金・玉ちゃん・不二子虎柄保留、CZ成功、RIZE成功は解析上「LUPIN BONUS or GOLDEN TIME」まで確定。振り分け率は未確認なので自動抽選せず、ここで検証先だけ選択する。SEVEN ZONEはGT確定の既存ルートを使用。</p><div class="panel-head"><button id="normalHitToLb" type="button">LB_OR_GT → LUPIN BONUS</button><button id="normalHitToGt" type="button">LB_OR_GT → GOLDEN TIME</button></div><pre id="normalHitRouteState">PENDING REWARD が LB_OR_GT の時だけ有効</pre>';
+  gameLog.parentNode.insertBefore(panel,gameLog);
+}
+installNormalHitRouter();
+const normalHitToLb=$('normalHitToLb'),normalHitToGt=$('normalHitToGt'),normalHitRouteState=$('normalHitRouteState');
+function routeNormalHit(destination){
+  const p=core.normal?.pendingReward;
+  if(!p||p.type!=='LB_OR_GT'){
+    normalHitRouteState.textContent='NO LB_OR_GT PENDING';return false;
+  }
+  const source=p.source;
+  let ok=false;
+  if(destination==='LUPIN_BONUS'){
+    ok=core.startLupinBonusForTest();
+    if(ok){core.lupinBonus.source=`NORMAL_${source}_DEBUG_DESTINATION`;p.status='ROUTED_TO_LUPIN_BONUS_STEP6P';}
+  }else if(destination==='GOLDEN_TIME'){
+    ok=core.startGoldenTimeForTest(0);
+    if(ok){core.goldenTime.entrySource=`NORMAL_${source}_DEBUG_DESTINATION`;p.status='ROUTED_TO_GOLDEN_TIME_STEP6P';}
+  }
+  normalHitRouteState.textContent=ok?`${source} → ${destination} / DEBUG DESTINATION ONLY`:'ROUTE BLOCKED';
+  renderState(core,logger);return ok;
+}
+normalHitToLb.addEventListener('click',()=>routeNormalHit('LUPIN_BONUS'));
+normalHitToGt.addEventListener('click',()=>routeNormalHit('GOLDEN_TIME'));
 
 betButton.addEventListener('click',()=>{core.bet();renderState(core,logger);});
 leverButton.addEventListener('click',()=>{const x=core.lever();if(x)startReelAnimation();renderState(core,logger);});
