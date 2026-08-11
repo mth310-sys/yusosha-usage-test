@@ -1,8 +1,8 @@
 import { RNG } from './rng.js';
 import { getSettingProfile } from './setting-profile.js';
 import { drawRole, expectedRoleRates } from './role-lottery.js';
-import { RAIUN_POINT_MODEL, drawInitialRaiunPoints, rollRaiunPointAdd, drawRaiunPointAdd } from './raiun-point-model.js?v=step5e';
-import { RAIUN_PROFILE, rollRaiunArtCalibrated } from './raiun-profile.js?v=step5e';
+import { RAIUN_POINT_MODEL, drawInitialRaiunPoints, rollRaiunPointAdd, drawRaiunPointAdd } from './raiun-point-model.js?v=step5f';
+import { RAIUN_PROFILE, rollRaiunArtCalibrated, rollShinRaiunLegendGate } from './raiun-profile.js?v=step5f';
 
 export function runFastSimulation({setting=1, games=100000, seed=0x13572468} = {}) {
   const profile = getSettingProfile(setting);
@@ -54,14 +54,10 @@ export function runRaiunArtSimulation({sessions=100000, seed=0x579BDF13} = {}) {
   let hits=0,totalGames=0;
   const hitGameCounts = Array(RAIUN_PROFILE.mode.normalGames).fill(0);
   for (let s=0; s<sessions; s++) {
-    let hit=false;
     for (let g=1; g<=RAIUN_PROFILE.mode.normalGames; g++) {
       totalGames+=1;
-      if (rollRaiunArtCalibrated(rng)) {
-        hits+=1; hit=true; hitGameCounts[g-1]+=1; break;
-      }
+      if (rollRaiunArtCalibrated(rng)) { hits+=1; hitGameCounts[g-1]+=1; break; }
     }
-    if (!hit) continue;
   }
   return {sessions,hits,misses:sessions-hits,observedExpectation:hits/sessions*100,targetExpectation:RAIUN_PROFILE.mode.artExpectation,perGameDenominator:RAIUN_PROFILE.mode.calibratedPerGameDenominator,modelSource:RAIUN_PROFILE.mode.artModelSource,avgGamesPlayed:totalGames/sessions,hitGameCounts};
 }
@@ -69,4 +65,16 @@ export function runRaiunArtSimulation({sessions=100000, seed=0x579BDF13} = {}) {
 export function formatRaiunArtReport(report) {
   const delta=report.observedExpectation-report.targetExpectation;
   return ['RAIUN 20G ART CALIBRATION SIM',`SESSIONS ${report.sessions.toLocaleString()}`,`MODEL ${report.modelSource}`,'',`PER-GAME RATE     1/${report.perGameDenominator.toFixed(2)}  CALIBRATED`,`ART HIT           ${report.hits.toLocaleString()}`,`ART MISS          ${report.misses.toLocaleString()}`,`OBSERVED ART      ${report.observedExpectation.toFixed(3)}%`,`TARGET ART        ${report.targetExpectation.toFixed(3)}%`,`DELTA             ${delta>=0?'+':''}${delta.toFixed(3)}pt`,`AVG G PLAYED      ${report.avgGamesPlayed.toFixed(3)}`,'','NOTE: 1G rate is not a published analysis value; it is derived from the verified 20G / ~23% aggregate expectation.'].join('\n');
+}
+
+export function runShinRaiunLegendGateSimulation({games=100000, seed=0x68ACE024} = {}) {
+  const rng = new RNG(seed);
+  let hits=0;
+  for(let g=0;g<games;g++) if(rollShinRaiunLegendGate(rng)) hits+=1;
+  return {games,hits,observedDenominator:hits?games/hits:Infinity,targetDenominator:RAIUN_PROFILE.mode.shinLegendGateDenominator,source:RAIUN_PROFILE.mode.shinLegendGateSource};
+}
+
+export function formatShinRaiunLegendGateReport(report) {
+  const delta=Number.isFinite(report.observedDenominator)?report.observedDenominator-report.targetDenominator:Infinity;
+  return ['SHIN RAIUN / LEGEND GATE SIM',`GAMES ${report.games.toLocaleString()}`,`SOURCE ${report.source}`,'',`HITS              ${report.hits.toLocaleString()}`,`OBSERVED RATE     ${Number.isFinite(report.observedDenominator)?`1/${report.observedDenominator.toFixed(3)}`:'-'}`,`TARGET RATE       1/${report.targetDenominator.toFixed(1)}`,`DENOM DELTA       ${Number.isFinite(delta)?`${delta>=0?'+':''}${delta.toFixed(3)}`:'-'}`,'','NOTE: This validates only the published LEGEND GATE occurrence rate. Ordinary Shin Raiun ART probability remains unimplemented.'].join('\n');
 }
