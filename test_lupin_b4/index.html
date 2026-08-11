@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#050505">
   <title>LUPIN B4 Core Test</title>
-  <link rel="stylesheet" href="./css/debug.css?v=step5d">
+  <link rel="stylesheet" href="./css/debug.css?v=step5e">
 </head>
 <body>
   <main class="debug">
@@ -26,12 +26,13 @@
     <section class="panel"><h2>VERIFIED HOLD TEST</h2><div class="panel-head"><select id="holdTypeSelect" disabled><option value="GOLD">GOLD → LB/GT</option><option value="TAMACHAN">TAMACHAN → LB/GT</option><option value="FUJIKO_TIGER">FUJIKO TIGER → LB/GT</option><option value="SEVEN_ZONE">SEVEN ZONE → GT確定</option><option value="DOROBO_ZONE">DOROBO ZONE</option><option value="FUJIKO_ZONE">FUJIKO ZONE</option><option value="PREMIUM">PREMIUM</option></select><button id="holdInject" type="button" disabled>INJECT NEXT HOLD</button></div></section>
     <section class="panel"><h2>CZ RESULT TEST</h2><div class="panel-head"><button id="czSuccess" type="button" disabled>FORCE SUCCESS</button><button id="czFail" type="button" disabled>FORCE FAIL</button></div></section>
     <section class="panel"><h2>RIZE ZONE TEST</h2><div class="panel-head"><button id="rizeEnter" type="button">ENTER RIZE</button><button id="shinRizeEnter" type="button">ENTER 真RIZE</button></div><div class="panel-head"><select id="rizeBackgroundSelect" disabled><option value="BLUE">BLUE</option><option value="YELLOW">YELLOW</option><option value="GREEN">GREEN</option><option value="RED">RED</option><option value="PURPLE">PURPLE</option><option value="RAINBOW">RAINBOW</option></select><button id="rizeBackgroundSet" type="button" disabled>SET BG</button><button id="rizeSuccess" type="button" disabled>FORCE SUCCESS</button><button id="rizeFail" type="button" disabled>FORCE FAIL</button></div></section>
-    <section class="panel"><h2>RAIUN SYSTEM TEST</h2><div class="panel-head"><select id="raiunLevelSelect"><option value="LOW">LOW / 1/30.5</option><option value="HIGH">HIGH / 1/13.3</option></select><button id="raiunSeek" type="button">SEEK 100pt</button></div><div class="panel-head"><button id="raiunEnter" type="button">ENTER 雷雲</button><button id="shinRaiunEnter" type="button">ENTER 真・雷雲</button><button id="raiunSuccess" type="button" disabled>FORCE 7 / ART</button><button id="raiunFail" type="button" disabled>FORCE FAIL</button></div><p class="note">Step 5D: Raiun point gameplay calibration is LOCKED at effective 1/7.96. RAW published values remain unchanged and separately identified.</p></section>
+    <section class="panel"><h2>RAIUN SYSTEM TEST</h2><div class="panel-head"><select id="raiunLevelSelect"><option value="LOW">LOW / 1/30.5</option><option value="HIGH">HIGH / 1/13.3</option></select><button id="raiunSeek" type="button">SEEK 100pt</button></div><div class="panel-head"><button id="raiunEnter" type="button">ENTER 雷雲</button><button id="shinRaiunEnter" type="button">ENTER 真・雷雲</button><button id="raiunSuccess" type="button" disabled>FORCE 7 / ART</button><button id="raiunFail" type="button" disabled>FORCE FAIL</button></div><p class="note">Step 5E: normal 20G Raiun now uses an isolated CALIBRATED per-game ART lottery derived from the published ~23% cumulative expectation. 真・雷雲 remains separate because its per-game ART rate is still unverified.</p></section>
     <section class="panel"><h2>GAME LOG / LAST 30G</h2><pre id="log">NO DATA</pre></section>
     <section class="panel"><div class="panel-head"><h2>FAST SIM / ROLE LOTTERY</h2><button id="simButton" type="button">100,000G RUN</button></div><pre id="simLog">NOT RUN</pre></section>
-    <section class="panel"><div class="panel-head"><h2>RAIUN CYCLE CALIBRATION</h2><button id="raiunSimButton" type="button">100,000 CYCLES RUN</button></div><pre id="raiunSimLog">NOT RUN</pre><p class="note">Locked target: average initial 22.6pt, average 3.3pt/add, effective add rate about 1/7.96, and average arrival near published ~190G.</p></section>
-    <p class="note">Step 5D: Raiun calibration is now fixed; later changes to verified source data can reopen it without altering RAW records.</p>
+    <section class="panel"><div class="panel-head"><h2>RAIUN CYCLE CALIBRATION</h2><button id="raiunSimButton" type="button">100,000 CYCLES RUN</button></div><pre id="raiunSimLog">NOT RUN</pre></section>
+    <section class="panel"><div class="panel-head"><h2>RAIUN 20G ART CALIBRATION</h2><button id="raiunArtSimButton" type="button">100,000 SESSIONS RUN</button></div><pre id="raiunArtSimLog">NOT RUN</pre><p class="note">Checks that the derived per-game rate (~1/77.02) converges to the published ~23% ART expectation over a maximum of 20 games.</p></section>
+    <p class="note">Step 5E: normal Raiun ART routing is now automatic; published aggregate values and calibrated derived values remain explicitly separated.</p>
   </main>
-  <script type="module" src="./js/main.js?v=step5d"></script>
+  <script type="module" src="./js/main.js?v=step5e"></script>
 </body>
 </html>
