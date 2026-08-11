@@ -23,6 +23,7 @@ export function renderState(core,logger){
   document.getElementById('czType').textContent=cz?.type??'---';
   document.getElementById('czState').textContent=cz?.state??'---';
   document.getElementById('czScenario').textContent=cz?.scenario??'---';
+  document.getElementById('czResult').textContent=cz?.result??'---';
   document.getElementById('czGames').textContent=cz?String(cz.gameCount):'---';
   document.getElementById('czRemain').textContent=cz?String(cz.remainingGames):'---';
   document.getElementById('czTotal').textContent=cz?String(cz.totalGames):'---';
@@ -37,6 +38,9 @@ export function renderState(core,logger){
   document.getElementById('wantedSeek').disabled=s.phase!=='WAIT_BET'||s.normal.mode!=='NORMAL';
   document.getElementById('holdInject').disabled=s.phase!=='WAIT_BET'||s.normal.mode!=='WANTED_CHANCE';
   document.getElementById('holdTypeSelect').disabled=s.normal.mode!=='WANTED_CHANCE';
+  const doroboReady=s.phase==='WAIT_BET'&&s.normal.mode==='DOROBO_ZONE'&&!!cz;
+  document.getElementById('czSuccess').disabled=!doroboReady;
+  document.getElementById('czFail').disabled=!doroboReady;
   document.querySelectorAll('[data-stop]').forEach(button=>{const i=Number(button.dataset.stop);button.disabled=s.phase!=='SPINNING'||s.reels.stopped[i];});
   document.getElementById('stopOrder').textContent=s.reels.stopOrder.length?s.reels.stopOrder.map(i=>['L','C','R'][i]).join(' → '):'---';
   document.getElementById('log').textContent=logger.toText();
