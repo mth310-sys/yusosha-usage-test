@@ -31,6 +31,7 @@ export function renderState(core, logger) {
   document.getElementById('normalGames').textContent = String(s.normal.gameCount);
   document.getElementById('wanted').textContent = String(s.normal.wantedCount);
   document.getElementById('wantedTarget').textContent = `${s.normal.wantedTargetZone.min}-${s.normal.wantedTargetZone.max}G`;
+  document.getElementById('wantedState').textContent = s.normal.wantedState;
   document.getElementById('credit').textContent = String(s.credit);
   document.getElementById('bet').textContent = String(s.bet);
   document.getElementById('payout').textContent = String(s.payout);
@@ -39,6 +40,7 @@ export function renderState(core, logger) {
   document.getElementById('betButton').disabled = s.phase !== 'WAIT_BET' || !core.creditSystem.canBet();
   document.getElementById('leverButton').disabled = s.phase !== 'WAIT_LEVER';
   document.getElementById('settingSelect').disabled = s.phase !== 'WAIT_BET';
+  document.getElementById('wantedSeek').disabled = s.phase !== 'WAIT_BET' || s.normal.mode !== 'NORMAL';
 
   document.querySelectorAll('[data-stop]').forEach(button => {
     const i = Number(button.dataset.stop);
