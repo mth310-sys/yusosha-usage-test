@@ -1,7 +1,7 @@
-import { GameCore } from './game-core.js?v=step6i';
-import { GameLogger } from './logger.js?v=step6i';
-import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step6i';
-import { runFastSimulation, formatSimulationReport, runRaiunCycleSimulation, formatRaiunCycleReport, runRaiunArtSimulation, formatRaiunArtReport, runShinRaiunLegendGateSimulation, formatShinRaiunLegendGateReport } from './simulator.js?v=step6i';
+import { GameCore } from './game-core.js?v=step6j';
+import { GameLogger } from './logger.js?v=step6j';
+import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step6j';
+import { runFastSimulation, formatSimulationReport, runRaiunCycleSimulation, formatRaiunCycleReport, runRaiunArtSimulation, formatRaiunArtReport, runShinRaiunLegendGateSimulation, formatShinRaiunLegendGateReport } from './simulator.js?v=step6j';
 
 const core=new GameCore({setting:1});const logger=new GameLogger();
 const $=id=>document.getElementById(id);
