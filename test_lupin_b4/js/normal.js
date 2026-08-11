@@ -1,14 +1,13 @@
-import { drawWantedInitialZone } from './wanted-profile.js?v=step4d';
-import { HoldQueue } from './hold-queue.js?v=step4d';
-import { drawCzLength, drawCzScenario } from './cz-profile.js?v=step4d';
+import { drawWantedInitialZone } from './wanted-profile.js?v=step4e';
+import { HoldQueue } from './hold-queue.js?v=step4e';
+import { drawCzLength, drawCzScenario } from './cz-profile.js?v=step4e';
 
 const DIRECT_ZONE_EVENTS = new Set(['DOROBO_ZONE','FUJIKO_ZONE','SEVEN_ZONE']);
 const SUPPORTED_CZ_TYPES = new Set(['DOROBO_ZONE','FUJIKO_ZONE']);
 
-// Step 4D: DOROBO_ZONE and FUJIKO_ZONE share a verified CZ container.
-// Both use the published setting-dependent 10G/20G duration and A-D scenario tables.
-// Published analysis confirms number alignment = success, but per-game/scenario hit rates are not public.
-// Therefore random success remains disabled; debug injection verifies SUCCESS/FAIL routing only.
+// Step 4E: DOROBO_ZONE/FUJIKO_ZONE remain shared probabilistic CZ containers.
+// SEVEN_ZONE is intentionally separate: published analysis confirms entry itself guarantees ART/GOLDEN TIME.
+// SEVEN_ZONE duration/presentation length is not verified, so no invented game count is added.
 export class NormalSystem {
   constructor(rng, setting = 1) {
     this.rng = rng;
@@ -56,6 +55,30 @@ export class NormalSystem {
     return true;
   }
 
+  startSevenZone(source) {
+    this.mode = 'SEVEN_ZONE';
+    this.cz = {
+      type:'SEVEN_ZONE',
+      state:'ART_GUARANTEED',
+      result:'SUCCESS',
+      resultSource:'VERIFIED_ZONE_ENTRY_GUARANTEE',
+      gameCount:null,
+      totalGames:null,
+      remainingGames:null,
+      scenario:null,
+      successModel:'GUARANTEED_ON_ENTRY',
+      publishedOverallExpectation:'100%',
+      transitionSource:source
+    };
+    this.pendingReward = {
+      type:'GOLDEN_TIME',
+      source:'SEVEN_ZONE_ENTRY',
+      guarantee:'ART_CONFIRMED',
+      status:'PENDING_GOLDEN_TIME_IMPLEMENTATION'
+    };
+    this.lastEvent = 'ENTER_SEVEN_ZONE_ART_GUARANTEED';
+  }
+
   resolveCzForTest(result) {
     if (!SUPPORTED_CZ_TYPES.has(this.mode) || !this.cz) return false;
     if (!['SUCCESS','FAIL'].includes(result)) return false;
@@ -92,12 +115,10 @@ export class NormalSystem {
 
       if (SUPPORTED_CZ_TYPES.has(hold.reservedEvent)) {
         this.startCz(hold.reservedEvent, this.transitionSource);
-      } else {
-        this.mode = hold.reservedEvent;
-        this.cz = null;
+        this.lastEvent = `ENTER_${hold.reservedEvent}`;
+      } else if (hold.reservedEvent === 'SEVEN_ZONE') {
+        this.startSevenZone(this.transitionSource);
       }
-
-      this.lastEvent = `ENTER_${hold.reservedEvent}`;
       return true;
     }
 
@@ -153,6 +174,8 @@ export class NormalSystem {
       } else {
         this.lastEvent = `${this.mode}_${this.cz?.state ?? 'UNKNOWN'}`;
       }
+    } else if (this.mode === 'SEVEN_ZONE') {
+      this.lastEvent = 'SEVEN_ZONE_ART_GUARANTEED_PENDING_GT';
     } else {
       this.lastEvent = `${this.mode}_GAME_UNIMPLEMENTED`;
     }
