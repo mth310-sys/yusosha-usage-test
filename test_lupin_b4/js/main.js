@@ -1,6 +1,6 @@
 import { GameCore } from './game-core.js';
 import { GameLogger } from './logger.js';
-import { renderState } from './ui.js';
+import { renderState, startReelAnimation, stopReelAnimation } from './ui.js';
 import { runFastSimulation, formatSimulationReport } from './simulator.js';
 
 const core = new GameCore({ setting:1 });
@@ -8,6 +8,7 @@ const logger = new GameLogger();
 
 const betButton = document.getElementById('betButton');
 const leverButton = document.getElementById('leverButton');
+const stopButtons = [...document.querySelectorAll('[data-stop]')];
 const settingSelect = document.getElementById('settingSelect');
 const simButton = document.getElementById('simButton');
 const simLog = document.getElementById('simLog');
@@ -18,9 +19,20 @@ betButton.addEventListener('click', () => {
 });
 
 leverButton.addEventListener('click', () => {
-  const result = core.lever();
-  if (result) logger.push(result);
+  const started = core.lever();
+  if (started) startReelAnimation();
   renderState(core, logger);
+});
+
+stopButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const index = Number(button.dataset.stop);
+    const outcome = core.stopReel(index);
+    if (!outcome) return;
+    stopReelAnimation(index, outcome.symbol);
+    if (outcome.complete) logger.push(outcome.result);
+    renderState(core, logger);
+  });
 });
 
 settingSelect.addEventListener('change', () => {
