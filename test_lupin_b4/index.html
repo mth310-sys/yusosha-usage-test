@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#050505">
   <title>LUPIN B4 Core Test</title>
-  <link rel="stylesheet" href="./css/debug.css?v=step4c">
+  <link rel="stylesheet" href="./css/debug.css?v=step4d">
 </head>
 <body>
   <main class="debug">
@@ -21,11 +21,11 @@
     <div class="controls"><button id="betButton" type="button">MAX BET</button><button id="leverButton" type="button" disabled>LEVER</button></div>
     <section class="panel"><div class="panel-head"><h2>WANTED ENTRY TEST</h2><button id="wantedSeek" type="button">SEEK WANTED</button></div><p class="note">Debug only: moves the WANTED counter to one game before the selected target band end.</p></section>
     <section class="panel"><h2>VERIFIED HOLD TEST</h2><div class="panel-head"><select id="holdTypeSelect" disabled><option value="GOLD">GOLD → LB/GT</option><option value="TAMACHAN">TAMACHAN → LB/GT</option><option value="FUJIKO_TIGER">FUJIKO TIGER → LB/GT</option><option value="SEVEN_ZONE">SEVEN ZONE</option><option value="DOROBO_ZONE">DOROBO ZONE</option><option value="FUJIKO_ZONE">FUJIKO ZONE</option><option value="PREMIUM">PREMIUM</option></select><button id="holdInject" type="button" disabled>INJECT NEXT HOLD</button></div></section>
-    <section class="panel"><h2>DOROBO RESULT TEST</h2><div class="panel-head"><button id="czSuccess" type="button" disabled>FORCE SUCCESS</button><button id="czFail" type="button" disabled>FORCE FAIL</button></div><p class="note">Debug only. Published data confirms odd-number alignment means success, but the per-game/scenario hit rate is not public. These buttons test routing only and are not used as the real lottery.</p></section>
+    <section class="panel"><h2>CZ RESULT TEST</h2><div class="panel-head"><button id="czSuccess" type="button" disabled>FORCE SUCCESS</button><button id="czFail" type="button" disabled>FORCE FAIL</button></div><p class="note">Debug only. DOROBO_ZONE and FUJIKO_ZONE both use verified 10G/20G and A-D scenario tables. Number alignment is the success condition, but per-game/scenario hit rates remain unpublished, so these buttons test routing only.</p></section>
     <section class="panel"><h2>GAME LOG / LAST 30G</h2><pre id="log">NO DATA</pre></section>
     <section class="panel"><div class="panel-head"><h2>FAST SIM / ROLE LOTTERY</h2><button id="simButton" type="button">100,000G RUN</button></div><pre id="simLog">NOT RUN</pre></section>
-    <p class="note">Step 4C: DOROBO_ZONE result-routing skeleton. Verified duration/scenario remain active; real success lottery stays disabled until per-game/scenario data is verified.</p>
+    <p class="note">Step 4D: FUJIKO_ZONE is now wired to the shared verified CZ engine. DOROBO overall expectation is about 39.6–43.2%; FUJIKO about 58.8–63.2%. Real per-game success lotteries remain intentionally disabled until verified data is found.</p>
   </main>
-  <script type="module" src="./js/main.js?v=step4c"></script>
+  <script type="module" src="./js/main.js?v=step4d"></script>
 </body>
 </html>
