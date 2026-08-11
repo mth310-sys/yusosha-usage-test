@@ -2,7 +2,7 @@
 // Published analysis identifies the reward as a LUPIN BONUS return, commonly announced
 // through Revenge Chance. Do not restart GOLDEN TIME directly on a hit.
 import { GoldenTimeSystem } from './golden-time.js?v=step6w';
-import { ART_RETURN_PROFILE, rollArtReturn } from './art-return-profile.js?v=step6z';
+import { ART_RETURN_PROFILE, rollArtReturn } from './art-return-profile.js?v=step6z2';
 
 function installArtReturnPanel() {
   if (document.getElementById('artReturnPanel')) return;
@@ -11,7 +11,7 @@ function installArtReturnPanel() {
   const panel = document.createElement('section');
   panel.className = 'panel';
   panel.id = 'artReturnPanel';
-  panel.innerHTML = '<h2>RETURN LOTTERY / STEP 6Z</h2><p class="note">Treasure Battle敗北後、最終TREASURE量でLUPIN BONUS引き戻し抽選。引き戻し当選はRevenge Chance経由で告知されやすい。公開確認済みの完全一致テーブルのみ使用し、未掲載値は補間しない。</p><pre id="artReturnState">TREASURE     ---\nRETURN RATE  ---\nRESULT       NOT RUN</pre>';
+  panel.innerHTML = '<h2>RETURN LOTTERY / STEP 6Z</h2><p class="note">Treasure Battle敗北後、最終TREASURE量でLUPIN BONUS引き戻し抽選。引き戻し当選はRevenge Chance経由で告知されやすい。公開資料間で最低段・偶数5万刻みに差があるため、抽選値の確認レベルも表示する。</p><pre id="artReturnState">TREASURE     ---\nRETURN RATE  ---\nCONFIDENCE   ---\nRESULT       NOT RUN</pre>';
   gameLog.parentNode.insertBefore(panel, gameLog);
 }
 
@@ -21,17 +21,18 @@ function renderArtReturnDebug(snap) {
   if (!el) return;
   const draw = snap?.artReturn;
   if (!draw) {
-    el.textContent = 'TREASURE     ---\nRETURN RATE  ---\nRESULT       NOT RUN';
+    el.textContent = 'TREASURE     ---\nRETURN RATE  ---\nCONFIDENCE   ---\nRESULT       NOT RUN';
     return;
   }
   const treasure = Number.isFinite(draw.treasurePoints)
     ? `${Math.round(draw.treasurePoints / 10000)}万`
     : '---';
   const rate = draw.resolved && Number.isFinite(draw.pct) ? `${draw.pct}%` : 'UNRESOLVED';
+  const confidence = draw.confidence ?? 'UNRESOLVED';
   const result = !draw.resolved
     ? 'UNRESOLVED'
     : (draw.hit ? 'HIT → LUPIN BONUS RETURN / REVENGE NOTIFY LIKELY' : 'FAIL → LEGACY REVENGE ROUTE');
-  el.textContent = `TREASURE     ${treasure}\nRETURN RATE  ${rate}\nRESULT       ${result}`;
+  el.textContent = `TREASURE     ${treasure}\nRETURN RATE  ${rate}\nCONFIDENCE   ${confidence}\nRESULT       ${result}`;
 }
 
 if (!GoldenTimeSystem.prototype.__step6yArtReturnPatched) {
