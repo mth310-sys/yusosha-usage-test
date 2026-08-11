@@ -31,7 +31,7 @@ export class GameCore {
   applyLupinRushAverageForTest(type){if(this.phase!=='WAIT_BET')return false;return this.goldenTime.applyLupinRushAverageForTest(type);}
   setGoldenTimeStageForTest(stage){if(this.phase!=='WAIT_BET')return false;return this.goldenTime.setStageForTest(stage);}
   setGoldChanceAddedGamesForTest(games){if(this.phase!=='WAIT_BET')return false;return this.goldenTime.setGoldChanceAddedGamesForTest(games);}
-  startExtraBonusForTest(){if(this.phase!=='WAIT_BET')return false;return this.goldenTime.startExtraBonus('DEBUG_GOLD_CHANCE_RESULT');}
+  startExtraBonusForTest(){if(this.phase!=='WAIT_BET')return false;if(this.goldenTime.state==='GOLD_CHANCE_PENDING_UNVERIFIED_DISTRIBUTION'){this.goldenTime.setGoldChanceAddedGamesForTest(Math.round(this.goldenTime.snapshot().extraBonusProfile.averageAddedGames));this.goldenTime.goldChanceSource='DEBUG_PUBLISHED_AVERAGE_18_2_ROUNDED_NOT_REAL_DISTRIBUTION';}return this.goldenTime.startExtraBonus('DEBUG_GOLD_CHANCE_AVERAGE_RESULT');}
   forceExtraSevenForTest(){if(this.phase!=='WAIT_BET')return false;return this.goldenTime.forceExtraSevenForTest();}
   snapshot(){return{gameNo:this.gameNo,setting:this.setting,phase:this.phase,role:this.lastRole?.name??'----',normal:this.normal.snapshot(),goldenTime:this.goldenTime.snapshot(),reels:this.reels.snapshot(),...this.creditSystem.snapshot()};}
 }
