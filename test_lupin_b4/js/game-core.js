@@ -4,7 +4,7 @@ import { getSettingProfile } from './setting-profile.js';
 import { drawRole } from './role-lottery.js';
 import { CreditSystem } from './credit.js';
 import { ReelController } from './reel-controller.js';
-import { NormalSystem } from './normal.js?v=step5e';
+import { NormalSystem } from './normal.js?v=step5f';
 
 export class GameCore {
   constructor({setting=1, seed=Date.now()} = {}) { this.setting=Number(setting); this.profile=getSettingProfile(this.setting); this.rng=new RNG(seed); this.creditSystem=new CreditSystem(MACHINE.initialCredit,MACHINE.betPerGame); this.reels=new ReelController(this.rng); this.normal=new NormalSystem(this.rng,this.setting); this.gameNo=0; this.phase='WAIT_BET'; this.lastRole=null; this.pendingRole=null; this.creditBeforeGame=null; }
