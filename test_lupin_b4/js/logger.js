@@ -16,6 +16,7 @@ export class GameLogger {
       `#${String(r.gameNo).padStart(6,'0')} S${r.setting}`,
       `MODE ${r.mode}`,
       `NORMAL_G ${r.normalGameCount}`,
+      `WANTED ${r.wantedCount}`,
       `ROLE ${r.role}`,
       `REEL ${r.reelResult.join(' | ')}`,
       `STOP ${r.stopOrder.map(i => ['L','C','R'][i]).join('→')}`,
