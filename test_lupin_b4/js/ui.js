@@ -22,6 +22,7 @@ export function renderState(core,logger){
   document.getElementById('transitionSource').textContent=s.normal.transitionSource??'---';
   document.getElementById('czType').textContent=cz?.type??'---';
   document.getElementById('czState').textContent=cz?.state??'---';
+  document.getElementById('czScenario').textContent=cz?.scenario??'---';
   document.getElementById('czGames').textContent=cz?String(cz.gameCount):'---';
   document.getElementById('czRemain').textContent=cz?String(cz.remainingGames):'---';
   document.getElementById('czTotal').textContent=cz?String(cz.totalGames):'---';
