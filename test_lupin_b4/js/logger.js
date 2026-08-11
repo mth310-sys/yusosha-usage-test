@@ -19,7 +19,7 @@ export class GameLogger {
       r.holdQueue?.length ? `HOLD_Q ${r.holdQueue.map(h => `${h.type}#${h.id}`).join('>')}` : '',
       r.transitionSource ? `TRANSITION_SRC ${r.transitionSource}` : '',
       r.pendingReward ? `PENDING ${r.pendingReward.type}` : '',
-      r.cz ? `CZ ${r.cz.type} ${r.cz.state} G${r.cz.gameCount}/${r.cz.totalGames} REM${r.cz.remainingGames}` : '',
+      r.cz ? `CZ ${r.cz.type} ${r.cz.state} SCN_${r.cz.scenario} G${r.cz.gameCount}/${r.cz.totalGames} REM${r.cz.remainingGames}` : '',
       r.event ? `EVENT ${r.event}` : '',
       r.wantedEntrySource ? `WANTED_SRC ${r.wantedEntrySource}` : '',
       `ROLE ${r.role}`,
