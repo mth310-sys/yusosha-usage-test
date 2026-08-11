@@ -1,6 +1,6 @@
-// Step 5E: verified Raiun aggregate values + isolated calibrated ART model.
-// Published analysis confirms 20G duration and about 23% ART expectation, but not the per-game 7-alignment rate.
-// The calibrated per-game rate below is mathematically derived so 20 independent games reproduce 23% cumulative ART expectation.
+// Step 5F: verified Raiun aggregate values + isolated calibrated ART model + verified Shin Raiun LEGEND GATE rate.
+// Normal Raiun: published 20G / about 23% ART expectation, per-game rate remains derived/calibrated.
+// Shin Raiun: published LEGEND GATE occurrence is 1/88.9; its ordinary per-game ART rate remains unverified.
 
 export const RAIUN_PROFILE = Object.freeze({
   counter:{
@@ -27,7 +27,8 @@ export const RAIUN_PROFILE = Object.freeze({
     shinUpgradeRate:0.8,
     shinContinuesUntilArt:true,
     shinPerGameArtRate:'UNVERIFIED',
-    shinLegendGateDenominator:88.9
+    shinLegendGateDenominator:88.9,
+    shinLegendGateSource:'VERIFIED_PUBLISHED_RATE'
   }
 });
 
@@ -46,4 +47,8 @@ export function rollShinRaiunUpgrade(rng) {
 
 export function rollRaiunArtCalibrated(rng) {
   return rng.next() < RAIUN_PROFILE.mode.calibratedPerGameProbability;
+}
+
+export function rollShinRaiunLegendGate(rng) {
+  return rng.next() < 1 / RAIUN_PROFILE.mode.shinLegendGateDenominator;
 }
