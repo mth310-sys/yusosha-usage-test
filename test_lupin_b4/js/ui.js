@@ -22,6 +22,16 @@ export function stopReelAnimation(index, symbol) {
   cell.classList.remove('spinning');
 }
 
+function renderHolds(holds) {
+  const root = document.getElementById('holdQueue');
+  if (!root) return;
+  if (!holds.length) {
+    root.textContent = '---';
+    return;
+  }
+  root.textContent = holds.map((hold, index) => `${index + 1}:${hold.type}#${hold.id}`).join('  ');
+}
+
 export function renderState(core, logger) {
   const s = core.snapshot();
   document.getElementById('game').textContent = `#${String(s.gameNo).padStart(6,'0')}`;
@@ -34,6 +44,8 @@ export function renderState(core, logger) {
   document.getElementById('wantedState').textContent = s.normal.wantedState;
   document.getElementById('wantedChanceGames').textContent = String(s.normal.wantedChanceGameCount);
   document.getElementById('holdCapacity').textContent = s.normal.holdCapacity == null ? '---' : String(s.normal.holdCapacity);
+  document.getElementById('consumedHold').textContent = s.normal.lastConsumedHold ? `${s.normal.lastConsumedHold.type}#${s.normal.lastConsumedHold.id}` : '---';
+  renderHolds(s.normal.holdQueue);
   document.getElementById('credit').textContent = String(s.credit);
   document.getElementById('bet').textContent = String(s.bet);
   document.getElementById('payout').textContent = String(s.payout);
