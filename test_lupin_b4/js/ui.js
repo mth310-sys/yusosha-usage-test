@@ -17,6 +17,8 @@ export function renderState(core,logger){
   document.getElementById('wantedChanceGames').textContent=String(s.normal.wantedChanceGameCount);
   document.getElementById('holdCapacity').textContent=s.normal.holdCapacity==null?'---':String(s.normal.holdCapacity);
   document.getElementById('consumedHold').textContent=s.normal.lastConsumedHold?`${s.normal.lastConsumedHold.type}#${s.normal.lastConsumedHold.id}`:'---';
+  document.getElementById('pendingReward').textContent=s.normal.pendingReward?`${s.normal.pendingReward.type} / ${s.normal.pendingReward.status}`:'---';
+  document.getElementById('transitionSource').textContent=s.normal.transitionSource??'---';
   renderHolds(s.normal.holdQueue);
   document.getElementById('credit').textContent=String(s.credit);
   document.getElementById('bet').textContent=String(s.bet);
