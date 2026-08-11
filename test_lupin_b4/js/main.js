@@ -1,11 +1,11 @@
-import { GameCore } from './game-core.js?v=step5g';
-import { GameLogger } from './logger.js?v=step5g';
-import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step5g';
-import { runFastSimulation, formatSimulationReport, runRaiunCycleSimulation, formatRaiunCycleReport, runRaiunArtSimulation, formatRaiunArtReport, runShinRaiunLegendGateSimulation, formatShinRaiunLegendGateReport } from './simulator.js?v=step5g';
+import { GameCore } from './game-core.js?v=step6a';
+import { GameLogger } from './logger.js?v=step6a';
+import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step6a';
+import { runFastSimulation, formatSimulationReport, runRaiunCycleSimulation, formatRaiunCycleReport, runRaiunArtSimulation, formatRaiunArtReport, runShinRaiunLegendGateSimulation, formatShinRaiunLegendGateReport } from './simulator.js?v=step6a';
 
 const core=new GameCore({setting:1});const logger=new GameLogger();
 const $=id=>document.getElementById(id);
-const betButton=$('betButton'),leverButton=$('leverButton'),stopButtons=[...document.querySelectorAll('[data-stop]')],settingSelect=$('settingSelect'),wantedSeek=$('wantedSeek'),holdTypeSelect=$('holdTypeSelect'),holdInject=$('holdInject'),czSuccess=$('czSuccess'),czFail=$('czFail'),rizeEnter=$('rizeEnter'),shinRizeEnter=$('shinRizeEnter'),rizeBackgroundSelect=$('rizeBackgroundSelect'),rizeBackgroundSet=$('rizeBackgroundSet'),rizeSuccess=$('rizeSuccess'),rizeFail=$('rizeFail'),raiunLevelSelect=$('raiunLevelSelect'),raiunSeek=$('raiunSeek'),raiunEnter=$('raiunEnter'),shinRaiunEnter=$('shinRaiunEnter'),raiunSuccess=$('raiunSuccess'),raiunFail=$('raiunFail'),legendGateEnter=$('legendGateEnter'),legendGateMedalSelect=$('legendGateMedalSelect'),legendGateMedalSet=$('legendGateMedalSet'),simButton=$('simButton'),simLog=$('simLog'),raiunSimButton=$('raiunSimButton'),raiunSimLog=$('raiunSimLog'),raiunArtSimButton=$('raiunArtSimButton'),raiunArtSimLog=$('raiunArtSimLog'),shinLegendSimButton=$('shinLegendSimButton'),shinLegendSimLog=$('shinLegendSimLog');
+const betButton=$('betButton'),leverButton=$('leverButton'),stopButtons=[...document.querySelectorAll('[data-stop]')],settingSelect=$('settingSelect'),wantedSeek=$('wantedSeek'),holdTypeSelect=$('holdTypeSelect'),holdInject=$('holdInject'),czSuccess=$('czSuccess'),czFail=$('czFail'),rizeEnter=$('rizeEnter'),shinRizeEnter=$('shinRizeEnter'),rizeBackgroundSelect=$('rizeBackgroundSelect'),rizeBackgroundSet=$('rizeBackgroundSet'),rizeSuccess=$('rizeSuccess'),rizeFail=$('rizeFail'),raiunLevelSelect=$('raiunLevelSelect'),raiunSeek=$('raiunSeek'),raiunEnter=$('raiunEnter'),shinRaiunEnter=$('shinRaiunEnter'),raiunSuccess=$('raiunSuccess'),raiunFail=$('raiunFail'),legendGateEnter=$('legendGateEnter'),legendGateMedalSelect=$('legendGateMedalSelect'),legendGateMedalSet=$('legendGateMedalSet'),goldenTimeEnter=$('goldenTimeEnter'),goldenTimePendingStart=$('goldenTimePendingStart'),goldenTimeStockSelect=$('goldenTimeStockSelect'),goldenTimeStockAdd=$('goldenTimeStockAdd'),simButton=$('simButton'),simLog=$('simLog'),raiunSimButton=$('raiunSimButton'),raiunSimLog=$('raiunSimLog'),raiunArtSimButton=$('raiunArtSimButton'),raiunArtSimLog=$('raiunArtSimLog'),shinLegendSimButton=$('shinLegendSimButton'),shinLegendSimLog=$('shinLegendSimLog');
 
 betButton.addEventListener('click',()=>{core.bet();renderState(core,logger);});
 leverButton.addEventListener('click',()=>{const x=core.lever();if(x)startReelAnimation();renderState(core,logger);});
@@ -27,6 +27,9 @@ raiunSuccess.addEventListener('click',()=>{core.resolveRaiunForTest('SUCCESS');r
 raiunFail.addEventListener('click',()=>{core.resolveRaiunForTest('FAIL');renderState(core,logger);});
 legendGateEnter.addEventListener('click',()=>{core.startLegendGateForTest();renderState(core,logger);});
 legendGateMedalSet.addEventListener('click',()=>{core.setLegendGateMedalsForTest(Number(legendGateMedalSelect.value));renderState(core,logger);});
+goldenTimeEnter.addEventListener('click',()=>{core.startGoldenTimeForTest(0);renderState(core,logger);});
+goldenTimePendingStart.addEventListener('click',()=>{core.startGoldenTimeFromPending();renderState(core,logger);});
+goldenTimeStockAdd.addEventListener('click',()=>{core.addGoldenTimeStocksForTest(Number(goldenTimeStockSelect.value));renderState(core,logger);});
 simButton.addEventListener('click',()=>{simButton.disabled=true;simLog.textContent='RUNNING...';requestAnimationFrame(()=>{const r=runFastSimulation({setting:Number(settingSelect.value),games:100000,seed:0x13572468});simLog.textContent=formatSimulationReport(r);simButton.disabled=false;});});
 raiunSimButton.addEventListener('click',()=>{raiunSimButton.disabled=true;raiunSimLog.textContent='RUNNING...';requestAnimationFrame(()=>{const r=runRaiunCycleSimulation({cycles:100000,seed:0x24681357});raiunSimLog.textContent=formatRaiunCycleReport(r);raiunSimButton.disabled=false;});});
 raiunArtSimButton.addEventListener('click',()=>{raiunArtSimButton.disabled=true;raiunArtSimLog.textContent='RUNNING...';requestAnimationFrame(()=>{const r=runRaiunArtSimulation({sessions:100000,seed:0x579BDF13});raiunArtSimLog.textContent=formatRaiunArtReport(r);raiunArtSimButton.disabled=false;});});
