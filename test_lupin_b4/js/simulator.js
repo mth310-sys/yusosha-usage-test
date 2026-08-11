@@ -1,8 +1,8 @@
 import { RNG } from './rng.js';
 import { getSettingProfile } from './setting-profile.js';
 import { drawRole, expectedRoleRates } from './role-lottery.js';
-import { RAIUN_POINT_MODEL, drawInitialRaiunPoints, rollRaiunPointAdd, drawRaiunPointAdd } from './raiun-point-model.js?v=step5f';
-import { RAIUN_PROFILE, rollRaiunArtCalibrated, rollShinRaiunLegendGate } from './raiun-profile.js?v=step5f';
+import { RAIUN_POINT_MODEL, drawInitialRaiunPoints, rollRaiunPointAdd, drawRaiunPointAdd } from './raiun-point-model.js?v=step5g';
+import { RAIUN_PROFILE, rollRaiunArtCalibrated, rollShinRaiunLegendGate } from './raiun-profile.js?v=step5g';
 
 export function runFastSimulation({setting=1, games=100000, seed=0x13572468} = {}) {
   const profile = getSettingProfile(setting);
