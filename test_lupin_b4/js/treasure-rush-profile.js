@@ -1,7 +1,7 @@
 // Step 6Z: Treasure RUSH outline with cross-source duration confidence.
-// Multiple independent published machine-analysis pages now agree on a 4-9G duration,
-// while major summary pages state 4G or more. A conflicting 5-10G secondary claim is
-// retained as a note, but 4-9G is promoted as the best-supported working model.
+// Multiple independent published machine-analysis pages agree on a 4-9G duration,
+// while major summary pages state 4G or more. Exact duration and award distributions
+// are still unrecovered, so automatic entry/draws remain disabled.
 export const TREASURE_RUSH_PROFILE = Object.freeze({
   entryTrigger: 'TREASURE_HUNT_SUCCESS_OR_ART_CONTINUOUS_PERFORMANCE_SUCCESS',
   minimumGames: 4,
@@ -39,8 +39,43 @@ export const TREASURE_RUSH_PROFILE = Object.freeze({
     firstGameExactAwardRange: true,
     exactFujikoCueDistribution: true
   }),
-  policy: '4_TO_9G_WORKING_MODEL; DO_NOT_AUTO_ENTRY OR SYNTHESIZE DURATION/AWARD DISTRIBUTIONS UNTIL EXACT TABLES ARE RECOVERED'
+  testPolicy: Object.freeze({
+    allowManualDurationOnly: true,
+    allowManualAwardOnly: true,
+    automaticDurationDraw: false,
+    automaticAwardDraw: false,
+    automaticEntry: false,
+    reason: 'EXACT_DISTRIBUTION_TABLES_NOT_RECOVERED'
+  }),
+  policy: '4_TO_9G_WORKING_MODEL; MANUAL TESTS MAY USE VERIFIED BOUNDS; DO NOT AUTO ENTRY OR SYNTHESIZE DURATION/AWARD DISTRIBUTIONS UNTIL EXACT TABLES ARE RECOVERED'
 });
+
+export function isSupportedTreasureRushDuration(games) {
+  const value = Number(games);
+  return Number.isInteger(value)
+    && value >= TREASURE_RUSH_PROFILE.minimumGames
+    && value <= TREASURE_RUSH_PROFILE.maximumGames;
+}
+
+export function getTreasureRushAwardBounds(gameIndex=1) {
+  const firstGame = Number(gameIndex) === 1;
+  return {
+    minimumPoints: TREASURE_RUSH_PROFILE.perGameAward.normalMinimumPoints,
+    maximumPoints: firstGame && TREASURE_RUSH_PROFILE.perGameAward.firstGameCanExceed1000000
+      ? null
+      : TREASURE_RUSH_PROFILE.perGameAward.normalMaximumPoints,
+    maximumResolved: !(firstGame && TREASURE_RUSH_PROFILE.perGameAward.firstGameCanExceed1000000)
+  };
+}
+
+export function validateTreasureRushManualAward(points, gameIndex=1) {
+  const value = Number(points);
+  if (!Number.isFinite(value)) return false;
+  const bounds = getTreasureRushAwardBounds(gameIndex);
+  if (value < bounds.minimumPoints) return false;
+  if (bounds.maximumResolved && value > bounds.maximumPoints) return false;
+  return true;
+}
 
 export function treasureRushSnapshot() {
   return {
@@ -57,6 +92,7 @@ export function treasureRushSnapshot() {
     presentation: { ...TREASURE_RUSH_PROFILE.presentation },
     carryover: { ...TREASURE_RUSH_PROFILE.carryover },
     unresolved: { ...TREASURE_RUSH_PROFILE.unresolved },
+    testPolicy: { ...TREASURE_RUSH_PROFILE.testPolicy },
     policy: TREASURE_RUSH_PROFILE.policy
   };
 }
