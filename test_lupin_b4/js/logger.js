@@ -1,14 +1,8 @@
 import { MACHINE } from './config.js';
 
 export class GameLogger {
-  constructor(limit = MACHINE.logLimit) {
-    this.limit = limit;
-    this.rows = [];
-  }
-  push(result) {
-    this.rows.unshift(result);
-    if (this.rows.length > this.limit) this.rows.length = this.limit;
-  }
+  constructor(limit = MACHINE.logLimit) { this.limit = limit; this.rows = []; }
+  push(result) { this.rows.unshift(result); if (this.rows.length > this.limit) this.rows.length = this.limit; }
   clear() { this.rows = []; }
   toText() {
     if (!this.rows.length) return 'NO DATA';
@@ -23,6 +17,8 @@ export class GameLogger {
       r.holdCapacity == null ? '' : `HOLD_CAP ${r.holdCapacity}`,
       r.consumedHold ? `HOLD_OUT ${r.consumedHold.type}#${r.consumedHold.id}` : '',
       r.holdQueue?.length ? `HOLD_Q ${r.holdQueue.map(h => `${h.type}#${h.id}`).join('>')}` : '',
+      r.transitionSource ? `TRANSITION_SRC ${r.transitionSource}` : '',
+      r.pendingReward ? `PENDING ${r.pendingReward.type}` : '',
       r.event ? `EVENT ${r.event}` : '',
       r.wantedEntrySource ? `WANTED_SRC ${r.wantedEntrySource}` : '',
       `ROLE ${r.role}`,
