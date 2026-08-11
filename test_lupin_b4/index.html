@@ -5,79 +5,41 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#050505">
   <title>LUPIN B4 Core Test</title>
-  <link rel="stylesheet" href="./css/debug.css?v=step3f">
+  <link rel="stylesheet" href="./css/debug.css?v=step3g">
 </head>
 <body>
   <main class="debug">
     <header class="head">
       <div><small>YUSOSHA REVERSE MODEL TEST</small><h1>LUPIN B4 / CORE TEST</h1></div>
-      <label>SETTING
-        <select id="settingSelect">
-          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
-        </select>
-      </label>
+      <label>SETTING<select id="settingSelect"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label>
     </header>
-
     <section class="grid" aria-label="core status">
-      <span>GAME</span><strong id="game">#000000</strong>
-      <span>SETTING</span><strong id="setting">1</strong>
-      <span>PHASE</span><strong id="phase">WAIT_BET</strong>
-      <span>MODE</span><strong id="mode">NORMAL</strong>
-      <span>NORMAL G</span><strong id="normalGames">0</strong>
-      <span>WANTED</span><strong id="wanted">0</strong>
-      <span>WANTED TARGET</span><strong id="wantedTarget">---</strong>
-      <span>WANTED STATE</span><strong id="wantedState">COUNTING</strong>
-      <span>WC G</span><strong id="wantedChanceGames">0</strong>
-      <span>HOLD CAP</span><strong id="holdCapacity">---</strong>
-      <span>HOLD OUT</span><strong id="consumedHold">---</strong>
-      <span>CREDIT</span><strong id="credit">50</strong>
-      <span>BET</span><strong id="bet">0</strong>
-      <span>PAYOUT</span><strong id="payout">0</strong>
-      <span>ROLE</span><strong id="role">----</strong>
-      <span>STOP ORDER</span><strong id="stopOrder">---</strong>
+      <span>GAME</span><strong id="game">#000000</strong><span>SETTING</span><strong id="setting">1</strong><span>PHASE</span><strong id="phase">WAIT_BET</strong><span>MODE</span><strong id="mode">NORMAL</strong><span>NORMAL G</span><strong id="normalGames">0</strong><span>WANTED</span><strong id="wanted">0</strong><span>WANTED TARGET</span><strong id="wantedTarget">---</strong><span>WANTED STATE</span><strong id="wantedState">COUNTING</strong><span>WC G</span><strong id="wantedChanceGames">0</strong><span>HOLD CAP</span><strong id="holdCapacity">---</strong><span>HOLD OUT</span><strong id="consumedHold">---</strong><span>CREDIT</span><strong id="credit">50</strong><span>BET</span><strong id="bet">0</strong><span>PAYOUT</span><strong id="payout">0</strong><span>ROLE</span><strong id="role">----</strong><span>STOP ORDER</span><strong id="stopOrder">---</strong>
     </section>
-
+    <section class="panel"><h2>WANTED HOLD QUEUE / 8 SLOTS</h2><pre id="holdQueue">---</pre></section>
+    <section class="reel-test" aria-label="provisional physical reels"><small>PHYSICAL REEL MECHANISM / PROVISIONAL STRIP</small><div class="reels"><div class="reel-cell" data-reel="0">---</div><div class="reel-cell" data-reel="1">---</div><div class="reel-cell" data-reel="2">---</div></div><div class="stop-controls"><button data-stop="0" type="button" disabled>STOP L</button><button data-stop="1" type="button" disabled>STOP C</button><button data-stop="2" type="button" disabled>STOP R</button></div></section>
+    <div class="controls"><button id="betButton" type="button">MAX BET</button><button id="leverButton" type="button" disabled>LEVER</button></div>
+    <section class="panel"><div class="panel-head"><h2>WANTED ENTRY TEST</h2><button id="wantedSeek" type="button">SEEK WANTED</button></div><p class="note">Debug only: moves the WANTED counter to one game before the selected target band end.</p></section>
     <section class="panel">
-      <h2>WANTED HOLD QUEUE / 8 SLOTS</h2>
-      <pre id="holdQueue">---</pre>
-    </section>
-
-    <section class="reel-test" aria-label="provisional physical reels">
-      <small>PHYSICAL REEL MECHANISM / PROVISIONAL STRIP</small>
-      <div class="reels">
-        <div class="reel-cell" data-reel="0">---</div>
-        <div class="reel-cell" data-reel="1">---</div>
-        <div class="reel-cell" data-reel="2">---</div>
+      <h2>VERIFIED HOLD TEST</h2>
+      <div class="panel-head">
+        <select id="holdTypeSelect" disabled>
+          <option value="GOLD">GOLD → LB/GT</option>
+          <option value="TAMACHAN">TAMACHAN → LB/GT</option>
+          <option value="FUJIKO_TIGER">FUJIKO TIGER → LB/GT</option>
+          <option value="SEVEN_ZONE">SEVEN ZONE</option>
+          <option value="DOROBO_ZONE">DOROBO ZONE</option>
+          <option value="FUJIKO_ZONE">FUJIKO ZONE</option>
+          <option value="PREMIUM">PREMIUM</option>
+        </select>
+        <button id="holdInject" type="button" disabled>INJECT NEXT HOLD</button>
       </div>
-      <div class="stop-controls">
-        <button data-stop="0" type="button" disabled>STOP L</button>
-        <button data-stop="1" type="button" disabled>STOP C</button>
-        <button data-stop="2" type="button" disabled>STOP R</button>
-      </div>
+      <p class="note">Debug only. Verified hold meanings are implemented; appearance rates are intentionally not randomized until verified distributions are found.</p>
     </section>
-
-    <div class="controls">
-      <button id="betButton" type="button">MAX BET</button>
-      <button id="leverButton" type="button" disabled>LEVER</button>
-    </div>
-
-    <section class="panel">
-      <div class="panel-head"><h2>WANTED ENTRY TEST</h2><button id="wantedSeek" type="button">SEEK WANTED</button></div>
-      <p class="note">Debug only: moves only the WANTED counter to one game before the selected target band end. The next completed game enters WANTED_CHANCE.</p>
-    </section>
-
-    <section class="panel">
-      <h2>GAME LOG / LAST 30G</h2>
-      <pre id="log">NO DATA</pre>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head"><h2>FAST SIM / ROLE LOTTERY</h2><button id="simButton" type="button">100,000G RUN</button></div>
-      <pre id="simLog">NOT RUN</pre>
-    </section>
-
-    <p class="note">Phase 3F: WANTED CHANCE now owns an 8-slot HOLD queue. For this mechanism test every HOLD is a NORMAL placeholder; verified color/type distributions, success lottery, exit condition and RAIUN are not implemented yet.</p>
+    <section class="panel"><h2>GAME LOG / LAST 30G</h2><pre id="log">NO DATA</pre></section>
+    <section class="panel"><div class="panel-head"><h2>FAST SIM / ROLE LOTTERY</h2><button id="simButton" type="button">100,000G RUN</button></div><pre id="simLog">NOT RUN</pre></section>
+    <p class="note">Phase 3G: verified HOLD catalog and debug injection. Special HOLD appearance rates and actual reserved-event transitions are not implemented yet.</p>
   </main>
-  <script type="module" src="./js/main.js?v=step3f"></script>
+  <script type="module" src="./js/main.js?v=step3g"></script>
 </body>
 </html>
