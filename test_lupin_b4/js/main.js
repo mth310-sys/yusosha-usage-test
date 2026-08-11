@@ -1,7 +1,7 @@
-import { GameCore } from './game-core.js?v=step3c';
-import { GameLogger } from './logger.js?v=step3c';
-import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step3c';
-import { runFastSimulation, formatSimulationReport } from './simulator.js?v=step3c';
+import { GameCore } from './game-core.js?v=step3d';
+import { GameLogger } from './logger.js?v=step3d';
+import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step3d';
+import { runFastSimulation, formatSimulationReport } from './simulator.js?v=step3d';
 
 const core = new GameCore({ setting:1 });
 const logger = new GameLogger();
@@ -10,6 +10,7 @@ const betButton = document.getElementById('betButton');
 const leverButton = document.getElementById('leverButton');
 const stopButtons = [...document.querySelectorAll('[data-stop]')];
 const settingSelect = document.getElementById('settingSelect');
+const wantedSeek = document.getElementById('wantedSeek');
 const simButton = document.getElementById('simButton');
 const simLog = document.getElementById('simLog');
 
@@ -37,6 +38,11 @@ stopButtons.forEach(button => {
 
 settingSelect.addEventListener('change', () => {
   core.setSetting(settingSelect.value);
+  renderState(core, logger);
+});
+
+wantedSeek.addEventListener('click', () => {
+  core.seekWantedForTest();
   renderState(core, logger);
 });
 
