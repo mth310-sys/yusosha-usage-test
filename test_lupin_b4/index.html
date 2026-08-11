@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#050505">
   <title>LUPIN B4 Core Test</title>
-  <link rel="stylesheet" href="./css/debug.css?v=step5b">
+  <link rel="stylesheet" href="./css/debug.css?v=step5c">
 </head>
 <body>
   <main class="debug">
@@ -26,11 +26,12 @@
     <section class="panel"><h2>VERIFIED HOLD TEST</h2><div class="panel-head"><select id="holdTypeSelect" disabled><option value="GOLD">GOLD → LB/GT</option><option value="TAMACHAN">TAMACHAN → LB/GT</option><option value="FUJIKO_TIGER">FUJIKO TIGER → LB/GT</option><option value="SEVEN_ZONE">SEVEN ZONE → GT確定</option><option value="DOROBO_ZONE">DOROBO ZONE</option><option value="FUJIKO_ZONE">FUJIKO ZONE</option><option value="PREMIUM">PREMIUM</option></select><button id="holdInject" type="button" disabled>INJECT NEXT HOLD</button></div></section>
     <section class="panel"><h2>CZ RESULT TEST</h2><div class="panel-head"><button id="czSuccess" type="button" disabled>FORCE SUCCESS</button><button id="czFail" type="button" disabled>FORCE FAIL</button></div></section>
     <section class="panel"><h2>RIZE ZONE TEST</h2><div class="panel-head"><button id="rizeEnter" type="button">ENTER RIZE</button><button id="shinRizeEnter" type="button">ENTER 真RIZE</button></div><div class="panel-head"><select id="rizeBackgroundSelect" disabled><option value="BLUE">BLUE</option><option value="YELLOW">YELLOW</option><option value="GREEN">GREEN</option><option value="RED">RED</option><option value="PURPLE">PURPLE</option><option value="RAINBOW">RAINBOW</option></select><button id="rizeBackgroundSet" type="button" disabled>SET BG</button><button id="rizeSuccess" type="button" disabled>FORCE SUCCESS</button><button id="rizeFail" type="button" disabled>FORCE FAIL</button></div></section>
-    <section class="panel"><h2>RAIUN SYSTEM TEST</h2><div class="panel-head"><select id="raiunLevelSelect"><option value="LOW">LOW / 1/30.5</option><option value="HIGH">HIGH / 1/13.3</option></select><button id="raiunSeek" type="button">SEEK 100pt</button></div><div class="panel-head"><button id="raiunEnter" type="button">ENTER 雷雲</button><button id="shinRaiunEnter" type="button">ENTER 真・雷雲</button><button id="raiunSuccess" type="button" disabled>FORCE 7 / ART</button><button id="raiunFail" type="button" disabled>FORCE FAIL</button></div><p class="note">Step 5B: normal games now accumulate Raiun points with a CALIBRATED model. RAW published aggregates are preserved separately. Effective point-add rate is tuned to ~1/8.10 so initial mean 22.6pt + mean 3.3pt/add converges near the published ~190G to 100pt. LOW/HIGH selection ratio remains unknown, so reaching 100pt stops at a pending state instead of inventing that split.</p></section>
+    <section class="panel"><h2>RAIUN SYSTEM TEST</h2><div class="panel-head"><select id="raiunLevelSelect"><option value="LOW">LOW / 1/30.5</option><option value="HIGH">HIGH / 1/13.3</option></select><button id="raiunSeek" type="button">SEEK 100pt</button></div><div class="panel-head"><button id="raiunEnter" type="button">ENTER 雷雲</button><button id="shinRaiunEnter" type="button">ENTER 真・雷雲</button><button id="raiunSuccess" type="button" disabled>FORCE 7 / ART</button><button id="raiunFail" type="button" disabled>FORCE FAIL</button></div><p class="note">Step 5C keeps RAW published aggregate values separate from the CALIBRATED point model.</p></section>
     <section class="panel"><h2>GAME LOG / LAST 30G</h2><pre id="log">NO DATA</pre></section>
     <section class="panel"><div class="panel-head"><h2>FAST SIM / ROLE LOTTERY</h2><button id="simButton" type="button">100,000G RUN</button></div><pre id="simLog">NOT RUN</pre></section>
-    <p class="note">Step 5B: Raiun point accumulation is active. Detailed unpublished distributions are never labeled VERIFIED; calibrated values are isolated from RAW published analysis.</p>
+    <section class="panel"><div class="panel-head"><h2>RAIUN CYCLE CALIBRATION</h2><button id="raiunSimButton" type="button">100,000 CYCLES RUN</button></div><pre id="raiunSimLog">NOT RUN</pre><p class="note">Checks average initial points, observed add frequency, average points per add and average games to 100pt. Target for the calibrated gameplay model is the published ~190G arrival time.</p></section>
+    <p class="note">Step 5C: Raiun calibration can now be measured independently from the role lottery.</p>
   </main>
-  <script type="module" src="./js/main.js?v=step5b"></script>
+  <script type="module" src="./js/main.js?v=step5c"></script>
 </body>
 </html>
