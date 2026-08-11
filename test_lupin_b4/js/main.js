@@ -1,7 +1,7 @@
-import { GameCore } from './game-core.js?v=step3h';
-import { GameLogger } from './logger.js?v=step3h';
-import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step3h';
-import { runFastSimulation, formatSimulationReport } from './simulator.js?v=step3h';
+import { GameCore } from './game-core.js?v=step4a';
+import { GameLogger } from './logger.js?v=step4a';
+import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step4a';
+import { runFastSimulation, formatSimulationReport } from './simulator.js?v=step4a';
 
 const core=new GameCore({setting:1});const logger=new GameLogger();
 const betButton=document.getElementById('betButton'),leverButton=document.getElementById('leverButton'),stopButtons=[...document.querySelectorAll('[data-stop]')],settingSelect=document.getElementById('settingSelect'),wantedSeek=document.getElementById('wantedSeek'),holdTypeSelect=document.getElementById('holdTypeSelect'),holdInject=document.getElementById('holdInject'),simButton=document.getElementById('simButton'),simLog=document.getElementById('simLog');
