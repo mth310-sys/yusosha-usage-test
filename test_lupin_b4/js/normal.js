@@ -1,8 +1,8 @@
-import { drawWantedInitialZone } from './wanted-profile.js?v=step3f';
-import { HoldQueue } from './hold-queue.js?v=step3f';
+import { drawWantedInitialZone } from './wanted-profile.js?v=step3g';
+import { HoldQueue } from './hold-queue.js?v=step3g';
 
-// Step 3F: WANTED CHANCE + 8-slot HOLD queue skeleton.
-// HOLD contents are NORMAL placeholders only; color/expectation distributions are not implemented yet.
+// Step 3G: WANTED CHANCE + verified HOLD type catalog.
+// Random HOLD distributions are not implemented; special holds can be debug-injected only.
 export class NormalSystem {
   constructor(rng) {
     this.mode = 'NORMAL';
@@ -26,11 +26,7 @@ export class NormalSystem {
 
     if (this.mode === 'NORMAL') {
       this.wantedCount += 1;
-
-      if (this.wantedState === 'COUNTING' && this.wantedCount >= this.wantedTargetZone.min) {
-        this.wantedState = 'ARMED';
-      }
-
+      if (this.wantedState === 'COUNTING' && this.wantedCount >= this.wantedTargetZone.min) this.wantedState = 'ARMED';
       if (this.wantedCount >= this.wantedTargetZone.max) {
         this.mode = 'WANTED_CHANCE';
         this.wantedState = 'ACTIVE';
@@ -50,10 +46,18 @@ export class NormalSystem {
       }
       const holdResult = this.holdQueue.consumeAndRefill();
       this.lastConsumedHold = holdResult.consumed;
-      this.lastEvent = 'WANTED_CHANCE_HOLD_CONSUME';
+      this.lastEvent = this.lastConsumedHold?.reservedEvent
+        ? `HOLD_RESERVED_${this.lastConsumedHold.reservedEvent}`
+        : 'WANTED_CHANCE_HOLD_CONSUME';
     }
-
     return this.snapshot();
+  }
+
+  injectHoldForTest(type) {
+    if (this.mode !== 'WANTED_CHANCE' || !this.holdQueue) return false;
+    this.holdQueue.injectNext(type);
+    this.lastEvent = `DEBUG_HOLD_INJECT_${type}`;
+    return true;
   }
 
   seekWantedForTest() {
