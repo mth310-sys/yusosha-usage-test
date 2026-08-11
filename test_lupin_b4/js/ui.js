@@ -6,6 +6,7 @@ export function stopReelAnimation(index,symbol){clearInterval(spinTimers[index])
 function renderHolds(holds){const root=document.getElementById('holdQueue');if(!root)return;if(!holds.length){root.textContent='---';return;}root.textContent=holds.map((hold,index)=>`${index+1}:${hold.type}#${hold.id}`).join('  ');}
 export function renderState(core,logger){
   const s=core.snapshot();
+  const cz=s.normal.cz;
   document.getElementById('game').textContent=`#${String(s.gameNo).padStart(6,'0')}`;
   document.getElementById('setting').textContent=String(s.setting);
   document.getElementById('phase').textContent=s.phase;
@@ -19,6 +20,11 @@ export function renderState(core,logger){
   document.getElementById('consumedHold').textContent=s.normal.lastConsumedHold?`${s.normal.lastConsumedHold.type}#${s.normal.lastConsumedHold.id}`:'---';
   document.getElementById('pendingReward').textContent=s.normal.pendingReward?`${s.normal.pendingReward.type} / ${s.normal.pendingReward.status}`:'---';
   document.getElementById('transitionSource').textContent=s.normal.transitionSource??'---';
+  document.getElementById('czType').textContent=cz?.type??'---';
+  document.getElementById('czState').textContent=cz?.state??'---';
+  document.getElementById('czGames').textContent=cz?String(cz.gameCount):'---';
+  document.getElementById('czRemain').textContent=cz?String(cz.remainingGames):'---';
+  document.getElementById('czTotal').textContent=cz?String(cz.totalGames):'---';
   renderHolds(s.normal.holdQueue);
   document.getElementById('credit').textContent=String(s.credit);
   document.getElementById('bet').textContent=String(s.bet);
