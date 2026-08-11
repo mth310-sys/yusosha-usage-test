@@ -62,6 +62,7 @@ export class GameCore {
       setting:this.setting,
       mode:normal.mode,
       normalGameCount:normal.gameCount,
+      wantedCount:normal.wantedCount,
       role:this.pendingRole.name,
       payout:this.pendingRole.payout,
       replay:this.pendingRole.replay,
