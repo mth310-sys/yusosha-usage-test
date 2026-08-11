@@ -1,6 +1,8 @@
-// Step 6E: verified GOLDEN TIME internal 9-stage scenario model.
-// Sources: published analysis tables for scenario distribution, initial internal stage and 10G 1UP/2UP.
-// What happens AFTER the 10G IKUKAN special window is intentionally not invented here.
+// Step 6Z: cross-checked GOLDEN TIME internal 9-stage scenario model.
+// 1geki, Slopachi Quest and Pachislo-data publish matching scenario-by-setting,
+// initial internal-stage and 10G 1UP/2UP tables. The 8 normal internal stages map to
+// four visible stages; IKUKAN is the ninth special stage. What happens after the 10G
+// IKUKAN window is intentionally not synthesized here.
 
 export const ART_STAGE_SCENARIO_PROFILE = Object.freeze({
   internalOrder:['JAPAN_A','JAPAN_B','SWISS_A','SWISS_B','CARIBBEAN_A','CARIBBEAN_B','UNDERGROUND_A','UNDERGROUND_B','IKUKAN'],
@@ -20,7 +22,11 @@ export const ART_STAGE_SCENARIO_PROFILE = Object.freeze({
   },
   twoStepUpgradePct:{A:25.0,B:37.5,C:50.0,D:75.0},
   upgradeIntervalGames:10,
-  source:'VERIFIED_PUBLISHED_ANALYSIS_TABLES'
+  upgradeAlwaysOccurs:true,
+  normalInternalStageCount:8,
+  specialStage:'IKUKAN',
+  source:'CROSS_SOURCE_MATCHING_PUBLISHED_ANALYSIS_TABLES',
+  sourceConfidence:'HIGH'
 });
 
 function weightedKey(table,rng){
