@@ -13,11 +13,14 @@ export class GameLogger {
   toText() {
     if (!this.rows.length) return 'NO DATA';
     return this.rows.map(r => [
-      `#${String(r.gameNo).padStart(6,'0')}  S${r.setting}`,
+      `#${String(r.gameNo).padStart(6,'0')} S${r.setting}`,
       `ROLE ${r.role}`,
+      `REEL ${r.reelResult.join(' | ')}`,
+      `STOP ${r.stopOrder.map(i => ['L','C','R'][i]).join('→')}`,
       `PAY ${r.payout}`,
       `CREDIT ${r.creditBefore} -> ${r.creditAfter}`,
       r.replay ? 'REPLAY' : '',
+      `REEL_SRC ${r.reelSource}`,
       `NEXT ${r.nextPhase}`
     ].filter(Boolean).join(' | ')).join('\n');
   }
