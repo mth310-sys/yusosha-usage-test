@@ -4,7 +4,7 @@ import { getSettingProfile } from './setting-profile.js';
 import { drawRole } from './role-lottery.js';
 import { CreditSystem } from './credit.js';
 import { ReelController } from './reel-controller.js';
-import { NormalSystem } from './normal.js?v=step3g';
+import { NormalSystem } from './normal.js?v=step3h';
 
 export class GameCore {
   constructor({setting=1, seed=Date.now()} = {}) {
@@ -30,7 +30,7 @@ export class GameCore {
     this.phase='RESULT';
     this.creditSystem.settle(this.pendingRole);
     const normal=this.normal.completeGame(); const after=this.creditSystem.snapshot(); const reels=this.reels.snapshot();
-    const result={gameNo:this.gameNo,setting:this.setting,mode:normal.mode,normalGameCount:normal.gameCount,wantedCount:normal.wantedCount,wantedCycle:normal.wantedCycle,wantedTargetZone:normal.wantedTargetZone,wantedState:normal.wantedState,wantedEntrySource:normal.wantedEntrySource,wantedChanceGameCount:normal.wantedChanceGameCount,holdCapacity:normal.holdCapacity,holdQueue:normal.holdQueue,consumedHold:normal.lastConsumedHold,event:normal.lastEvent,role:this.pendingRole.name,payout:this.pendingRole.payout,replay:this.pendingRole.replay,creditBefore:this.creditBeforeGame.credit,creditAfter:after.credit,reelResult:reels.result,stopOrder:reels.stopOrder,reelSource:this.pendingRole.name==='MB'?'VERIFIED_MB_PATTERN':'PROVISIONAL',nextPhase:'WAIT_BET'};
+    const result={gameNo:this.gameNo,setting:this.setting,mode:normal.mode,normalGameCount:normal.gameCount,wantedCount:normal.wantedCount,wantedCycle:normal.wantedCycle,wantedTargetZone:normal.wantedTargetZone,wantedState:normal.wantedState,wantedEntrySource:normal.wantedEntrySource,wantedChanceGameCount:normal.wantedChanceGameCount,holdCapacity:normal.holdCapacity,holdQueue:normal.holdQueue,consumedHold:normal.lastConsumedHold,pendingReward:normal.pendingReward,transitionSource:normal.transitionSource,event:normal.lastEvent,role:this.pendingRole.name,payout:this.pendingRole.payout,replay:this.pendingRole.replay,creditBefore:this.creditBeforeGame.credit,creditAfter:after.credit,reelResult:reels.result,stopOrder:reels.stopOrder,reelSource:this.pendingRole.name==='MB'?'VERIFIED_MB_PATTERN':'PROVISIONAL',nextPhase:'WAIT_BET'};
     this.pendingRole=null; this.phase='WAIT_BET'; return {complete:true,symbol,result};
   }
   seekWantedForTest(){ if(this.phase!=='WAIT_BET') return false; return this.normal.seekWantedForTest(); }
