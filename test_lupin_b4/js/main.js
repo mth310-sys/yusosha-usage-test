@@ -1,45 +1,18 @@
-import { GameCore } from './game-core.js?v=step6v';
-import { GameLogger } from './logger.js?v=step6t';
-import { renderState as renderBaseState, startReelAnimation, stopReelAnimation } from './ui.js?v=step6t';
-import { runFastSimulation, formatSimulationReport, runRaiunCycleSimulation, formatRaiunCycleReport, runRaiunArtSimulation, formatRaiunArtReport, runShinRaiunLegendGateSimulation, formatShinRaiunLegendGateReport } from './simulator.js?v=step6t';
+import { GameCore } from './game-core.js?v=step6w';
+import { GameLogger } from './logger.js?v=step6w';
+import { renderState as renderBaseState, startReelAnimation, stopReelAnimation } from './ui.js?v=step6w';
+import { runFastSimulation, formatSimulationReport, runRaiunCycleSimulation, formatRaiunCycleReport, runRaiunArtSimulation, formatRaiunArtReport, runShinRaiunLegendGateSimulation, formatShinRaiunLegendGateReport } from './simulator.js?v=step6w';
 
 const core=new GameCore({setting:1});const logger=new GameLogger();
 const $=id=>document.getElementById(id);
 function renderLcdChance(){const el=$('lcdChanceState');if(!el)return;const x=core.snapshot().lcdChance,last=x.last;el.textContent=`NORMAL RATE  BLUE 1/${x.profile.NORMAL.WEAK_BLUE.denominator}  RED 1/${x.profile.NORMAL.MIDDLE_RED.denominator}  7 1/${x.profile.NORMAL.STRONG_7.denominator}\nWC RATE      BLUE 1/${x.profile.WANTED_CHANCE.WEAK_BLUE.denominator}  RED 1/${x.profile.WANTED_CHANCE.MIDDLE_RED.denominator}  7 1/${x.profile.WANTED_CHANCE.STRONG_7.denominator}\nLAST         ${last?`${last.mode} / ${last.key} / ${last.won?`WIN → ${last.destination}`:'MISS'} @ #${String(last.gameNo).padStart(6,'0')}`:'---'}\nTOTAL        ${x.totalHits}\nNORMAL       ${x.normalHits}\nWANTED       ${x.wantedHits}\nWON          ${x.wonHits}\nBLUE         ${x.weakHits}\nRED          ${x.middleHits}\n7            ${x.strongHits}\nVISUAL STEP-UP DISTRIBUTION: UNVERIFIED`;}
-function renderState(coreArg,loggerArg){renderBaseState(coreArg,loggerArg);renderLcdChance();}
+function renderNextInitialHit(){const el=$('nextInitialHitState');if(!el)return;const x=core.snapshot().nextInitialHit,r=x.reservation,last=x.lastResolution,p=x.profile[core.setting];el.textContent=`SETTING ${core.setting}  LB ${p.LUPIN_BONUS}% / ART ${p.GOLDEN_TIME}%\nNEXT HIT      ${r?.type??'---'}\nRESERVE SRC   ${r?.reservationSource??'---'}\nDRAW #        ${r?.drawNo??'---'}\nLAST USED     ${last?`${last.type} ← ${last.consumedBy}`:'---'}\nDRAWS / USED ${x.draws} / ${x.consumed}\nPOLICY        PRESELECT AT BONUS / ART END\nART GUARANTEE OVERRIDE: YES`;}
+function renderState(coreArg,loggerArg){renderBaseState(coreArg,loggerArg);renderLcdChance();renderNextInitialHit();}
 const betButton=$('betButton'),leverButton=$('leverButton'),stopButtons=[...document.querySelectorAll('[data-stop]')],settingSelect=$('settingSelect'),wantedSeek=$('wantedSeek'),holdTypeSelect=$('holdTypeSelect'),holdInject=$('holdInject'),czSuccess=$('czSuccess'),czFail=$('czFail'),rizeEnter=$('rizeEnter'),shinRizeEnter=$('shinRizeEnter'),rizeBackgroundSelect=$('rizeBackgroundSelect'),rizeBackgroundSet=$('rizeBackgroundSet'),rizeSuccess=$('rizeSuccess'),rizeFail=$('rizeFail'),raiunLevelSelect=$('raiunLevelSelect'),raiunSeek=$('raiunSeek'),raiunEnter=$('raiunEnter'),shinRaiunEnter=$('shinRaiunEnter'),raiunSuccess=$('raiunSuccess'),raiunFail=$('raiunFail'),legendGateEnter=$('legendGateEnter'),legendGateMedalSelect=$('legendGateMedalSelect'),legendGateMedalSet=$('legendGateMedalSet'),goldenTimeEnter=$('goldenTimeEnter'),goldenTimePendingStart=$('goldenTimePendingStart'),goldenTimeStockSelect=$('goldenTimeStockSelect'),goldenTimeStockAdd=$('goldenTimeStockAdd'),goldenTimeTreasureSelect=$('goldenTimeTreasureSelect'),goldenTimeTreasureSet=$('goldenTimeTreasureSet'),lupinRushTypeSelect=$('lupinRushTypeSelect'),lupinRushApplyAverage=$('lupinRushApplyAverage'),gtStageSelect=$('gtStageSelect'),gtStageSet=$('gtStageSet'),goldChanceAddedSelect=$('goldChanceAddedSelect'),goldChanceApply=$('goldChanceApply'),extraBonusStart=$('extraBonusStart'),extraSevenForce=$('extraSevenForce'),revengeStart=$('revengeStart'),revengeSkip=$('revengeSkip'),revengeLb=$('revengeLb'),revengeArt=$('revengeArt'),lupinBonusEnter=$('lupinBonusEnter'),lupinBonusEarlyWin=$('lupinBonusEarlyWin'),lupinBonusTypewriterWin=$('lupinBonusTypewriterWin'),simButton=$('simButton'),simLog=$('simLog'),raiunSimButton=$('raiunSimButton'),raiunSimLog=$('raiunSimLog'),raiunArtSimButton=$('raiunArtSimButton'),raiunArtSimLog=$('raiunArtSimLog'),shinLegendSimButton=$('shinLegendSimButton'),shinLegendSimLog=$('shinLegendSimLog');
 
-function installLcdChancePanel(){const gameLog=$('log')?.closest('.panel');if(!gameLog||$('lcdChancePanel'))return;const panel=document.createElement('section');panel.className='panel';panel.id='lcdChancePanel';panel.innerHTML='<h2>LCD CHANCE / NORMAL + WANTED / STEP 6V</h2><p class="note">液晶3桁チャンス目は物理リールとは別抽選。通常時もWANTED CHANCE中も公開出現率・当選期待度・当選先振り分けを使用。通常時当選はLB/GT pendingまたは各CZへ接続し、WC中は予約保留として消化時に発動。見た目の保留ステップアップ振り分けのみ未確認。</p><pre id="lcdChanceState">NOT RUN</pre>';gameLog.parentNode.insertBefore(panel,gameLog);}
-installLcdChancePanel();
-
-function installNormalHitRouter(){
-  const gameLog=$('log')?.closest('.panel');
-  if(!gameLog||$('normalHitRouter'))return;
-  const panel=document.createElement('section');panel.className='panel';panel.id='normalHitRouter';
-  panel.innerHTML='<h2>NORMAL HIT ROUTER / STEP 6V</h2><p class="note">LB_OR_GTまで確定している契機は、LB/GT間の正確な振り分け率が未確認なので自動二択しない。通常液晶チャンス目でLB_OR_GT当選した場合もここへ合流する。</p><div class="panel-head"><button id="normalHitToLb" type="button">LB_OR_GT → LUPIN BONUS</button><button id="normalHitToGt" type="button">LB_OR_GT → GOLDEN TIME</button></div><pre id="normalHitRouteState">PENDING REWARD が LB_OR_GT の時だけ有効</pre>';
-  gameLog.parentNode.insertBefore(panel,gameLog);
-}
-installNormalHitRouter();
-const normalHitToLb=$('normalHitToLb'),normalHitToGt=$('normalHitToGt'),normalHitRouteState=$('normalHitRouteState');
-function routeNormalHit(destination){
-  const p=core.normal?.pendingReward;
-  if(!p||p.type!=='LB_OR_GT'){
-    normalHitRouteState.textContent=p?.type==='PREMIUM'?'PREMIUM PENDING / EXACT BENEFIT UNVERIFIED / AUTO ROUTE BLOCKED':'NO LB_OR_GT PENDING';return false;
-  }
-  const source=p.source;
-  let ok=false;
-  if(destination==='LUPIN_BONUS'){
-    ok=core.startLupinBonusForTest();
-    if(ok){core.lupinBonus.source=`NORMAL_${source}_DEBUG_DESTINATION`;p.status='ROUTED_TO_LUPIN_BONUS_STEP6V';}
-  }else if(destination==='GOLDEN_TIME'){
-    ok=core.startGoldenTimeForTest(0);
-    if(ok){core.goldenTime.entrySource=`NORMAL_${source}_DEBUG_DESTINATION`;p.status='ROUTED_TO_GOLDEN_TIME_STEP6V';}
-  }
-  normalHitRouteState.textContent=ok?`${source} → ${destination} / DEBUG DESTINATION ONLY`:'ROUTE BLOCKED';
-  renderState(core,logger);return ok;
-}
-normalHitToLb.addEventListener('click',()=>routeNormalHit('LUPIN_BONUS'));
-normalHitToGt.addEventListener('click',()=>routeNormalHit('GOLDEN_TIME'));
+function installLcdChancePanel(){const gameLog=$('log')?.closest('.panel');if(!gameLog||$('lcdChancePanel'))return;const panel=document.createElement('section');panel.className='panel';panel.id='lcdChancePanel';panel.innerHTML='<h2>LCD CHANCE / NORMAL + WANTED / STEP 6W</h2><p class="note">通常時/WANTED CHANCEとも公開出現率・当選期待度・当選先を使用。LB_OR_GT成立時はNEXT INITIAL HIT予約を自動消費してLBまたはGTへ進む。</p><pre id="lcdChanceState">NOT RUN</pre>';gameLog.parentNode.insertBefore(panel,gameLog);}
+function installNextInitialHitPanel(){const gameLog=$('log')?.closest('.panel');if(!gameLog||$('nextInitialHitPanel'))return;const panel=document.createElement('section');panel.className='panel';panel.id='nextInitialHitPanel';panel.innerHTML='<h2>NEXT INITIAL HIT / STEP 6W</h2><p class="note">通常初当たりのLUPIN BONUS / ART種別は、直前のBONUSまたはART終了時に設定別で先決め。ART確定契機はこの予約を上書きする。起動直後のみ検証用BOOTSTRAP予約。</p><pre id="nextInitialHitState">NOT RUN</pre>';gameLog.parentNode.insertBefore(panel,gameLog);}
+installLcdChancePanel();installNextInitialHitPanel();
 
 betButton.addEventListener('click',()=>{core.bet();renderState(core,logger);});
 leverButton.addEventListener('click',()=>{const x=core.lever();if(x)startReelAnimation();renderState(core,logger);});
