@@ -1,11 +1,11 @@
-import { GameCore } from './game-core.js?v=step5d';
-import { GameLogger } from './logger.js?v=step5d';
-import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step5d';
-import { runFastSimulation, formatSimulationReport, runRaiunCycleSimulation, formatRaiunCycleReport } from './simulator.js?v=step5d';
+import { GameCore } from './game-core.js?v=step5e';
+import { GameLogger } from './logger.js?v=step5e';
+import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step5e';
+import { runFastSimulation, formatSimulationReport, runRaiunCycleSimulation, formatRaiunCycleReport, runRaiunArtSimulation, formatRaiunArtReport } from './simulator.js?v=step5e';
 
 const core=new GameCore({setting:1});const logger=new GameLogger();
 const $=id=>document.getElementById(id);
-const betButton=$('betButton'),leverButton=$('leverButton'),stopButtons=[...document.querySelectorAll('[data-stop]')],settingSelect=$('settingSelect'),wantedSeek=$('wantedSeek'),holdTypeSelect=$('holdTypeSelect'),holdInject=$('holdInject'),czSuccess=$('czSuccess'),czFail=$('czFail'),rizeEnter=$('rizeEnter'),shinRizeEnter=$('shinRizeEnter'),rizeBackgroundSelect=$('rizeBackgroundSelect'),rizeBackgroundSet=$('rizeBackgroundSet'),rizeSuccess=$('rizeSuccess'),rizeFail=$('rizeFail'),raiunLevelSelect=$('raiunLevelSelect'),raiunSeek=$('raiunSeek'),raiunEnter=$('raiunEnter'),shinRaiunEnter=$('shinRaiunEnter'),raiunSuccess=$('raiunSuccess'),raiunFail=$('raiunFail'),simButton=$('simButton'),simLog=$('simLog'),raiunSimButton=$('raiunSimButton'),raiunSimLog=$('raiunSimLog');
+const betButton=$('betButton'),leverButton=$('leverButton'),stopButtons=[...document.querySelectorAll('[data-stop]')],settingSelect=$('settingSelect'),wantedSeek=$('wantedSeek'),holdTypeSelect=$('holdTypeSelect'),holdInject=$('holdInject'),czSuccess=$('czSuccess'),czFail=$('czFail'),rizeEnter=$('rizeEnter'),shinRizeEnter=$('shinRizeEnter'),rizeBackgroundSelect=$('rizeBackgroundSelect'),rizeBackgroundSet=$('rizeBackgroundSet'),rizeSuccess=$('rizeSuccess'),rizeFail=$('rizeFail'),raiunLevelSelect=$('raiunLevelSelect'),raiunSeek=$('raiunSeek'),raiunEnter=$('raiunEnter'),shinRaiunEnter=$('shinRaiunEnter'),raiunSuccess=$('raiunSuccess'),raiunFail=$('raiunFail'),simButton=$('simButton'),simLog=$('simLog'),raiunSimButton=$('raiunSimButton'),raiunSimLog=$('raiunSimLog'),raiunArtSimButton=$('raiunArtSimButton'),raiunArtSimLog=$('raiunArtSimLog');
 
 betButton.addEventListener('click',()=>{core.bet();renderState(core,logger);});
 leverButton.addEventListener('click',()=>{const x=core.lever();if(x)startReelAnimation();renderState(core,logger);});
@@ -27,4 +27,5 @@ raiunSuccess.addEventListener('click',()=>{core.resolveRaiunForTest('SUCCESS');r
 raiunFail.addEventListener('click',()=>{core.resolveRaiunForTest('FAIL');renderState(core,logger);});
 simButton.addEventListener('click',()=>{simButton.disabled=true;simLog.textContent='RUNNING...';requestAnimationFrame(()=>{const r=runFastSimulation({setting:Number(settingSelect.value),games:100000,seed:0x13572468});simLog.textContent=formatSimulationReport(r);simButton.disabled=false;});});
 raiunSimButton.addEventListener('click',()=>{raiunSimButton.disabled=true;raiunSimLog.textContent='RUNNING...';requestAnimationFrame(()=>{const r=runRaiunCycleSimulation({cycles:100000,seed:0x24681357});raiunSimLog.textContent=formatRaiunCycleReport(r);raiunSimButton.disabled=false;});});
+raiunArtSimButton.addEventListener('click',()=>{raiunArtSimButton.disabled=true;raiunArtSimLog.textContent='RUNNING...';requestAnimationFrame(()=>{const r=runRaiunArtSimulation({sessions:100000,seed:0x579BDF13});raiunArtSimLog.textContent=formatRaiunArtReport(r);raiunArtSimButton.disabled=false;});});
 renderState(core,logger);
