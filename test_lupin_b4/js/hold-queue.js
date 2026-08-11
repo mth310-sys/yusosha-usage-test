@@ -1,6 +1,7 @@
-// Step 3F: HOLD queue skeleton for WANTED CHANCE.
-// Contents are intentionally NORMAL placeholders until verified hold distributions are implemented.
+import { getHoldDefinition } from './hold-profile.js?v=step3g';
 
+// Step 3G: HOLD queue + verified hold catalog support.
+// Random appearance distributions are intentionally not implemented yet.
 export class HoldQueue {
   constructor(capacity = 8) {
     this.capacity = capacity;
@@ -8,29 +9,31 @@ export class HoldQueue {
     this.items = [];
   }
 
-  createPlaceholder() {
+  createHold(type = 'NORMAL', sourceOverride = null) {
+    const def = getHoldDefinition(type);
     return {
       id:this.nextId++,
-      type:'NORMAL',
-      source:'PLACEHOLDER_UNVERIFIED'
+      ...def,
+      source:sourceOverride ?? def.source
     };
   }
 
   fill() {
-    while (this.items.length < this.capacity) {
-      this.items.push(this.createPlaceholder());
-    }
+    while (this.items.length < this.capacity) this.items.push(this.createHold('NORMAL'));
     return this.snapshot();
+  }
+
+  injectNext(type) {
+    if (!this.items.length) this.fill();
+    this.items[0] = this.createHold(type, 'DEBUG_INJECT');
+    return { ...this.items[0] };
   }
 
   consumeAndRefill() {
     if (!this.items.length) this.fill();
     const consumed = this.items.shift() ?? null;
-    this.items.push(this.createPlaceholder());
-    return {
-      consumed:consumed ? { ...consumed } : null,
-      queue:this.snapshot()
-    };
+    this.items.push(this.createHold('NORMAL'));
+    return { consumed:consumed ? { ...consumed } : null, queue:this.snapshot() };
   }
 
   snapshot() {
