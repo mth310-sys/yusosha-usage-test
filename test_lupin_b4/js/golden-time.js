@@ -1,77 +1,14 @@
-import { GOLDEN_TIME_PROFILE } from './golden-time-profile.js?v=step6a';
+import { GOLDEN_TIME_PROFILE } from './golden-time-profile.js?v=step6b';
+import { getTreasureContinuationPct, rollTreasureContinuation } from './treasure-profile.js?v=step6b';
 
 export class GoldenTimeSystem {
-  constructor(){
-    this.reset();
-  }
-
-  reset(){
-    this.state='IDLE';
-    this.setNo=0;
-    this.gameInSet=0;
-    this.remainingGames=null;
-    this.guaranteedStocks=0;
-    this.entrySource=null;
-    this.lastEvent=null;
-    this.result='UNRESOLVED';
-  }
-
-  start({guaranteedStocks=0,source='DEBUG_DIRECT_ENTRY'}={}){
-    this.state='ACTIVE_SET';
-    this.setNo=1;
-    this.gameInSet=0;
-    this.remainingGames=GOLDEN_TIME_PROFILE.setGamesApprox;
-    this.guaranteedStocks=Math.max(0,Number(guaranteedStocks)||0);
-    this.entrySource=source;
-    this.lastEvent='GOLDEN_TIME_START';
-    this.result='UNRESOLVED';
-    return true;
-  }
-
-  addStocks(count,source='DEBUG_ONLY'){
-    if(this.state==='IDLE')return false;
-    const add=Math.max(0,Number(count)||0);
-    this.guaranteedStocks+=add;
-    this.lastEvent=`GT_STOCK_PLUS_${add}_${source}`;
-    return true;
-  }
-
-  completeGame(){
-    this.lastEvent=null;
-    if(this.state!=='ACTIVE_SET'){
-      this.lastEvent=`GOLDEN_TIME_${this.state}`;
-      return this.snapshot();
-    }
-    this.gameInSet+=1;
-    this.remainingGames=Math.max(0,GOLDEN_TIME_PROFILE.setGamesApprox-this.gameInSet);
-    if(this.remainingGames>0){
-      this.lastEvent='GOLDEN_TIME_GAME';
-      return this.snapshot();
-    }
-    if(this.guaranteedStocks>0){
-      this.guaranteedStocks-=1;
-      this.setNo+=1;
-      this.gameInSet=0;
-      this.remainingGames=GOLDEN_TIME_PROFILE.setGamesApprox;
-      this.lastEvent='GOLDEN_TIME_CONTINUE_BY_STOCK';
-      return this.snapshot();
-    }
-    this.state='BATTLE_PENDING_TREASURE_MODEL';
-    this.lastEvent='GOLDEN_TIME_SET_END_PENDING_TREASURE_BATTLE';
-    return this.snapshot();
-  }
-
-  snapshot(){
-    return {
-      state:this.state,
-      setNo:this.setNo,
-      gameInSet:this.gameInSet,
-      remainingGames:this.remainingGames,
-      guaranteedStocks:this.guaranteedStocks,
-      entrySource:this.entrySource,
-      result:this.result,
-      lastEvent:this.lastEvent,
-      profile:GOLDEN_TIME_PROFILE
-    };
-  }
+  constructor(rng){this.rng=rng;this.reset();}
+  reset(){this.state='IDLE';this.setNo=0;this.gameInSet=0;this.remainingGames=null;this.guaranteedStocks=0;this.entrySource=null;this.lastEvent=null;this.result='UNRESOLVED';this.treasurePoints=0;this.battleContinuationPct=null;this.battleResult=null;this.battleSource=null;}
+  start({guaranteedStocks=0,source='DEBUG_DIRECT_ENTRY'}={}){this.state='ACTIVE_SET';this.setNo=1;this.gameInSet=0;this.remainingGames=GOLDEN_TIME_PROFILE.setGamesApprox;this.guaranteedStocks=Math.max(0,Number(guaranteedStocks)||0);this.entrySource=source;this.lastEvent='GOLDEN_TIME_START';this.result='UNRESOLVED';this.treasurePoints=0;this.battleContinuationPct=null;this.battleResult=null;this.battleSource=null;return true;}
+  addStocks(count,source='DEBUG_ONLY'){if(this.state==='IDLE')return false;const add=Math.max(0,Number(count)||0);this.guaranteedStocks+=add;this.lastEvent=`GT_STOCK_PLUS_${add}_${source}`;return true;}
+  setTreasureForTest(points){if(this.state==='IDLE')return false;const pct=getTreasureContinuationPct(points);if(pct==null)return false;this.treasurePoints=Number(points);this.battleContinuationPct=pct;this.lastEvent=`DEBUG_TREASURE_SET_${points}`;return true;}
+  beginNextSet(source){this.setNo+=1;this.gameInSet=0;this.remainingGames=GOLDEN_TIME_PROFILE.setGamesApprox;this.state='ACTIVE_SET';this.result='UNRESOLVED';this.treasurePoints=0;this.battleContinuationPct=null;this.battleResult=null;this.battleSource=source;}
+  resolveTreasureBattle(){const pct=getTreasureContinuationPct(this.treasurePoints);this.battleContinuationPct=pct;if(pct==null){this.state='BATTLE_PENDING_UNVERIFIED_TREASURE_POINT';this.battleResult='UNRESOLVED';this.battleSource='NO_INTERPOLATION';this.lastEvent='GT_BATTLE_PENDING_EXACT_TREASURE_VALUE';return this.snapshot();}const win=rollTreasureContinuation(this.treasurePoints,this.rng);this.battleResult=win?'WIN':'LOSE';this.battleSource='VERIFIED_TREASURE_TABLE';if(win){this.result='CONTINUE';this.lastEvent='GT_TREASURE_BATTLE_WIN';this.beginNextSet('TREASURE_BATTLE_WIN');}else{this.state='ART_END_PENDING_RETURN';this.result='END';this.lastEvent='GT_TREASURE_BATTLE_LOSE';}return this.snapshot();}
+  completeGame(){this.lastEvent=null;if(this.state!=='ACTIVE_SET'){this.lastEvent=`GOLDEN_TIME_${this.state}`;return this.snapshot();}this.gameInSet+=1;this.remainingGames=Math.max(0,GOLDEN_TIME_PROFILE.setGamesApprox-this.gameInSet);if(this.remainingGames>0){this.lastEvent='GOLDEN_TIME_GAME';return this.snapshot();}if(this.guaranteedStocks>0){this.guaranteedStocks-=1;this.beginNextSet('GUARANTEED_STOCK');this.lastEvent='GOLDEN_TIME_CONTINUE_BY_STOCK';return this.snapshot();}return this.resolveTreasureBattle();}
+  snapshot(){return{state:this.state,setNo:this.setNo,gameInSet:this.gameInSet,remainingGames:this.remainingGames,guaranteedStocks:this.guaranteedStocks,entrySource:this.entrySource,result:this.result,lastEvent:this.lastEvent,treasurePoints:this.treasurePoints,battleContinuationPct:this.battleContinuationPct,battleResult:this.battleResult,battleSource:this.battleSource,profile:GOLDEN_TIME_PROFILE};}
 }
