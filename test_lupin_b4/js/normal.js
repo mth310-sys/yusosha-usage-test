@@ -1,12 +1,15 @@
-import { drawWantedInitialZone } from './wanted-profile.js?v=step3h';
-import { HoldQueue } from './hold-queue.js?v=step3h';
+import { drawWantedInitialZone } from './wanted-profile.js?v=step4a';
+import { HoldQueue } from './hold-queue.js?v=step4a';
+import { drawCzLength } from './cz-profile.js?v=step4a';
 
 const DIRECT_ZONE_EVENTS = new Set(['DOROBO_ZONE','FUJIKO_ZONE','SEVEN_ZONE']);
 
-// Step 3H: verified HOLD consumption now drives real mode transitions for known zone holds.
-// LB/GT and PREMIUM holds remain pending reservations until those destination systems exist.
+// Step 4A: DOROBO_ZONE gets a real CZ game container with verified 10G/20G duration draw.
+// CZ success lottery is intentionally not implemented yet.
 export class NormalSystem {
-  constructor(rng) {
+  constructor(rng, setting = 1) {
+    this.rng = rng;
+    this.setting = Number(setting);
     this.mode = 'NORMAL';
     this.gameCount = 0;
     this.wantedCount = 0;
@@ -20,7 +23,12 @@ export class NormalSystem {
     this.lastConsumedHold = null;
     this.pendingReward = null;
     this.transitionSource = null;
+    this.cz = null;
     this.lastEvent = null;
+  }
+
+  setSetting(setting) {
+    this.setting = Number(setting);
   }
 
   closeWantedHolds() {
@@ -28,15 +36,36 @@ export class NormalSystem {
     this.holdQueue = null;
   }
 
+  startDoroboZone(source) {
+    const totalGames = drawCzLength(this.setting, this.rng);
+    this.mode = 'DOROBO_ZONE';
+    this.cz = {
+      type:'DOROBO_ZONE',
+      state:'ACTIVE',
+      gameCount:0,
+      totalGames,
+      remainingGames:totalGames,
+      lengthSource:'VERIFIED_SETTING_TABLE',
+      transitionSource:source
+    };
+  }
+
   applyConsumedHold(hold) {
     if (!hold?.reservedEvent) return false;
 
     if (DIRECT_ZONE_EVENTS.has(hold.reservedEvent)) {
-      this.mode = hold.reservedEvent;
       this.wantedState = 'SUSPENDED';
       this.transitionSource = `HOLD_${hold.type}`;
       this.pendingReward = null;
       this.closeWantedHolds();
+
+      if (hold.reservedEvent === 'DOROBO_ZONE') {
+        this.startDoroboZone(this.transitionSource);
+      } else {
+        this.mode = hold.reservedEvent;
+        this.cz = null;
+      }
+
       this.lastEvent = `ENTER_${hold.reservedEvent}`;
       return true;
     }
@@ -79,11 +108,21 @@ export class NormalSystem {
       }
       const holdResult = this.holdQueue.consumeAndRefill();
       this.lastConsumedHold = holdResult.consumed;
-      if (!this.applyConsumedHold(this.lastConsumedHold)) {
-        this.lastEvent = 'WANTED_CHANCE_HOLD_CONSUME';
+      if (!this.applyConsumedHold(this.lastConsumedHold)) this.lastEvent = 'WANTED_CHANCE_HOLD_CONSUME';
+    } else if (this.mode === 'DOROBO_ZONE') {
+      if (this.cz?.state === 'ACTIVE') {
+        this.cz.gameCount += 1;
+        this.cz.remainingGames = Math.max(0, this.cz.totalGames - this.cz.gameCount);
+        if (this.cz.remainingGames === 0) {
+          this.cz.state = 'END_PENDING_SUCCESS_ROUTING';
+          this.lastEvent = 'DOROBO_ZONE_END_PENDING';
+        } else {
+          this.lastEvent = 'DOROBO_ZONE_GAME';
+        }
+      } else {
+        this.lastEvent = 'DOROBO_ZONE_END_PENDING';
       }
     } else {
-      // Destination gameplay is intentionally deferred to later steps.
       this.lastEvent = `${this.mode}_GAME_UNIMPLEMENTED`;
     }
     return this.snapshot();
@@ -119,6 +158,7 @@ export class NormalSystem {
       lastConsumedHold:this.lastConsumedHold ? { ...this.lastConsumedHold } : null,
       pendingReward:this.pendingReward ? { ...this.pendingReward } : null,
       transitionSource:this.transitionSource,
+      cz:this.cz ? { ...this.cz } : null,
       lastEvent:this.lastEvent
     };
   }
