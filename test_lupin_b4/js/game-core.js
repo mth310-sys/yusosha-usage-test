@@ -3,6 +3,7 @@ import { RNG } from './rng.js';
 import { getSettingProfile } from './setting-profile.js';
 import { drawRole } from './role-lottery.js';
 import { CreditSystem } from './credit.js';
+import { ReelController } from './reel-controller.js';
 
 export class GameCore {
   constructor({setting=1, seed=Date.now()} = {}) {
@@ -10,49 +11,75 @@ export class GameCore {
     this.profile = getSettingProfile(this.setting);
     this.rng = new RNG(seed);
     this.creditSystem = new CreditSystem(MACHINE.initialCredit, MACHINE.betPerGame);
+    this.reels = new ReelController(this.rng);
     this.gameNo = 0;
     this.phase = 'WAIT_BET';
     this.lastRole = null;
+    this.pendingRole = null;
+    this.creditBeforeGame = null;
   }
+
   setSetting(setting) {
     if (this.phase !== 'WAIT_BET') return false;
     this.setting = Number(setting);
     this.profile = getSettingProfile(this.setting);
     return true;
   }
+
   bet() {
     if (this.phase !== 'WAIT_BET') return false;
     if (!this.creditSystem.maxBet()) return false;
     this.phase = 'WAIT_LEVER';
     return true;
   }
+
   lever() {
     if (this.phase !== 'WAIT_LEVER') return null;
-    this.phase = 'ROLE_LOTTERY';
     this.gameNo += 1;
-    const before = this.creditSystem.snapshot();
-    const role = drawRole(this.profile, this.rng);
-    this.lastRole = role;
-    this.creditSystem.settle(role);
+    this.creditBeforeGame = this.creditSystem.snapshot();
+    this.pendingRole = drawRole(this.profile, this.rng);
+    this.lastRole = this.pendingRole;
+    this.reels.start(this.pendingRole);
+    this.phase = 'SPINNING';
+    return { role:this.pendingRole.name };
+  }
+
+  stopReel(index) {
+    if (this.phase !== 'SPINNING') return null;
+    const symbol = this.reels.stop(index);
+    if (symbol == null) return null;
+    if (!this.reels.allStopped) return { complete:false, symbol };
+
+    this.phase = 'RESULT';
+    this.creditSystem.settle(this.pendingRole);
     const after = this.creditSystem.snapshot();
-    this.phase = 'WAIT_BET';
-    return {
+    const reels = this.reels.snapshot();
+    const result = {
       gameNo:this.gameNo,
       setting:this.setting,
-      role:role.name,
-      payout:role.payout,
-      replay:role.replay,
-      creditBefore:before.credit,
+      role:this.pendingRole.name,
+      payout:this.pendingRole.payout,
+      replay:this.pendingRole.replay,
+      creditBefore:this.creditBeforeGame.credit,
       creditAfter:after.credit,
-      nextPhase:this.phase
+      reelResult:reels.result,
+      stopOrder:reels.stopOrder,
+      reelSource:this.pendingRole.name === 'MB' ? 'VERIFIED_MB_PATTERN' : 'PROVISIONAL',
+      nextPhase:'WAIT_BET'
     };
+
+    this.pendingRole = null;
+    this.phase = 'WAIT_BET';
+    return { complete:true, symbol, result };
   }
+
   snapshot() {
     return {
       gameNo:this.gameNo,
       setting:this.setting,
       phase:this.phase,
       role:this.lastRole?.name ?? '----',
+      reels:this.reels.snapshot(),
       ...this.creditSystem.snapshot()
     };
   }
