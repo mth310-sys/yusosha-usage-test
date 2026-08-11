@@ -1,8 +1,17 @@
-import { GameCore } from './game-core.js?v=step4b';
-import { GameLogger } from './logger.js?v=step4b';
-import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step4b';
-import { runFastSimulation, formatSimulationReport } from './simulator.js?v=step4b';
+import { GameCore } from './game-core.js?v=step4c';
+import { GameLogger } from './logger.js?v=step4c';
+import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step4c';
+import { runFastSimulation, formatSimulationReport } from './simulator.js?v=step4c';
 
 const core=new GameCore({setting:1});const logger=new GameLogger();
-const betButton=document.getElementById('betButton'),leverButton=document.getElementById('leverButton'),stopButtons=[...document.querySelectorAll('[data-stop]')],settingSelect=document.getElementById('settingSelect'),wantedSeek=document.getElementById('wantedSeek'),holdTypeSelect=document.getElementById('holdTypeSelect'),holdInject=document.getElementById('holdInject'),simButton=document.getElementById('simButton'),simLog=document.getElementById('simLog');
-betButton.addEventListener('click',()=>{core.bet();renderState(core,logger);});leverButton.addEventListener('click',()=>{const x=core.lever();if(x)startReelAnimation();renderState(core,logger);});stopButtons.forEach(b=>b.addEventListener('click',()=>{const i=Number(b.dataset.stop),o=core.stopReel(i);if(!o)return;stopReelAnimation(i,o.symbol);if(o.complete)logger.push(o.result);renderState(core,logger);}));settingSelect.addEventListener('change',()=>{core.setSetting(settingSelect.value);renderState(core,logger);});wantedSeek.addEventListener('click',()=>{core.seekWantedForTest();renderState(core,logger);});holdInject.addEventListener('click',()=>{core.injectHoldForTest(holdTypeSelect.value);renderState(core,logger);});simButton.addEventListener('click',()=>{simButton.disabled=true;simLog.textContent='RUNNING...';requestAnimationFrame(()=>{const r=runFastSimulation({setting:Number(settingSelect.value),games:100000,seed:0x13572468});simLog.textContent=formatSimulationReport(r);simButton.disabled=false;});});renderState(core,logger);
+const betButton=document.getElementById('betButton'),leverButton=document.getElementById('leverButton'),stopButtons=[...document.querySelectorAll('[data-stop]')],settingSelect=document.getElementById('settingSelect'),wantedSeek=document.getElementById('wantedSeek'),holdTypeSelect=document.getElementById('holdTypeSelect'),holdInject=document.getElementById('holdInject'),czSuccess=document.getElementById('czSuccess'),czFail=document.getElementById('czFail'),simButton=document.getElementById('simButton'),simLog=document.getElementById('simLog');
+betButton.addEventListener('click',()=>{core.bet();renderState(core,logger);});
+leverButton.addEventListener('click',()=>{const x=core.lever();if(x)startReelAnimation();renderState(core,logger);});
+stopButtons.forEach(b=>b.addEventListener('click',()=>{const i=Number(b.dataset.stop),o=core.stopReel(i);if(!o)return;stopReelAnimation(i,o.symbol);if(o.complete)logger.push(o.result);renderState(core,logger);}));
+settingSelect.addEventListener('change',()=>{core.setSetting(settingSelect.value);renderState(core,logger);});
+wantedSeek.addEventListener('click',()=>{core.seekWantedForTest();renderState(core,logger);});
+holdInject.addEventListener('click',()=>{core.injectHoldForTest(holdTypeSelect.value);renderState(core,logger);});
+czSuccess.addEventListener('click',()=>{core.resolveDoroboForTest('SUCCESS');renderState(core,logger);});
+czFail.addEventListener('click',()=>{core.resolveDoroboForTest('FAIL');renderState(core,logger);});
+simButton.addEventListener('click',()=>{simButton.disabled=true;simLog.textContent='RUNNING...';requestAnimationFrame(()=>{const r=runFastSimulation({setting:Number(settingSelect.value),games:100000,seed:0x13572468});simLog.textContent=formatSimulationReport(r);simButton.disabled=false;});});
+renderState(core,logger);
