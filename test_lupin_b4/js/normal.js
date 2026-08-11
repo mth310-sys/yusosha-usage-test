@@ -1,8 +1,10 @@
-import { drawWantedInitialZone } from './wanted-profile.js?v=step3g';
-import { HoldQueue } from './hold-queue.js?v=step3g';
+import { drawWantedInitialZone } from './wanted-profile.js?v=step3h';
+import { HoldQueue } from './hold-queue.js?v=step3h';
 
-// Step 3G: WANTED CHANCE + verified HOLD type catalog.
-// Random HOLD distributions are not implemented; special holds can be debug-injected only.
+const DIRECT_ZONE_EVENTS = new Set(['DOROBO_ZONE','FUJIKO_ZONE','SEVEN_ZONE']);
+
+// Step 3H: verified HOLD consumption now drives real mode transitions for known zone holds.
+// LB/GT and PREMIUM holds remain pending reservations until those destination systems exist.
 export class NormalSystem {
   constructor(rng) {
     this.mode = 'NORMAL';
@@ -16,7 +18,38 @@ export class NormalSystem {
     this.holdCapacity = null;
     this.holdQueue = null;
     this.lastConsumedHold = null;
+    this.pendingReward = null;
+    this.transitionSource = null;
     this.lastEvent = null;
+  }
+
+  closeWantedHolds() {
+    this.holdCapacity = null;
+    this.holdQueue = null;
+  }
+
+  applyConsumedHold(hold) {
+    if (!hold?.reservedEvent) return false;
+
+    if (DIRECT_ZONE_EVENTS.has(hold.reservedEvent)) {
+      this.mode = hold.reservedEvent;
+      this.wantedState = 'SUSPENDED';
+      this.transitionSource = `HOLD_${hold.type}`;
+      this.pendingReward = null;
+      this.closeWantedHolds();
+      this.lastEvent = `ENTER_${hold.reservedEvent}`;
+      return true;
+    }
+
+    this.pendingReward = {
+      type:hold.reservedEvent,
+      source:`HOLD_${hold.type}`,
+      guarantee:hold.guarantee,
+      status:'PENDING_DESTINATION_IMPLEMENTATION'
+    };
+    this.transitionSource = `HOLD_${hold.type}`;
+    this.lastEvent = `RESERVE_${hold.reservedEvent}`;
+    return true;
   }
 
   completeGame() {
@@ -46,9 +79,12 @@ export class NormalSystem {
       }
       const holdResult = this.holdQueue.consumeAndRefill();
       this.lastConsumedHold = holdResult.consumed;
-      this.lastEvent = this.lastConsumedHold?.reservedEvent
-        ? `HOLD_RESERVED_${this.lastConsumedHold.reservedEvent}`
-        : 'WANTED_CHANCE_HOLD_CONSUME';
+      if (!this.applyConsumedHold(this.lastConsumedHold)) {
+        this.lastEvent = 'WANTED_CHANCE_HOLD_CONSUME';
+      }
+    } else {
+      // Destination gameplay is intentionally deferred to later steps.
+      this.lastEvent = `${this.mode}_GAME_UNIMPLEMENTED`;
     }
     return this.snapshot();
   }
@@ -81,6 +117,8 @@ export class NormalSystem {
       holdCapacity:this.holdCapacity,
       holdQueue:this.holdQueue ? this.holdQueue.snapshot() : [],
       lastConsumedHold:this.lastConsumedHold ? { ...this.lastConsumedHold } : null,
+      pendingReward:this.pendingReward ? { ...this.pendingReward } : null,
+      transitionSource:this.transitionSource,
       lastEvent:this.lastEvent
     };
   }
