@@ -1,7 +1,6 @@
-import { getHoldDefinition } from './hold-profile.js?v=step3g';
+import { getHoldDefinition } from './hold-profile.js?v=step6t';
 
-// Step 3G: HOLD queue + verified hold catalog support.
-// Random appearance distributions are intentionally not implemented yet.
+// Step 6T: HOLD queue + verified hold catalog + automatic LCD chance-eye holds.
 export class HoldQueue {
   constructor(capacity = 8) {
     this.capacity = capacity;
@@ -23,9 +22,9 @@ export class HoldQueue {
     return this.snapshot();
   }
 
-  injectNext(type) {
+  injectNext(type, sourceOverride = 'DEBUG_INJECT') {
     if (!this.items.length) this.fill();
-    this.items[0] = this.createHold(type, 'DEBUG_INJECT');
+    this.items[0] = this.createHold(type, sourceOverride);
     return { ...this.items[0] };
   }
 
