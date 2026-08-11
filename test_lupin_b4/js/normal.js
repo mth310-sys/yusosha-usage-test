@@ -1,11 +1,12 @@
-import { drawWantedInitialZone } from './wanted-profile.js?v=step4b';
-import { HoldQueue } from './hold-queue.js?v=step4b';
-import { drawCzLength, drawCzScenario } from './cz-profile.js?v=step4b';
+import { drawWantedInitialZone } from './wanted-profile.js?v=step4c';
+import { HoldQueue } from './hold-queue.js?v=step4c';
+import { drawCzLength, drawCzScenario } from './cz-profile.js?v=step4c';
 
 const DIRECT_ZONE_EVENTS = new Set(['DOROBO_ZONE','FUJIKO_ZONE','SEVEN_ZONE']);
 
-// Step 4B: DOROBO_ZONE gets verified setting-dependent 10G/20G duration and A-D scenario draw.
-// Scenario meaning/stage behavior and CZ success lottery are intentionally not implemented yet.
+// Step 4C: DOROBO_ZONE result-routing skeleton.
+// Published analysis confirms odd-number alignment = success, but per-game/scenario hit rates are not public.
+// Therefore random success is intentionally disabled. Debug injection can verify SUCCESS/FAIL routing only.
 export class NormalSystem {
   constructor(rng, setting = 1) {
     this.rng = rng;
@@ -37,14 +38,42 @@ export class NormalSystem {
     this.cz = {
       type:'DOROBO_ZONE',
       state:'ACTIVE',
+      result:'UNRESOLVED',
+      resultSource:null,
       gameCount:0,
       totalGames,
       remainingGames:totalGames,
       scenario,
       lengthSource:'VERIFIED_SETTING_TABLE',
       scenarioSource:'VERIFIED_SETTING_TABLE',
+      successModel:'UNIMPLEMENTED_PER_GAME_RATE_UNKNOWN',
       transitionSource:source
     };
+  }
+
+  resolveDoroboForTest(result) {
+    if (this.mode !== 'DOROBO_ZONE' || !this.cz) return false;
+    if (!['SUCCESS','FAIL'].includes(result)) return false;
+
+    this.cz.result = result;
+    this.cz.resultSource = 'DEBUG_ONLY';
+    this.cz.remainingGames = 0;
+
+    if (result === 'SUCCESS') {
+      this.cz.state = 'SUCCESS_PENDING_DESTINATION';
+      this.pendingReward = {
+        type:'LB_OR_GT',
+        source:'DOROBO_ZONE_ODD_NUMBER_ALIGNMENT_DEBUG',
+        guarantee:'LB_OR_GT',
+        status:'PENDING_DESTINATION_IMPLEMENTATION'
+      };
+      this.lastEvent = 'DEBUG_DOROBO_SUCCESS_ROUTED';
+    } else {
+      this.cz.state = 'FAIL_PENDING_RETURN';
+      this.pendingReward = null;
+      this.lastEvent = 'DEBUG_DOROBO_FAIL_ROUTED';
+    }
+    return true;
   }
 
   applyConsumedHold(hold) {
@@ -111,13 +140,13 @@ export class NormalSystem {
         this.cz.gameCount += 1;
         this.cz.remainingGames = Math.max(0, this.cz.totalGames - this.cz.gameCount);
         if (this.cz.remainingGames === 0) {
-          this.cz.state = 'END_PENDING_SUCCESS_ROUTING';
-          this.lastEvent = 'DOROBO_ZONE_END_PENDING';
+          this.cz.state = 'END_PENDING_VERIFIED_SUCCESS_MODEL';
+          this.lastEvent = 'DOROBO_ZONE_END_PENDING_MODEL';
         } else {
           this.lastEvent = 'DOROBO_ZONE_GAME';
         }
       } else {
-        this.lastEvent = 'DOROBO_ZONE_END_PENDING';
+        this.lastEvent = `DOROBO_ZONE_${this.cz?.state ?? 'UNKNOWN'}`;
       }
     } else {
       this.lastEvent = `${this.mode}_GAME_UNIMPLEMENTED`;
