@@ -19,6 +19,8 @@ export class GameLogger {
       `WANTED ${r.wantedCount}`,
       `WANTED_TARGET ${r.wantedTargetZone.min}-${r.wantedTargetZone.max}G`,
       `WANTED_STATE ${r.wantedState}`,
+      `WC_G ${r.wantedChanceGameCount}`,
+      r.holdCapacity == null ? '' : `HOLD_CAP ${r.holdCapacity}`,
       r.event ? `EVENT ${r.event}` : '',
       r.wantedEntrySource ? `WANTED_SRC ${r.wantedEntrySource}` : '',
       `ROLE ${r.role}`,
