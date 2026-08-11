@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>LUPIN B4 Core Test</title>
+  <link rel="stylesheet" href="./css/debug.css">
+</head>
+<body>
+  <main class="debug">
+    <h1>LUPIN B4 / CORE TEST</h1>
+    <div class="grid">
+      <span>GAME</span><strong id="game">#000000</strong>
+      <span>SETTING</span><strong id="setting">1</strong>
+      <span>PHASE</span><strong id="phase">WAIT_BET</strong>
+      <span>CREDIT</span><strong id="credit">50</strong>
+      <span>BET</span><strong id="bet">0</strong>
+      <span>PAYOUT</span><strong id="payout">0</strong>
+      <span>ROLE</span><strong id="role">----</strong>
+    </div>
+    <div class="controls">
+      <button id="betButton">MAX BET</button>
+      <button id="leverButton" disabled>LEVER</button>
+    </div>
+    <h2>GAME LOG</h2>
+    <pre id="log"></pre>
+  </main>
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
