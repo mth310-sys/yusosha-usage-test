@@ -1,8 +1,8 @@
-import { drawWantedInitialZone } from './wanted-profile.js?v=step3e';
+import { drawWantedInitialZone } from './wanted-profile.js?v=step3f';
+import { HoldQueue } from './hold-queue.js?v=step3f';
 
-// Step 3E: NORMAL + WANTED target window + WANTED CHANCE base gameplay.
-// Public analysis confirms WANTED CHANCE expands the hold display to 8.
-// Success lottery / exit condition / exact intra-band entry timing are not implemented yet.
+// Step 3F: WANTED CHANCE + 8-slot HOLD queue skeleton.
+// HOLD contents are NORMAL placeholders only; color/expectation distributions are not implemented yet.
 export class NormalSystem {
   constructor(rng) {
     this.mode = 'NORMAL';
@@ -14,11 +14,14 @@ export class NormalSystem {
     this.wantedEntrySource = null;
     this.wantedChanceGameCount = 0;
     this.holdCapacity = null;
+    this.holdQueue = null;
+    this.lastConsumedHold = null;
     this.lastEvent = null;
   }
 
   completeGame() {
     this.lastEvent = null;
+    this.lastConsumedHold = null;
     this.gameCount += 1;
 
     if (this.mode === 'NORMAL') {
@@ -34,12 +37,20 @@ export class NormalSystem {
         this.wantedEntrySource = 'PROVISIONAL_WINDOW_END';
         this.wantedChanceGameCount = 0;
         this.holdCapacity = 8;
+        this.holdQueue = new HoldQueue(this.holdCapacity);
+        this.holdQueue.fill();
         this.lastEvent = 'WANTED_CHANCE_START';
       }
     } else if (this.mode === 'WANTED_CHANCE') {
       this.wantedChanceGameCount += 1;
       this.holdCapacity = 8;
-      this.lastEvent = 'WANTED_CHANCE_GAME';
+      if (!this.holdQueue) {
+        this.holdQueue = new HoldQueue(this.holdCapacity);
+        this.holdQueue.fill();
+      }
+      const holdResult = this.holdQueue.consumeAndRefill();
+      this.lastConsumedHold = holdResult.consumed;
+      this.lastEvent = 'WANTED_CHANCE_HOLD_CONSUME';
     }
 
     return this.snapshot();
@@ -64,6 +75,8 @@ export class NormalSystem {
       wantedEntrySource:this.wantedEntrySource,
       wantedChanceGameCount:this.wantedChanceGameCount,
       holdCapacity:this.holdCapacity,
+      holdQueue:this.holdQueue ? this.holdQueue.snapshot() : [],
+      lastConsumedHold:this.lastConsumedHold ? { ...this.lastConsumedHold } : null,
       lastEvent:this.lastEvent
     };
   }
