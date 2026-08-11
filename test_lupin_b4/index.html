@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#050505">
   <title>LUPIN B4 Core Test</title>
-  <link rel="stylesheet" href="./css/debug.css?v=step2-fix1">
+  <link rel="stylesheet" href="./css/debug.css?v=step3a">
 </head>
 <body>
   <main class="debug">
@@ -22,6 +22,8 @@
       <span>GAME</span><strong id="game">#000000</strong>
       <span>SETTING</span><strong id="setting">1</strong>
       <span>PHASE</span><strong id="phase">WAIT_BET</strong>
+      <span>MODE</span><strong id="mode">NORMAL</strong>
+      <span>NORMAL G</span><strong id="normalGames">0</strong>
       <span>CREDIT</span><strong id="credit">50</strong>
       <span>BET</span><strong id="bet">0</strong>
       <span>PAYOUT</span><strong id="payout">0</strong>
@@ -58,8 +60,8 @@
       <pre id="simLog">NOT RUN</pre>
     </section>
 
-    <p class="note">Phase 2: BET → LEVER → role lottery → provisional physical reels → STOP×3 → payout/credit → log. Exact B4 reel strips are not yet verified; only the MB stop-form concept is marked verified.</p>
+    <p class="note">Phase 3A: NORMAL base state + completed NORMAL game counter. WANTED, RAIUN and HOLD are intentionally not implemented yet.</p>
   </main>
-  <script type="module" src="./js/main.js?v=step2-fix1"></script>
+  <script type="module" src="./js/main.js?v=step3a"></script>
 </body>
 </html>
