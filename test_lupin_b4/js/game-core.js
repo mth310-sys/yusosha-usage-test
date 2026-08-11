@@ -4,7 +4,7 @@ import { getSettingProfile } from './setting-profile.js';
 import { drawRole } from './role-lottery.js';
 import { CreditSystem } from './credit.js';
 import { ReelController } from './reel-controller.js';
-import { NormalSystem } from './normal.js?v=step4c';
+import { NormalSystem } from './normal.js?v=step4d';
 
 export class GameCore {
   constructor({setting=1, seed=Date.now()} = {}) {
@@ -41,6 +41,6 @@ export class GameCore {
   }
   seekWantedForTest(){ if(this.phase!=='WAIT_BET') return false; return this.normal.seekWantedForTest(); }
   injectHoldForTest(type){ if(this.phase!=='WAIT_BET') return false; return this.normal.injectHoldForTest(type); }
-  resolveDoroboForTest(result){ if(this.phase!=='WAIT_BET') return false; return this.normal.resolveDoroboForTest(result); }
+  resolveCzForTest(result){ if(this.phase!=='WAIT_BET') return false; return this.normal.resolveCzForTest(result); }
   snapshot(){ return {gameNo:this.gameNo,setting:this.setting,phase:this.phase,role:this.lastRole?.name??'----',normal:this.normal.snapshot(),reels:this.reels.snapshot(),...this.creditSystem.snapshot()}; }
 }
