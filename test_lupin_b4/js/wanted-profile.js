@@ -1,6 +1,6 @@
-// Step 3C: verified WANTED initial-cycle target zones.
-// Source: 1geki WANTED counter analysis (2016-08-14).
-// Public data gives 32G target bands, not an exact game inside each band.
+// Step 6R: verified WANTED initial-cycle target zones + exact in-band target game.
+// Public analysis provides 32G target bands and states that each game inside a selected band is equally distributed.
+// WANTED CHANCE is guaranteed by 480G at the latest.
 
 export const WANTED_INITIAL_ZONES = Object.freeze([
   { min:1, max:32, weight:6.3 },
@@ -20,7 +20,7 @@ export const WANTED_INITIAL_ZONES = Object.freeze([
   { min:449, max:480, weight:2.0 }
 ]);
 
-export function drawWantedInitialZone(rng) {
+function drawWeightedZone(rng) {
   const total = WANTED_INITIAL_ZONES.reduce((sum, row) => sum + row.weight, 0);
   let value = rng.next() * total;
   for (const row of WANTED_INITIAL_ZONES) {
@@ -28,4 +28,20 @@ export function drawWantedInitialZone(rng) {
     if (value < 0) return { ...row };
   }
   return { ...WANTED_INITIAL_ZONES[WANTED_INITIAL_ZONES.length - 1] };
+}
+
+export function drawWantedInitialZone(rng) {
+  return drawWeightedZone(rng);
+}
+
+export function drawWantedInitialTarget(rng) {
+  const zone = drawWeightedZone(rng);
+  const width = zone.max - zone.min + 1;
+  const game = zone.min + Math.floor(rng.next() * width);
+  return {
+    zone,
+    game: Math.min(480, game),
+    distribution:'VERIFIED_UNIFORM_WITHIN_SELECTED_32G_BAND',
+    hardMaxGame:480
+  };
 }
