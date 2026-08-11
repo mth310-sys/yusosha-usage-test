@@ -4,10 +4,10 @@ import { getSettingProfile } from './setting-profile.js';
 import { drawRole } from './role-lottery.js';
 import { CreditSystem } from './credit.js';
 import { ReelController } from './reel-controller.js';
-import { NormalSystem } from './normal.js?v=step6n';
-import { GoldenTimeSystem } from './golden-time.js?v=step6n';
-import { RevengeChanceSystem } from './revenge-chance.js?v=step6n';
-import { LupinBonusSystem } from './lupin-bonus.js?v=step6n';
+import { NormalSystem } from './normal.js?v=step6o';
+import { GoldenTimeSystem } from './golden-time.js?v=step6o';
+import { RevengeChanceSystem } from './revenge-chance.js?v=step6o';
+import { LupinBonusSystem } from './lupin-bonus.js?v=step6o';
 
 export class GameCore {
   constructor({setting=1, seed=Date.now()} = {}) { this.setting=Number(setting); this.profile=getSettingProfile(this.setting); this.rng=new RNG(seed); this.creditSystem=new CreditSystem(MACHINE.initialCredit,MACHINE.betPerGame); this.reels=new ReelController(this.rng); this.normal=new NormalSystem(this.rng,this.setting); this.goldenTime=new GoldenTimeSystem(this.rng,this.setting); this.revenge=new RevengeChanceSystem(); this.lupinBonus=new LupinBonusSystem(this.rng); this.gameNo=0; this.phase='WAIT_BET'; this.lastRole=null; this.pendingRole=null; this.creditBeforeGame=null; }
@@ -21,9 +21,9 @@ export class GameCore {
     }else if(this.lupinBonus.state==='ACTIVE'){
       lupinBonus=this.lupinBonus.completeGame();mode='LUPIN_BONUS';event=lupinBonus.lastEvent;
       if(lupinBonus.state==='SUCCESS_ART_PENDING_GT'){
-        this.goldenTime.reset();this.goldenTime.start({guaranteedStocks:0,source:'LUPIN_BONUS_WIN_STEP6N'});gt=this.goldenTime.snapshot();this.lupinBonus.state='IDLE';lupinBonus=this.lupinBonus.snapshot();mode='GOLDEN_TIME';event='LUPIN_BONUS_WIN_GOLDEN_TIME_AUTO_START';
+        this.goldenTime.reset();this.goldenTime.start({guaranteedStocks:0,source:'LUPIN_BONUS_WIN_STEP6O'});gt=this.goldenTime.snapshot();this.lupinBonus.reset();lupinBonus=this.lupinBonus.snapshot();mode='GOLDEN_TIME';event='LUPIN_BONUS_WIN_GOLDEN_TIME_AUTO_START';
       }else if(lupinBonus.state==='FAIL_REVENGE_ENTRY_PENDING'){
-        this.revenge.reset();this.revenge.offer('LUPIN_BONUS_LOSE');revenge=this.revenge.snapshot();this.lupinBonus.state='IDLE';lupinBonus=this.lupinBonus.snapshot();mode='REVENGE_CHANCE_PENDING';event='LUPIN_BONUS_LOSE_REVENGE_ENTRY_PENDING_UNVERIFIED_RATE';
+        this.revenge.reset();this.revenge.offer('LUPIN_BONUS_LOSE');revenge=this.revenge.snapshot();this.lupinBonus.reset();lupinBonus=this.lupinBonus.snapshot();mode='REVENGE_CHANCE_PENDING';event='LUPIN_BONUS_LOSE_REVENGE_ENTRY_PENDING_UNVERIFIED_RATE';
       }
     }else if(this.goldenTime.state!=='IDLE'){
       gt=this.goldenTime.completeGame();mode='GOLDEN_TIME';event=gt.lastEvent;
@@ -43,7 +43,7 @@ export class GameCore {
   startLegendGateForTest(){if(!this.baseNormalReady())return false;return this.normal.startLegendGateForTest();}
   setLegendGateMedalsForTest(medals){if(!this.baseNormalReady())return false;return this.normal.setLegendGateMedalsForTest(medals);}
   startGoldenTimeForTest(stocks=0){if(!this.baseNormalReady())return false;return this.goldenTime.start({guaranteedStocks:Number(stocks)||0,source:'DEBUG_DIRECT_ENTRY'});}
-  startGoldenTimeFromPending(){if(!this.baseNormalReady())return false;const p=this.normal.pendingReward;if(!p||!['GOLDEN_TIME','GOLDEN_TIME_STOCKS'].includes(p.type))return false;const stocks=p.type==='GOLDEN_TIME_STOCKS'?(Number(p.minStocks)||0):0;const ok=this.goldenTime.start({guaranteedStocks:stocks,source:`PENDING_${p.source}`});if(ok){p.status='ROUTED_TO_GOLDEN_TIME_STEP6N';}return ok;}
+  startGoldenTimeFromPending(){if(!this.baseNormalReady())return false;const p=this.normal.pendingReward;if(!p||!['GOLDEN_TIME','GOLDEN_TIME_STOCKS'].includes(p.type))return false;const stocks=p.type==='GOLDEN_TIME_STOCKS'?(Number(p.minStocks)||0):0;const ok=this.goldenTime.start({guaranteedStocks:stocks,source:`PENDING_${p.source}`});if(ok){p.status='ROUTED_TO_GOLDEN_TIME_STEP6O';}return ok;}
   addGoldenTimeStocksForTest(count=1){if(this.phase!=='WAIT_BET'||this.revenge.state!=='IDLE'||this.lupinBonus.state!=='IDLE')return false;return this.goldenTime.addStocks(count,'DEBUG_ONLY');}
   setGoldenTimeTreasureForTest(points){if(this.phase!=='WAIT_BET'||this.revenge.state!=='IDLE'||this.lupinBonus.state!=='IDLE')return false;return this.goldenTime.setTreasureForTest(points);}
   applyLupinRushAverageForTest(type){if(this.phase!=='WAIT_BET'||this.revenge.state!=='IDLE'||this.lupinBonus.state!=='IDLE')return false;return this.goldenTime.applyLupinRushAverageForTest(type);}
@@ -55,5 +55,6 @@ export class GameCore {
   skipRevengeChanceForTest(){if(this.phase!=='WAIT_BET'||!this.revenge.skipForTest())return false;this.goldenTime.reset();this.revenge.reset();return true;}
   resolveRevengeForTest(destination){if(this.phase!=='WAIT_BET'||!this.revenge.resolveForTest(destination))return false;if(destination==='GOLDEN_TIME'){this.goldenTime.reset();this.goldenTime.start({guaranteedStocks:0,source:'REVENGE_CHANCE_DIRECT_ART_DEBUG_ROUTE'});this.revenge.reset();return true;}if(destination==='LUPIN_BONUS'){this.goldenTime.reset();this.lupinBonus.reset();this.lupinBonus.start('REVENGE_CHANCE_SUCCESS_DEBUG_ROUTE');this.revenge.reset();return true;}return false;}
   startLupinBonusForTest(){if(!this.baseNormalReady())return false;return this.lupinBonus.start('DEBUG_DIRECT_ENTRY');}
+  forceLupinBonusEarlyArtForTest(trigger='BATTLE_WIN'){if(this.phase!=='WAIT_BET'||!this.lupinBonus.forceVerifiedEarlyBattleWinForTest(trigger))return false;this.goldenTime.reset();this.goldenTime.start({guaranteedStocks:0,source:`LUPIN_BONUS_EARLY_${trigger}_STEP6O`});this.lupinBonus.reset();return true;}
   snapshot(){return{gameNo:this.gameNo,setting:this.setting,phase:this.phase,role:this.lastRole?.name??'----',normal:this.normal.snapshot(),goldenTime:this.goldenTime.snapshot(),revenge:this.revenge.snapshot(),lupinBonus:this.lupinBonus.snapshot(),reels:this.reels.snapshot(),...this.creditSystem.snapshot()};}
 }
