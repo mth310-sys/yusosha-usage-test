@@ -1,34 +1,8 @@
-import { GameCore } from './game-core.js?v=step3g';
-import { GameLogger } from './logger.js?v=step3g';
-import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step3g';
-import { runFastSimulation, formatSimulationReport } from './simulator.js?v=step3g';
+import { GameCore } from './game-core.js?v=step3h';
+import { GameLogger } from './logger.js?v=step3h';
+import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step3h';
+import { runFastSimulation, formatSimulationReport } from './simulator.js?v=step3h';
 
-const core = new GameCore({ setting:1 });
-const logger = new GameLogger();
-
-const betButton = document.getElementById('betButton');
-const leverButton = document.getElementById('leverButton');
-const stopButtons = [...document.querySelectorAll('[data-stop]')];
-const settingSelect = document.getElementById('settingSelect');
-const wantedSeek = document.getElementById('wantedSeek');
-const holdTypeSelect = document.getElementById('holdTypeSelect');
-const holdInject = document.getElementById('holdInject');
-const simButton = document.getElementById('simButton');
-const simLog = document.getElementById('simLog');
-
-betButton.addEventListener('click', () => { core.bet(); renderState(core, logger); });
-leverButton.addEventListener('click', () => { const started=core.lever(); if(started) startReelAnimation(); renderState(core,logger); });
-stopButtons.forEach(button => button.addEventListener('click', () => {
-  const index=Number(button.dataset.stop); const outcome=core.stopReel(index); if(!outcome) return;
-  stopReelAnimation(index,outcome.symbol); if(outcome.complete) logger.push(outcome.result); renderState(core,logger);
-}));
-settingSelect.addEventListener('change', () => { core.setSetting(settingSelect.value); renderState(core,logger); });
-wantedSeek.addEventListener('click', () => { core.seekWantedForTest(); renderState(core,logger); });
-holdInject.addEventListener('click', () => { core.injectHoldForTest(holdTypeSelect.value); renderState(core,logger); });
-simButton.addEventListener('click', () => {
-  simButton.disabled=true; simLog.textContent='RUNNING...'; requestAnimationFrame(() => {
-    const report=runFastSimulation({setting:Number(settingSelect.value),games:100000,seed:0x13572468});
-    simLog.textContent=formatSimulationReport(report); simButton.disabled=false;
-  });
-});
-renderState(core, logger);
+const core=new GameCore({setting:1});const logger=new GameLogger();
+const betButton=document.getElementById('betButton'),leverButton=document.getElementById('leverButton'),stopButtons=[...document.querySelectorAll('[data-stop]')],settingSelect=document.getElementById('settingSelect'),wantedSeek=document.getElementById('wantedSeek'),holdTypeSelect=document.getElementById('holdTypeSelect'),holdInject=document.getElementById('holdInject'),simButton=document.getElementById('simButton'),simLog=document.getElementById('simLog');
+betButton.addEventListener('click',()=>{core.bet();renderState(core,logger);});leverButton.addEventListener('click',()=>{const x=core.lever();if(x)startReelAnimation();renderState(core,logger);});stopButtons.forEach(b=>b.addEventListener('click',()=>{const i=Number(b.dataset.stop),o=core.stopReel(i);if(!o)return;stopReelAnimation(i,o.symbol);if(o.complete)logger.push(o.result);renderState(core,logger);}));settingSelect.addEventListener('change',()=>{core.setSetting(settingSelect.value);renderState(core,logger);});wantedSeek.addEventListener('click',()=>{core.seekWantedForTest();renderState(core,logger);});holdInject.addEventListener('click',()=>{core.injectHoldForTest(holdTypeSelect.value);renderState(core,logger);});simButton.addEventListener('click',()=>{simButton.disabled=true;simLog.textContent='RUNNING...';requestAnimationFrame(()=>{const r=runFastSimulation({setting:Number(settingSelect.value),games:100000,seed:0x13572468});simLog.textContent=formatSimulationReport(r);simButton.disabled=false;});});renderState(core,logger);
