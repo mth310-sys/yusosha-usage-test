@@ -29,6 +29,7 @@ export function renderState(core, logger) {
   document.getElementById('phase').textContent = s.phase;
   document.getElementById('mode').textContent = s.normal.mode;
   document.getElementById('normalGames').textContent = String(s.normal.gameCount);
+  document.getElementById('wanted').textContent = String(s.normal.wantedCount);
   document.getElementById('credit').textContent = String(s.credit);
   document.getElementById('bet').textContent = String(s.bet);
   document.getElementById('payout').textContent = String(s.payout);
