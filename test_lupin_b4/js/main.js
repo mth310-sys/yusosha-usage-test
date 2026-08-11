@@ -1,7 +1,7 @@
-import { GameCore } from './game-core.js?v=step6p';
-import { GameLogger } from './logger.js?v=step6p';
-import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step6p';
-import { runFastSimulation, formatSimulationReport, runRaiunCycleSimulation, formatRaiunCycleReport, runRaiunArtSimulation, formatRaiunArtReport, runShinRaiunLegendGateSimulation, formatShinRaiunLegendGateReport } from './simulator.js?v=step6p';
+import { GameCore } from './game-core.js?v=step6r';
+import { GameLogger } from './logger.js?v=step6r';
+import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step6r';
+import { runFastSimulation, formatSimulationReport, runRaiunCycleSimulation, formatRaiunCycleReport, runRaiunArtSimulation, formatRaiunArtReport, runShinRaiunLegendGateSimulation, formatShinRaiunLegendGateReport } from './simulator.js?v=step6r';
 
 const core=new GameCore({setting:1});const logger=new GameLogger();
 const $=id=>document.getElementById(id);
@@ -11,7 +11,7 @@ function installNormalHitRouter(){
   const gameLog=$('log')?.closest('.panel');
   if(!gameLog||$('normalHitRouter'))return;
   const panel=document.createElement('section');panel.className='panel';panel.id='normalHitRouter';
-  panel.innerHTML='<h2>NORMAL HIT ROUTER / STEP 6Q</h2><p class="note">金・玉ちゃん・不二子虎柄保留、CZ成功、RIZE成功は解析上「LUPIN BONUS or GOLDEN TIME」まで確定。振り分け率は未確認なので自動抽選しない。PREMIUM保留は「プレミア確定」までしか恩恵を確認できないため、このLB/GTルーターには入れずPENDING保持する。SEVEN ZONEはGT確定の既存ルートを使用。</p><div class="panel-head"><button id="normalHitToLb" type="button">LB_OR_GT → LUPIN BONUS</button><button id="normalHitToGt" type="button">LB_OR_GT → GOLDEN TIME</button></div><pre id="normalHitRouteState">PENDING REWARD が LB_OR_GT の時だけ有効</pre>';
+  panel.innerHTML='<h2>NORMAL HIT ROUTER / STEP 6R</h2><p class="note">金・玉ちゃん・不二子虎柄保留、CZ成功、RIZE成功は解析上「LUPIN BONUS or GOLDEN TIME」まで確定。振り分け率は未確認なので自動抽選しない。PREMIUM保留は恩恵未確認のためPENDING保持。WANTED規定Gは選択32G帯の中から均等抽選し、最大480G。</p><div class="panel-head"><button id="normalHitToLb" type="button">LB_OR_GT → LUPIN BONUS</button><button id="normalHitToGt" type="button">LB_OR_GT → GOLDEN TIME</button></div><pre id="normalHitRouteState">PENDING REWARD が LB_OR_GT の時だけ有効</pre>';
   gameLog.parentNode.insertBefore(panel,gameLog);
 }
 installNormalHitRouter();
@@ -25,10 +25,10 @@ function routeNormalHit(destination){
   let ok=false;
   if(destination==='LUPIN_BONUS'){
     ok=core.startLupinBonusForTest();
-    if(ok){core.lupinBonus.source=`NORMAL_${source}_DEBUG_DESTINATION`;p.status='ROUTED_TO_LUPIN_BONUS_STEP6Q';}
+    if(ok){core.lupinBonus.source=`NORMAL_${source}_DEBUG_DESTINATION`;p.status='ROUTED_TO_LUPIN_BONUS_STEP6R';}
   }else if(destination==='GOLDEN_TIME'){
     ok=core.startGoldenTimeForTest(0);
-    if(ok){core.goldenTime.entrySource=`NORMAL_${source}_DEBUG_DESTINATION`;p.status='ROUTED_TO_GOLDEN_TIME_STEP6Q';}
+    if(ok){core.goldenTime.entrySource=`NORMAL_${source}_DEBUG_DESTINATION`;p.status='ROUTED_TO_GOLDEN_TIME_STEP6R';}
   }
   normalHitRouteState.textContent=ok?`${source} → ${destination} / DEBUG DESTINATION ONLY`:'ROUTE BLOCKED';
   renderState(core,logger);return ok;
