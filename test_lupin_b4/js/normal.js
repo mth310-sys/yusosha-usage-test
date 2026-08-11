@@ -1,11 +1,11 @@
-import { drawWantedInitialZone } from './wanted-profile.js?v=step4a';
-import { HoldQueue } from './hold-queue.js?v=step4a';
-import { drawCzLength } from './cz-profile.js?v=step4a';
+import { drawWantedInitialZone } from './wanted-profile.js?v=step4b';
+import { HoldQueue } from './hold-queue.js?v=step4b';
+import { drawCzLength, drawCzScenario } from './cz-profile.js?v=step4b';
 
 const DIRECT_ZONE_EVENTS = new Set(['DOROBO_ZONE','FUJIKO_ZONE','SEVEN_ZONE']);
 
-// Step 4A: DOROBO_ZONE gets a real CZ game container with verified 10G/20G duration draw.
-// CZ success lottery is intentionally not implemented yet.
+// Step 4B: DOROBO_ZONE gets verified setting-dependent 10G/20G duration and A-D scenario draw.
+// Scenario meaning/stage behavior and CZ success lottery are intentionally not implemented yet.
 export class NormalSystem {
   constructor(rng, setting = 1) {
     this.rng = rng;
@@ -27,17 +27,12 @@ export class NormalSystem {
     this.lastEvent = null;
   }
 
-  setSetting(setting) {
-    this.setting = Number(setting);
-  }
-
-  closeWantedHolds() {
-    this.holdCapacity = null;
-    this.holdQueue = null;
-  }
+  setSetting(setting) { this.setting = Number(setting); }
+  closeWantedHolds() { this.holdCapacity = null; this.holdQueue = null; }
 
   startDoroboZone(source) {
     const totalGames = drawCzLength(this.setting, this.rng);
+    const scenario = drawCzScenario(this.setting, this.rng);
     this.mode = 'DOROBO_ZONE';
     this.cz = {
       type:'DOROBO_ZONE',
@@ -45,7 +40,9 @@ export class NormalSystem {
       gameCount:0,
       totalGames,
       remainingGames:totalGames,
+      scenario,
       lengthSource:'VERIFIED_SETTING_TABLE',
+      scenarioSource:'VERIFIED_SETTING_TABLE',
       transitionSource:source
     };
   }
