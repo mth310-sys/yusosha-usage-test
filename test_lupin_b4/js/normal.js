@@ -1,13 +1,14 @@
-import { drawWantedInitialZone } from './wanted-profile.js?v=step4e';
-import { HoldQueue } from './hold-queue.js?v=step4e';
-import { drawCzLength, drawCzScenario } from './cz-profile.js?v=step4e';
+import { drawWantedInitialZone } from './wanted-profile.js?v=step4f';
+import { HoldQueue } from './hold-queue.js?v=step4f';
+import { drawCzLength, drawCzScenario } from './cz-profile.js?v=step4f';
+import { RIZE_PROFILE, getRizeConfidence } from './rize-profile.js?v=step4f';
 
 const DIRECT_ZONE_EVENTS = new Set(['DOROBO_ZONE','FUJIKO_ZONE','SEVEN_ZONE']);
 const SUPPORTED_CZ_TYPES = new Set(['DOROBO_ZONE','FUJIKO_ZONE']);
 
-// Step 4E: DOROBO_ZONE/FUJIKO_ZONE remain shared probabilistic CZ containers.
-// SEVEN_ZONE is intentionally separate: published analysis confirms entry itself guarantees ART/GOLDEN TIME.
-// SEVEN_ZONE duration/presentation length is not verified, so no invented game count is added.
+// Step 4F: adds RIZE_ZONE as a separate premonition container.
+// Published analysis: entry rate about 1/2980.1, overall expectation 44.66%, background confidence tables,
+// and SHIN_RIZE as a stronger variant. Duration and background-upgrade probabilities are not verified.
 export class NormalSystem {
   constructor(rng, setting = 1) {
     this.rng = rng;
@@ -26,6 +27,7 @@ export class NormalSystem {
     this.pendingReward = null;
     this.transitionSource = null;
     this.cz = null;
+    this.rize = null;
     this.lastEvent = null;
   }
 
@@ -37,6 +39,7 @@ export class NormalSystem {
     const totalGames = drawCzLength(this.setting, this.rng);
     const scenario = drawCzScenario(this.setting, this.rng);
     this.mode = type;
+    this.rize = null;
     this.cz = {
       type,
       state:'ACTIVE',
@@ -57,6 +60,7 @@ export class NormalSystem {
 
   startSevenZone(source) {
     this.mode = 'SEVEN_ZONE';
+    this.rize = null;
     this.cz = {
       type:'SEVEN_ZONE',
       state:'ART_GUARANTEED',
@@ -79,14 +83,67 @@ export class NormalSystem {
     this.lastEvent = 'ENTER_SEVEN_ZONE_ART_GUARANTEED';
   }
 
+  startRizeZone(variant='RIZE', source='DEBUG_ONLY') {
+    if (!['RIZE','SHIN_RIZE'].includes(variant)) return false;
+    this.mode = 'RIZE_ZONE';
+    this.cz = null;
+    this.pendingReward = null;
+    this.transitionSource = source;
+    this.rize = {
+      type:'RIZE_ZONE',
+      variant,
+      state:'ACTIVE_PREMONITION',
+      result:'UNRESOLVED',
+      resultSource:null,
+      background:'BLUE',
+      backgroundConfidence:getRizeConfidence(variant,'BLUE'),
+      entryRate:variant === 'RIZE' ? `1/${RIZE_PROFILE.entryRate}` : 'UNVERIFIED_VARIANT_ENTRY_RATE',
+      publishedOverallExpectation:variant === 'RIZE' ? `${RIZE_PROFILE.overallExpectation}%` : 'BACKGROUND_TABLE_ONLY',
+      duration:'UNVERIFIED',
+      upgradeModel:'UNVERIFIED',
+      transitionSource:source
+    };
+    this.lastEvent = `ENTER_${variant}`;
+    return true;
+  }
+
+  setRizeBackgroundForTest(background) {
+    if (this.mode !== 'RIZE_ZONE' || !this.rize) return false;
+    if (!RIZE_PROFILE.backgrounds.includes(background)) return false;
+    this.rize.background = background;
+    this.rize.backgroundConfidence = getRizeConfidence(this.rize.variant, background);
+    this.lastEvent = `DEBUG_RIZE_BACKGROUND_${background}`;
+    return true;
+  }
+
+  resolveRizeForTest(result) {
+    if (this.mode !== 'RIZE_ZONE' || !this.rize) return false;
+    if (!['SUCCESS','FAIL'].includes(result)) return false;
+    this.rize.result = result;
+    this.rize.resultSource = 'DEBUG_ONLY';
+    if (result === 'SUCCESS') {
+      this.rize.state = 'SUCCESS_PENDING_DESTINATION';
+      this.pendingReward = {
+        type:'LB_OR_GT',
+        source:`${this.rize.variant}_${this.rize.background}_DEBUG`,
+        guarantee:'LB_OR_GT',
+        status:'PENDING_DESTINATION_IMPLEMENTATION'
+      };
+      this.lastEvent = 'DEBUG_RIZE_SUCCESS_ROUTED';
+    } else {
+      this.rize.state = 'FAIL_PENDING_RETURN';
+      this.pendingReward = null;
+      this.lastEvent = 'DEBUG_RIZE_FAIL_ROUTED';
+    }
+    return true;
+  }
+
   resolveCzForTest(result) {
     if (!SUPPORTED_CZ_TYPES.has(this.mode) || !this.cz) return false;
     if (!['SUCCESS','FAIL'].includes(result)) return false;
-
     this.cz.result = result;
     this.cz.resultSource = 'DEBUG_ONLY';
     this.cz.remainingGames = 0;
-
     if (result === 'SUCCESS') {
       this.cz.state = 'SUCCESS_PENDING_DESTINATION';
       this.pendingReward = {
@@ -106,13 +163,11 @@ export class NormalSystem {
 
   applyConsumedHold(hold) {
     if (!hold?.reservedEvent) return false;
-
     if (DIRECT_ZONE_EVENTS.has(hold.reservedEvent)) {
       this.wantedState = 'SUSPENDED';
       this.transitionSource = `HOLD_${hold.type}`;
       this.pendingReward = null;
       this.closeWantedHolds();
-
       if (SUPPORTED_CZ_TYPES.has(hold.reservedEvent)) {
         this.startCz(hold.reservedEvent, this.transitionSource);
         this.lastEvent = `ENTER_${hold.reservedEvent}`;
@@ -121,7 +176,6 @@ export class NormalSystem {
       }
       return true;
     }
-
     this.pendingReward = {
       type:hold.reservedEvent,
       source:`HOLD_${hold.type}`,
@@ -137,7 +191,6 @@ export class NormalSystem {
     this.lastEvent = null;
     this.lastConsumedHold = null;
     this.gameCount += 1;
-
     if (this.mode === 'NORMAL') {
       this.wantedCount += 1;
       if (this.wantedState === 'COUNTING' && this.wantedCount >= this.wantedTargetZone.min) this.wantedState = 'ARMED';
@@ -154,10 +207,7 @@ export class NormalSystem {
     } else if (this.mode === 'WANTED_CHANCE') {
       this.wantedChanceGameCount += 1;
       this.holdCapacity = 8;
-      if (!this.holdQueue) {
-        this.holdQueue = new HoldQueue(this.holdCapacity);
-        this.holdQueue.fill();
-      }
+      if (!this.holdQueue) { this.holdQueue = new HoldQueue(this.holdCapacity); this.holdQueue.fill(); }
       const holdResult = this.holdQueue.consumeAndRefill();
       this.lastConsumedHold = holdResult.consumed;
       if (!this.applyConsumedHold(this.lastConsumedHold)) this.lastEvent = 'WANTED_CHANCE_HOLD_CONSUME';
@@ -168,14 +218,12 @@ export class NormalSystem {
         if (this.cz.remainingGames === 0) {
           this.cz.state = 'END_PENDING_VERIFIED_SUCCESS_MODEL';
           this.lastEvent = `${this.cz.type}_END_PENDING_MODEL`;
-        } else {
-          this.lastEvent = `${this.cz.type}_GAME`;
-        }
-      } else {
-        this.lastEvent = `${this.mode}_${this.cz?.state ?? 'UNKNOWN'}`;
-      }
+        } else this.lastEvent = `${this.cz.type}_GAME`;
+      } else this.lastEvent = `${this.mode}_${this.cz?.state ?? 'UNKNOWN'}`;
     } else if (this.mode === 'SEVEN_ZONE') {
       this.lastEvent = 'SEVEN_ZONE_ART_GUARANTEED_PENDING_GT';
+    } else if (this.mode === 'RIZE_ZONE') {
+      this.lastEvent = `RIZE_ZONE_${this.rize?.state ?? 'UNKNOWN'}`;
     } else {
       this.lastEvent = `${this.mode}_GAME_UNIMPLEMENTED`;
     }
@@ -213,6 +261,7 @@ export class NormalSystem {
       pendingReward:this.pendingReward ? { ...this.pendingReward } : null,
       transitionSource:this.transitionSource,
       cz:this.cz ? { ...this.cz } : null,
+      rize:this.rize ? { ...this.rize } : null,
       lastEvent:this.lastEvent
     };
   }
