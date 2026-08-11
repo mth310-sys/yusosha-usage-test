@@ -1,39 +1,59 @@
-import { CONFIG, PHASE } from './config.js';
-import { placeBet, settlePayout } from './credit.js';
+import { MACHINE } from './config.js';
+import { RNG } from './rng.js';
+import { getSettingProfile } from './setting-profile.js';
 import { drawRole } from './role-lottery.js';
-import { createLogger } from './logger.js';
+import { CreditSystem } from './credit.js';
 
-export function createGameCore() {
-  const logger = createLogger(CONFIG.logLimit);
-  const state = {
-    game: 0,
-    setting: CONFIG.setting,
-    phase: PHASE.WAIT_BET,
-    credit: CONFIG.initialCredit,
-    bet: 0,
-    payout: 0,
-    role: '----'
-  };
-
-  function maxBet() {
-    if (state.phase !== PHASE.WAIT_BET) return false;
-    if (!placeBet(state, CONFIG.maxBet)) return false;
-    state.phase = PHASE.WAIT_LEVER;
-    logger.push(`BET ${CONFIG.maxBet} / CREDIT ${state.credit}`);
+export class GameCore {
+  constructor({setting=1, seed=Date.now()} = {}) {
+    this.setting = Number(setting);
+    this.profile = getSettingProfile(this.setting);
+    this.rng = new RNG(seed);
+    this.creditSystem = new CreditSystem(MACHINE.initialCredit, MACHINE.betPerGame);
+    this.gameNo = 0;
+    this.phase = 'WAIT_BET';
+    this.lastRole = null;
+  }
+  setSetting(setting) {
+    if (this.phase !== 'WAIT_BET') return false;
+    this.setting = Number(setting);
+    this.profile = getSettingProfile(this.setting);
     return true;
   }
-
-  function lever() {
-    if (state.phase !== PHASE.WAIT_LEVER) return false;
-    state.game += 1;
-    const role = drawRole(state.setting);
-    state.role = role.name;
-    settlePayout(state, role.payout);
-    logger.push(`#${String(state.game).padStart(6, '0')} ${role.name} PAYOUT ${role.payout} CREDIT ${state.credit}`);
-    state.bet = 0;
-    state.phase = PHASE.WAIT_BET;
+  bet() {
+    if (this.phase !== 'WAIT_BET') return false;
+    if (!this.creditSystem.maxBet()) return false;
+    this.phase = 'WAIT_LEVER';
     return true;
   }
-
-  return { state, logger, maxBet, lever };
+  lever() {
+    if (this.phase !== 'WAIT_LEVER') return null;
+    this.phase = 'ROLE_LOTTERY';
+    this.gameNo += 1;
+    const before = this.creditSystem.snapshot();
+    const role = drawRole(this.profile, this.rng);
+    this.lastRole = role;
+    this.creditSystem.settle(role);
+    const after = this.creditSystem.snapshot();
+    this.phase = 'WAIT_BET';
+    return {
+      gameNo:this.gameNo,
+      setting:this.setting,
+      role:role.name,
+      payout:role.payout,
+      replay:role.replay,
+      creditBefore:before.credit,
+      creditAfter:after.credit,
+      nextPhase:this.phase
+    };
+  }
+  snapshot() {
+    return {
+      gameNo:this.gameNo,
+      setting:this.setting,
+      phase:this.phase,
+      role:this.lastRole?.name ?? '----',
+      ...this.creditSystem.snapshot()
+    };
+  }
 }

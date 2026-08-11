@@ -1,11 +1,14 @@
-export const CONFIG = Object.freeze({
+export const MACHINE = Object.freeze({
+  id: 'LUPIN_B4_CORE_TEST',
+  betPerGame: 3,
   initialCredit: 50,
-  maxBet: 3,
-  setting: 1,
-  logLimit: 120
+  logLimit: 30,
+  simDefaultGames: 100000
 });
 
-export const PHASE = Object.freeze({
-  WAIT_BET: 'WAIT_BET',
-  WAIT_LEVER: 'WAIT_LEVER'
+export const SOURCE_STATUS = Object.freeze({
+  VERIFIED: 'VERIFIED',
+  PARTIAL: 'PARTIAL',
+  CALIBRATED: 'CALIBRATED',
+  UNKNOWN: 'UNKNOWN'
 });

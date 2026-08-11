@@ -1,12 +1,24 @@
-export function createLogger(limit = 120) {
-  const lines = [];
-  return {
-    push(message) {
-      lines.unshift(message);
-      if (lines.length > limit) lines.length = limit;
-    },
-    text() {
-      return lines.join('\n');
-    }
-  };
+import { MACHINE } from './config.js';
+
+export class GameLogger {
+  constructor(limit = MACHINE.logLimit) {
+    this.limit = limit;
+    this.rows = [];
+  }
+  push(result) {
+    this.rows.unshift(result);
+    if (this.rows.length > this.limit) this.rows.length = this.limit;
+  }
+  clear() { this.rows = []; }
+  toText() {
+    if (!this.rows.length) return 'NO DATA';
+    return this.rows.map(r => [
+      `#${String(r.gameNo).padStart(6,'0')}  S${r.setting}`,
+      `ROLE ${r.role}`,
+      `PAY ${r.payout}`,
+      `CREDIT ${r.creditBefore} -> ${r.creditAfter}`,
+      r.replay ? 'REPLAY' : '',
+      `NEXT ${r.nextPhase}`
+    ].filter(Boolean).join(' | ')).join('\n');
+  }
 }
