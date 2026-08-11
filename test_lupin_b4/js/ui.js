@@ -7,6 +7,7 @@ function renderHolds(holds){const root=document.getElementById('holdQueue');if(!
 export function renderState(core,logger){
   const s=core.snapshot();
   const cz=s.normal.cz;
+  const rize=s.normal.rize;
   document.getElementById('game').textContent=`#${String(s.gameNo).padStart(6,'0')}`;
   document.getElementById('setting').textContent=String(s.setting);
   document.getElementById('phase').textContent=s.phase;
@@ -24,9 +25,14 @@ export function renderState(core,logger){
   document.getElementById('czState').textContent=cz?.state??'---';
   document.getElementById('czScenario').textContent=cz?.scenario??'---';
   document.getElementById('czResult').textContent=cz?.result??'---';
-  document.getElementById('czGames').textContent=cz?String(cz.gameCount):'---';
-  document.getElementById('czRemain').textContent=cz?String(cz.remainingGames):'---';
-  document.getElementById('czTotal').textContent=cz?String(cz.totalGames):'---';
+  document.getElementById('czGames').textContent=cz?.gameCount==null?'---':String(cz.gameCount);
+  document.getElementById('czRemain').textContent=cz?.remainingGames==null?'---':String(cz.remainingGames);
+  document.getElementById('czTotal').textContent=cz?.totalGames==null?'---':String(cz.totalGames);
+  document.getElementById('rizeVariant').textContent=rize?.variant??'---';
+  document.getElementById('rizeState').textContent=rize?.state??'---';
+  document.getElementById('rizeBackground').textContent=rize?.background??'---';
+  document.getElementById('rizeConfidence').textContent=rize?.backgroundConfidence==null?'---':`${rize.backgroundConfidence}%`;
+  document.getElementById('rizeResult').textContent=rize?.result??'---';
   renderHolds(s.normal.holdQueue);
   document.getElementById('credit').textContent=String(s.credit);
   document.getElementById('bet').textContent=String(s.bet);
@@ -41,6 +47,14 @@ export function renderState(core,logger){
   const czReady=s.phase==='WAIT_BET'&&['DOROBO_ZONE','FUJIKO_ZONE'].includes(s.normal.mode)&&!!cz;
   document.getElementById('czSuccess').disabled=!czReady;
   document.getElementById('czFail').disabled=!czReady;
+  const normalReady=s.phase==='WAIT_BET'&&s.normal.mode==='NORMAL';
+  document.getElementById('rizeEnter').disabled=!normalReady;
+  document.getElementById('shinRizeEnter').disabled=!normalReady;
+  const rizeReady=s.phase==='WAIT_BET'&&s.normal.mode==='RIZE_ZONE'&&!!rize;
+  document.getElementById('rizeBackgroundSelect').disabled=!rizeReady;
+  document.getElementById('rizeBackgroundSet').disabled=!rizeReady;
+  document.getElementById('rizeSuccess').disabled=!rizeReady;
+  document.getElementById('rizeFail').disabled=!rizeReady;
   document.querySelectorAll('[data-stop]').forEach(button=>{const i=Number(button.dataset.stop);button.disabled=s.phase!=='SPINNING'||s.reels.stopped[i];});
   document.getElementById('stopOrder').textContent=s.reels.stopOrder.length?s.reels.stopOrder.map(i=>['L','C','R'][i]).join(' → '):'---';
   document.getElementById('log').textContent=logger.toText();
