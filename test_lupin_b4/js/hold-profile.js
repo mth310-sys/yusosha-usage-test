@@ -1,10 +1,15 @@
-// Step 6Q: verified NORMAL/WANTED hold catalog.
-// Appearance rates are intentionally NOT defined because verified distributions are not available.
+// Step 6T: verified NORMAL/WANTED hold catalog.
+// Special destination holds are preserved from earlier steps.
+// LCD chance-eye holds are now generated automatically from verified appearance rates,
+// but their later visual step-up/destination distribution remains unverified.
 // IMPORTANT: PREMIUM hold is verified only as "premium confirmed". Its exact gameplay benefit/destination
 // has not been verified, so it must NOT be auto-routed to LUPIN BONUS or GOLDEN TIME.
 
 export const HOLD_CATALOG = Object.freeze({
   NORMAL: { type:'NORMAL', guarantee:'NONE', reservedEvent:null, source:'BASE' },
+  CHANCE_BLUE: { type:'CHANCE_BLUE', guarantee:'CHANCE_EYE_WEAK', reservedEvent:null, source:'VERIFIED_LCD_WEAK_BLUE', stepup:'UNVERIFIED' },
+  CHANCE_RED: { type:'CHANCE_RED', guarantee:'CHANCE_EYE_MIDDLE', reservedEvent:null, source:'VERIFIED_LCD_MIDDLE_RED', stepup:'UNVERIFIED' },
+  CHANCE_7: { type:'CHANCE_7', guarantee:'CHANCE_EYE_STRONG', reservedEvent:null, source:'VERIFIED_LCD_STRONG_7', stepup:'UNVERIFIED' },
   GOLD: { type:'GOLD', guarantee:'LB_OR_GT', reservedEvent:'LB_OR_GT', source:'VERIFIED' },
   TAMACHAN: { type:'TAMACHAN', guarantee:'LB_OR_GT', reservedEvent:'LB_OR_GT', source:'VERIFIED' },
   FUJIKO_TIGER: { type:'FUJIKO_TIGER', guarantee:'LB_OR_GT', reservedEvent:'LB_OR_GT', source:'VERIFIED' },
@@ -21,7 +26,7 @@ export const HOLD_CATALOG = Object.freeze({
   }
 });
 
-export const DEBUG_HOLD_TYPES = Object.freeze(Object.keys(HOLD_CATALOG).filter(k => k !== 'NORMAL'));
+export const DEBUG_HOLD_TYPES = Object.freeze(Object.keys(HOLD_CATALOG).filter(k => !['NORMAL','CHANCE_BLUE','CHANCE_RED','CHANCE_7'].includes(k)));
 
 export function getHoldDefinition(type) {
   const row = HOLD_CATALOG[type] ?? HOLD_CATALOG.NORMAL;
