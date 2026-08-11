@@ -17,13 +17,10 @@ if (!GoldenTimeSystem.prototype.__step6yArtReturnPatched) {
     const draw = rollArtReturn(this.treasurePoints, this.rng);
     this.artReturnLast = { ...draw, timing:ART_RETURN_PROFILE.timing };
 
-    if (!draw.resolved) {
-      this.lastEvent = 'TREASURE_BATTLE_LOSE_ART_RETURN_UNRESOLVED_EXACT_TREASURE_NOT_IN_TABLE';
-      return originalSnapshot.call(this);
-    }
-
-    if (!draw.hit) {
-      this.lastEvent = `TREASURE_BATTLE_LOSE_ART_RETURN_FAIL_${draw.pct}PCT`;
+    // Miss/unresolved must preserve the legacy event string so GameCore continues
+    // into the existing Revenge Chance offer path.
+    if (!draw.resolved || !draw.hit) {
+      this.lastEvent = 'TREASURE_BATTLE_G4_LOSE_ART_END';
       return originalSnapshot.call(this);
     }
 
