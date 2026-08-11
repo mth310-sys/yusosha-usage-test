@@ -4,7 +4,7 @@ import { getSettingProfile } from './setting-profile.js';
 import { drawRole } from './role-lottery.js';
 import { CreditSystem } from './credit.js';
 import { ReelController } from './reel-controller.js';
-import { NormalSystem } from './normal.js?v=step3d';
+import { NormalSystem } from './normal.js?v=step3e';
 
 export class GameCore {
   constructor({setting=1, seed=Date.now()} = {}) {
@@ -67,6 +67,8 @@ export class GameCore {
       wantedTargetZone:normal.wantedTargetZone,
       wantedState:normal.wantedState,
       wantedEntrySource:normal.wantedEntrySource,
+      wantedChanceGameCount:normal.wantedChanceGameCount,
+      holdCapacity:normal.holdCapacity,
       event:normal.lastEvent,
       role:this.pendingRole.name,
       payout:this.pendingRole.payout,
