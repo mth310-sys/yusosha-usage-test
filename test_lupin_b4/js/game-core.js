@@ -4,11 +4,11 @@ import { getSettingProfile } from './setting-profile.js';
 import { drawRole } from './role-lottery.js';
 import { CreditSystem } from './credit.js';
 import { ReelController } from './reel-controller.js';
-import { NormalSystem } from './normal.js?v=step6a';
-import { GoldenTimeSystem } from './golden-time.js?v=step6a';
+import { NormalSystem } from './normal.js?v=step6b';
+import { GoldenTimeSystem } from './golden-time.js?v=step6b';
 
 export class GameCore {
-  constructor({setting=1, seed=Date.now()} = {}) { this.setting=Number(setting); this.profile=getSettingProfile(this.setting); this.rng=new RNG(seed); this.creditSystem=new CreditSystem(MACHINE.initialCredit,MACHINE.betPerGame); this.reels=new ReelController(this.rng); this.normal=new NormalSystem(this.rng,this.setting); this.goldenTime=new GoldenTimeSystem(); this.gameNo=0; this.phase='WAIT_BET'; this.lastRole=null; this.pendingRole=null; this.creditBeforeGame=null; }
+  constructor({setting=1, seed=Date.now()} = {}) { this.setting=Number(setting); this.profile=getSettingProfile(this.setting); this.rng=new RNG(seed); this.creditSystem=new CreditSystem(MACHINE.initialCredit,MACHINE.betPerGame); this.reels=new ReelController(this.rng); this.normal=new NormalSystem(this.rng,this.setting); this.goldenTime=new GoldenTimeSystem(this.rng); this.gameNo=0; this.phase='WAIT_BET'; this.lastRole=null; this.pendingRole=null; this.creditBeforeGame=null; }
   setSetting(setting){if(this.phase!=='WAIT_BET'||this.goldenTime.state!=='IDLE')return false;this.setting=Number(setting);this.profile=getSettingProfile(this.setting);this.normal.setSetting(this.setting);return true;}
   bet(){if(this.phase!=='WAIT_BET'||(this.goldenTime.state!=='IDLE'&&this.goldenTime.state!=='ACTIVE_SET')||!this.creditSystem.maxBet())return false;this.phase='WAIT_LEVER';return true;}
   lever(){if(this.phase!=='WAIT_LEVER')return null;this.gameNo+=1;this.creditBeforeGame=this.creditSystem.snapshot();this.pendingRole=drawRole(this.profile,this.rng);this.lastRole=this.pendingRole;this.reels.start(this.pendingRole);this.phase='SPINNING';return{role:this.pendingRole.name};}
@@ -25,7 +25,8 @@ export class GameCore {
   startLegendGateForTest(){if(this.phase!=='WAIT_BET'||this.goldenTime.state!=='IDLE')return false;return this.normal.startLegendGateForTest();}
   setLegendGateMedalsForTest(medals){if(this.phase!=='WAIT_BET'||this.goldenTime.state!=='IDLE')return false;return this.normal.setLegendGateMedalsForTest(medals);}
   startGoldenTimeForTest(stocks=0){if(this.phase!=='WAIT_BET'||this.goldenTime.state!=='IDLE')return false;return this.goldenTime.start({guaranteedStocks:Number(stocks)||0,source:'DEBUG_DIRECT_ENTRY'});}
-  startGoldenTimeFromPending(){if(this.phase!=='WAIT_BET'||this.goldenTime.state!=='IDLE')return false;const p=this.normal.pendingReward;if(!p||!['GOLDEN_TIME','GOLDEN_TIME_STOCKS'].includes(p.type))return false;const stocks=p.type==='GOLDEN_TIME_STOCKS'?(Number(p.minStocks)||0):0;const ok=this.goldenTime.start({guaranteedStocks:stocks,source:`PENDING_${p.source}`});if(ok){p.status='ROUTED_TO_GOLDEN_TIME_STEP6A';}return ok;}
+  startGoldenTimeFromPending(){if(this.phase!=='WAIT_BET'||this.goldenTime.state!=='IDLE')return false;const p=this.normal.pendingReward;if(!p||!['GOLDEN_TIME','GOLDEN_TIME_STOCKS'].includes(p.type))return false;const stocks=p.type==='GOLDEN_TIME_STOCKS'?(Number(p.minStocks)||0):0;const ok=this.goldenTime.start({guaranteedStocks:stocks,source:`PENDING_${p.source}`});if(ok){p.status='ROUTED_TO_GOLDEN_TIME_STEP6B';}return ok;}
   addGoldenTimeStocksForTest(count=1){if(this.phase!=='WAIT_BET')return false;return this.goldenTime.addStocks(count,'DEBUG_ONLY');}
+  setGoldenTimeTreasureForTest(points){if(this.phase!=='WAIT_BET')return false;return this.goldenTime.setTreasureForTest(points);}
   snapshot(){return{gameNo:this.gameNo,setting:this.setting,phase:this.phase,role:this.lastRole?.name??'----',normal:this.normal.snapshot(),goldenTime:this.goldenTime.snapshot(),reels:this.reels.snapshot(),...this.creditSystem.snapshot()};}
 }
