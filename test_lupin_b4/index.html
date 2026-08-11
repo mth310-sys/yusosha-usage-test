@@ -26,6 +26,21 @@
       <span>BET</span><strong id="bet">0</strong>
       <span>PAYOUT</span><strong id="payout">0</strong>
       <span>ROLE</span><strong id="role">----</strong>
+      <span>STOP ORDER</span><strong id="stopOrder">---</strong>
+    </section>
+
+    <section class="reel-test" aria-label="provisional physical reels">
+      <small>PHYSICAL REEL MECHANISM / PROVISIONAL STRIP</small>
+      <div class="reels">
+        <div class="reel-cell" data-reel="0">---</div>
+        <div class="reel-cell" data-reel="1">---</div>
+        <div class="reel-cell" data-reel="2">---</div>
+      </div>
+      <div class="stop-controls">
+        <button data-stop="0" type="button" disabled>STOP L</button>
+        <button data-stop="1" type="button" disabled>STOP C</button>
+        <button data-stop="2" type="button" disabled>STOP R</button>
+      </div>
     </section>
 
     <div class="controls">
@@ -43,7 +58,7 @@
       <pre id="simLog">NOT RUN</pre>
     </section>
 
-    <p class="note">Phase 1: BET → LEVER → verified base-role lottery → payout/credit → 1G log. Cabinet, reels, CZ and GT are intentionally not implemented yet.</p>
+    <p class="note">Phase 2: BET → LEVER → role lottery → provisional physical reels → STOP×3 → payout/credit → log. Exact B4 reel strips are not yet verified; only the MB stop-form concept is marked verified.</p>
   </main>
   <script type="module" src="./js/main.js"></script>
 </body>
