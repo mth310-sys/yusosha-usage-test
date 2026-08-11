@@ -14,6 +14,8 @@ export class GameLogger {
     if (!this.rows.length) return 'NO DATA';
     return this.rows.map(r => [
       `#${String(r.gameNo).padStart(6,'0')} S${r.setting}`,
+      `MODE ${r.mode}`,
+      `NORMAL_G ${r.normalGameCount}`,
       `ROLE ${r.role}`,
       `REEL ${r.reelResult.join(' | ')}`,
       `STOP ${r.stopOrder.map(i => ['L','C','R'][i]).join('→')}`,
