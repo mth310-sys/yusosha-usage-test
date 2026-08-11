@@ -21,6 +21,8 @@ export class GameLogger {
       `WANTED_STATE ${r.wantedState}`,
       `WC_G ${r.wantedChanceGameCount}`,
       r.holdCapacity == null ? '' : `HOLD_CAP ${r.holdCapacity}`,
+      r.consumedHold ? `HOLD_OUT ${r.consumedHold.type}#${r.consumedHold.id}` : '',
+      r.holdQueue?.length ? `HOLD_Q ${r.holdQueue.map(h => `${h.type}#${h.id}`).join('>')}` : '',
       r.event ? `EVENT ${r.event}` : '',
       r.wantedEntrySource ? `WANTED_SRC ${r.wantedEntrySource}` : '',
       `ROLE ${r.role}`,
