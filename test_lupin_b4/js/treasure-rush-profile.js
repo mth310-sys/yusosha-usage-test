@@ -1,10 +1,15 @@
 // Step 6Z: verified Treasure RUSH outline.
 // Sources cross-checked against published machine analysis pages.
-// Only confirmed values are modeled here; unknown duration/award distributions are not synthesized.
+// Only confirmed values are modeled here; conflicting duration claims are retained explicitly.
 export const TREASURE_RUSH_PROFILE = Object.freeze({
   entryTrigger: 'TREASURE_HUNT_SUCCESS_OR_ART_CONTINUOUS_PERFORMANCE_SUCCESS',
   minimumGames: 4,
   maximumGames: null,
+  publishedDurationClaims: Object.freeze([
+    Object.freeze({range:'4G_OR_MORE',confidence:'HIGH',sourceGroup:'1GEKI_PWORLD_PACHIGABU'}),
+    Object.freeze({range:'4_TO_9G',confidence:'SECONDARY_CROSS_SOURCE',sourceGroup:'CHONBORISTA_PACHISLO_DATA'}),
+    Object.freeze({range:'5_TO_10G',confidence:'CONFLICTING_SECONDARY',sourceGroup:'KUMAPAPA'})
+  ]),
   averageTreasurePoints: 499000,
   everyGameTreasureAdd: true,
   continuationCue: 'MADAMADA',
@@ -33,7 +38,7 @@ export const TREASURE_RUSH_PROFILE = Object.freeze({
     firstGameExactAwardRange: true,
     exactFujikoCueDistribution: true
   }),
-  policy: 'NO_AUTO_ENTRY_OR_SYNTHETIC_DISTRIBUTION_UNTIL_VERIFIED'
+  policy: 'USE_MINIMUM_4G_ONLY; DO_NOT_AUTO_ENTRY_OR_SYNTHESIZE_DURATION/AWARD DISTRIBUTIONS UNTIL VERIFIED'
 });
 
 export function treasureRushSnapshot() {
@@ -41,6 +46,7 @@ export function treasureRushSnapshot() {
     entryTrigger: TREASURE_RUSH_PROFILE.entryTrigger,
     minimumGames: TREASURE_RUSH_PROFILE.minimumGames,
     maximumGames: TREASURE_RUSH_PROFILE.maximumGames,
+    publishedDurationClaims: TREASURE_RUSH_PROFILE.publishedDurationClaims.map(x=>({ ...x })),
     averageTreasurePoints: TREASURE_RUSH_PROFILE.averageTreasurePoints,
     everyGameTreasureAdd: TREASURE_RUSH_PROFILE.everyGameTreasureAdd,
     continuationCue: TREASURE_RUSH_PROFILE.continuationCue,
