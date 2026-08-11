@@ -1,7 +1,7 @@
-import { GameCore } from './game-core.js?v=step3e';
-import { GameLogger } from './logger.js?v=step3e';
-import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step3e';
-import { runFastSimulation, formatSimulationReport } from './simulator.js?v=step3e';
+import { GameCore } from './game-core.js?v=step3f';
+import { GameLogger } from './logger.js?v=step3f';
+import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step3f';
+import { runFastSimulation, formatSimulationReport } from './simulator.js?v=step3f';
 
 const core = new GameCore({ setting:1 });
 const logger = new GameLogger();
