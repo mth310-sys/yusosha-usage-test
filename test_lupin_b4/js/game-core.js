@@ -4,7 +4,7 @@ import { getSettingProfile } from './setting-profile.js';
 import { drawRole } from './role-lottery.js';
 import { CreditSystem } from './credit.js';
 import { ReelController } from './reel-controller.js';
-import { NormalSystem } from './normal.js?v=step3c';
+import { NormalSystem } from './normal.js?v=step3d';
 
 export class GameCore {
   constructor({setting=1, seed=Date.now()} = {}) {
@@ -65,6 +65,9 @@ export class GameCore {
       wantedCount:normal.wantedCount,
       wantedCycle:normal.wantedCycle,
       wantedTargetZone:normal.wantedTargetZone,
+      wantedState:normal.wantedState,
+      wantedEntrySource:normal.wantedEntrySource,
+      event:normal.lastEvent,
       role:this.pendingRole.name,
       payout:this.pendingRole.payout,
       replay:this.pendingRole.replay,
@@ -79,6 +82,11 @@ export class GameCore {
     this.pendingRole = null;
     this.phase = 'WAIT_BET';
     return { complete:true, symbol, result };
+  }
+
+  seekWantedForTest() {
+    if (this.phase !== 'WAIT_BET') return false;
+    return this.normal.seekWantedForTest();
   }
 
   snapshot() {
