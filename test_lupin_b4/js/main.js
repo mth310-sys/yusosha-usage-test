@@ -1,17 +1,22 @@
-import { GameCore } from './game-core.js?v=step6s';
-import { GameLogger } from './logger.js?v=step6s';
-import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step6s';
-import { runFastSimulation, formatSimulationReport, runRaiunCycleSimulation, formatRaiunCycleReport, runRaiunArtSimulation, formatRaiunArtReport, runShinRaiunLegendGateSimulation, formatShinRaiunLegendGateReport } from './simulator.js?v=step6s';
+import { GameCore } from './game-core.js?v=step6t';
+import { GameLogger } from './logger.js?v=step6t';
+import { renderState as renderBaseState, startReelAnimation, stopReelAnimation } from './ui.js?v=step6t';
+import { runFastSimulation, formatSimulationReport, runRaiunCycleSimulation, formatRaiunCycleReport, runRaiunArtSimulation, formatRaiunArtReport, runShinRaiunLegendGateSimulation, formatShinRaiunLegendGateReport } from './simulator.js?v=step6t';
 
 const core=new GameCore({setting:1});const logger=new GameLogger();
 const $=id=>document.getElementById(id);
+function renderLcdChance(){const el=$('lcdChanceState');if(!el)return;const x=core.snapshot().lcdChance,last=x.last;el.textContent=`WC RATE  BLUE 1/${x.profile.WANTED_CHANCE.WEAK_BLUE.denominator}  RED 1/${x.profile.WANTED_CHANCE.MIDDLE_RED.denominator}  7 1/${x.profile.WANTED_CHANCE.STRONG_7.denominator}\nLAST     ${last?`${last.key} @ GAME #${String(last.gameNo).padStart(6,'0')} → ${last.holdType}`:'---'}\nTOTAL    ${x.totalHits}\nBLUE     ${x.weakHits}\nRED      ${x.middleHits}\n7        ${x.strongHits}\nSTEP-UP DESTINATION DISTRIBUTION: UNVERIFIED`;}
+function renderState(coreArg,loggerArg){renderBaseState(coreArg,loggerArg);renderLcdChance();}
 const betButton=$('betButton'),leverButton=$('leverButton'),stopButtons=[...document.querySelectorAll('[data-stop]')],settingSelect=$('settingSelect'),wantedSeek=$('wantedSeek'),holdTypeSelect=$('holdTypeSelect'),holdInject=$('holdInject'),czSuccess=$('czSuccess'),czFail=$('czFail'),rizeEnter=$('rizeEnter'),shinRizeEnter=$('shinRizeEnter'),rizeBackgroundSelect=$('rizeBackgroundSelect'),rizeBackgroundSet=$('rizeBackgroundSet'),rizeSuccess=$('rizeSuccess'),rizeFail=$('rizeFail'),raiunLevelSelect=$('raiunLevelSelect'),raiunSeek=$('raiunSeek'),raiunEnter=$('raiunEnter'),shinRaiunEnter=$('shinRaiunEnter'),raiunSuccess=$('raiunSuccess'),raiunFail=$('raiunFail'),legendGateEnter=$('legendGateEnter'),legendGateMedalSelect=$('legendGateMedalSelect'),legendGateMedalSet=$('legendGateMedalSet'),goldenTimeEnter=$('goldenTimeEnter'),goldenTimePendingStart=$('goldenTimePendingStart'),goldenTimeStockSelect=$('goldenTimeStockSelect'),goldenTimeStockAdd=$('goldenTimeStockAdd'),goldenTimeTreasureSelect=$('goldenTimeTreasureSelect'),goldenTimeTreasureSet=$('goldenTimeTreasureSet'),lupinRushTypeSelect=$('lupinRushTypeSelect'),lupinRushApplyAverage=$('lupinRushApplyAverage'),gtStageSelect=$('gtStageSelect'),gtStageSet=$('gtStageSet'),goldChanceAddedSelect=$('goldChanceAddedSelect'),goldChanceApply=$('goldChanceApply'),extraBonusStart=$('extraBonusStart'),extraSevenForce=$('extraSevenForce'),revengeStart=$('revengeStart'),revengeSkip=$('revengeSkip'),revengeLb=$('revengeLb'),revengeArt=$('revengeArt'),lupinBonusEnter=$('lupinBonusEnter'),lupinBonusEarlyWin=$('lupinBonusEarlyWin'),lupinBonusTypewriterWin=$('lupinBonusTypewriterWin'),simButton=$('simButton'),simLog=$('simLog'),raiunSimButton=$('raiunSimButton'),raiunSimLog=$('raiunSimLog'),raiunArtSimButton=$('raiunArtSimButton'),raiunArtSimLog=$('raiunArtSimLog'),shinLegendSimButton=$('shinLegendSimButton'),shinLegendSimLog=$('shinLegendSimLog');
+
+function installLcdChancePanel(){const gameLog=$('log')?.closest('.panel');if(!gameLog||$('lcdChancePanel'))return;const panel=document.createElement('section');panel.className='panel';panel.id='lcdChancePanel';panel.innerHTML='<h2>LCD CHANCE / AUTO HOLD CHANGE / STEP 6T</h2><p class="note">液晶3桁チャンス目を物理リールとは別抽選。WANTED CHANCE中は青同色1/13.9・赤同色1/7.3・7停止1/45.7。発生時は次保留を自動変化。保留のその後の細かなステップアップ振り分けは未確認なので未実装。</p><pre id="lcdChanceState">NOT RUN</pre>';gameLog.parentNode.insertBefore(panel,gameLog);}
+installLcdChancePanel();
 
 function installNormalHitRouter(){
   const gameLog=$('log')?.closest('.panel');
   if(!gameLog||$('normalHitRouter'))return;
   const panel=document.createElement('section');panel.className='panel';panel.id='normalHitRouter';
-  panel.innerHTML='<h2>NORMAL HIT ROUTER / STEP 6S</h2><p class="note">金・玉ちゃん・不二子虎柄保留、CZ成功、RIZE成功は解析上「LUPIN BONUS or GOLDEN TIME」まで確定。振り分け率は未確認なので自動抽選しない。PREMIUM保留は恩恵未確認のためPENDING保持。WANTED CHANCEは基本10G、変化保留が残る間はカウント停止。失敗後は設定別次周期テーブルで再抽選する。</p><div class="panel-head"><button id="normalHitToLb" type="button">LB_OR_GT → LUPIN BONUS</button><button id="normalHitToGt" type="button">LB_OR_GT → GOLDEN TIME</button></div><pre id="normalHitRouteState">PENDING REWARD が LB_OR_GT の時だけ有効</pre>';
+  panel.innerHTML='<h2>NORMAL HIT ROUTER / STEP 6T</h2><p class="note">金・玉ちゃん・不二子虎柄保留、CZ成功、RIZE成功は解析上「LUPIN BONUS or GOLDEN TIME」まで確定。振り分け率は未確認なので自動抽選しない。PREMIUM保留は恩恵未確認のためPENDING保持。</p><div class="panel-head"><button id="normalHitToLb" type="button">LB_OR_GT → LUPIN BONUS</button><button id="normalHitToGt" type="button">LB_OR_GT → GOLDEN TIME</button></div><pre id="normalHitRouteState">PENDING REWARD が LB_OR_GT の時だけ有効</pre>';
   gameLog.parentNode.insertBefore(panel,gameLog);
 }
 installNormalHitRouter();
@@ -25,10 +30,10 @@ function routeNormalHit(destination){
   let ok=false;
   if(destination==='LUPIN_BONUS'){
     ok=core.startLupinBonusForTest();
-    if(ok){core.lupinBonus.source=`NORMAL_${source}_DEBUG_DESTINATION`;p.status='ROUTED_TO_LUPIN_BONUS_STEP6S';}
+    if(ok){core.lupinBonus.source=`NORMAL_${source}_DEBUG_DESTINATION`;p.status='ROUTED_TO_LUPIN_BONUS_STEP6T';}
   }else if(destination==='GOLDEN_TIME'){
     ok=core.startGoldenTimeForTest(0);
-    if(ok){core.goldenTime.entrySource=`NORMAL_${source}_DEBUG_DESTINATION`;p.status='ROUTED_TO_GOLDEN_TIME_STEP6S';}
+    if(ok){core.goldenTime.entrySource=`NORMAL_${source}_DEBUG_DESTINATION`;p.status='ROUTED_TO_GOLDEN_TIME_STEP6T';}
   }
   normalHitRouteState.textContent=ok?`${source} → ${destination} / DEBUG DESTINATION ONLY`:'ROUTE BLOCKED';
   renderState(core,logger);return ok;
