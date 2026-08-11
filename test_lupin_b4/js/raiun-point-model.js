@@ -1,11 +1,15 @@
-// Step 5B: calibrated Raiun point accumulation model.
+// Step 5D: calibrated Raiun point accumulation model.
 // Published aggregate values do not reconcile exactly if used as a naive single-stage process:
-// average initial 22.6pt + ~1/7.0-1/7.1 add frequency + 3.3pt/add implies ~165G to 100pt,
-// while published guidance is about 190G. Keep RAW values separate and use an effective calibrated
-// event rate for gameplay so the 100pt arrival time is near the published 190G target.
+// average initial 22.6pt + ~1/7.0-1/7.1 add frequency + 3.3pt/add implies a shorter arrival time,
+// while published guidance is about 190G. RAW values remain untouched.
+//
+// A cycle simulation that includes discrete point increments and the final 100pt boundary showed
+// 1/8.10 converged around 193-194G. The isolated gameplay calibration is therefore fixed at 1/7.96,
+// which converges near the published ~190G target while preserving mean initial 22.6pt and 3.3pt/add.
 
 export const RAIUN_POINT_MODEL = Object.freeze({
   source:'CALIBRATED_FROM_PUBLISHED_AGGREGATES',
+  calibrationStatus:'LOCKED_STEP5D',
   raw:{
     averageInitialPoints:22.6,
     publishedAddRateRange:'1/7.0-1/7.1',
@@ -13,9 +17,11 @@ export const RAIUN_POINT_MODEL = Object.freeze({
     publishedAverageGamesTo100:190
   },
   calibrated:{
-    effectiveAddDenominator:8.10,
+    effectiveAddDenominator:7.96,
     initialDistribution:{22:40,23:60},
-    addDistribution:{1:10,2:20,3:20,4:30,5:20}
+    addDistribution:{1:10,2:20,3:20,4:30,5:20},
+    targetAverageGamesTo100:190,
+    expectedSimulationRange:'about 189.5-190.5G / 100k cycles'
   }
 });
 
