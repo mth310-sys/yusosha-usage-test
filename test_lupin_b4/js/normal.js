@@ -1,9 +1,8 @@
-import { drawWantedInitialZone } from './wanted-profile.js?v=step3d';
+import { drawWantedInitialZone } from './wanted-profile.js?v=step3e';
 
-// Step 3D: NORMAL + WANTED target window + WANTED CHANCE entry skeleton.
-// Public analysis gives a 32G target band, not the exact game inside that band.
-// Therefore the temporary entry point is the final game of the selected band and
-// is explicitly marked PROVISIONAL_WINDOW_END until exact intra-band data is found.
+// Step 3E: NORMAL + WANTED target window + WANTED CHANCE base gameplay.
+// Public analysis confirms WANTED CHANCE expands the hold display to 8.
+// Success lottery / exit condition / exact intra-band entry timing are not implemented yet.
 export class NormalSystem {
   constructor(rng) {
     this.mode = 'NORMAL';
@@ -13,14 +12,16 @@ export class NormalSystem {
     this.wantedTargetZone = drawWantedInitialZone(rng);
     this.wantedState = 'COUNTING';
     this.wantedEntrySource = null;
+    this.wantedChanceGameCount = 0;
+    this.holdCapacity = null;
     this.lastEvent = null;
   }
 
   completeGame() {
     this.lastEvent = null;
+    this.gameCount += 1;
 
     if (this.mode === 'NORMAL') {
-      this.gameCount += 1;
       this.wantedCount += 1;
 
       if (this.wantedState === 'COUNTING' && this.wantedCount >= this.wantedTargetZone.min) {
@@ -31,8 +32,14 @@ export class NormalSystem {
         this.mode = 'WANTED_CHANCE';
         this.wantedState = 'ACTIVE';
         this.wantedEntrySource = 'PROVISIONAL_WINDOW_END';
+        this.wantedChanceGameCount = 0;
+        this.holdCapacity = 8;
         this.lastEvent = 'WANTED_CHANCE_START';
       }
+    } else if (this.mode === 'WANTED_CHANCE') {
+      this.wantedChanceGameCount += 1;
+      this.holdCapacity = 8;
+      this.lastEvent = 'WANTED_CHANCE_GAME';
     }
 
     return this.snapshot();
@@ -55,6 +62,8 @@ export class NormalSystem {
       wantedTargetZone:{ ...this.wantedTargetZone },
       wantedState:this.wantedState,
       wantedEntrySource:this.wantedEntrySource,
+      wantedChanceGameCount:this.wantedChanceGameCount,
+      holdCapacity:this.holdCapacity,
       lastEvent:this.lastEvent
     };
   }
