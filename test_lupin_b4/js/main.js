@@ -1,10 +1,10 @@
-import { GameCore } from './game-core.js?v=step4e';
-import { GameLogger } from './logger.js?v=step4e';
-import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step4e';
-import { runFastSimulation, formatSimulationReport } from './simulator.js?v=step4e';
+import { GameCore } from './game-core.js?v=step4f';
+import { GameLogger } from './logger.js?v=step4f';
+import { renderState, startReelAnimation, stopReelAnimation } from './ui.js?v=step4f';
+import { runFastSimulation, formatSimulationReport } from './simulator.js?v=step4f';
 
 const core=new GameCore({setting:1});const logger=new GameLogger();
-const betButton=document.getElementById('betButton'),leverButton=document.getElementById('leverButton'),stopButtons=[...document.querySelectorAll('[data-stop]')],settingSelect=document.getElementById('settingSelect'),wantedSeek=document.getElementById('wantedSeek'),holdTypeSelect=document.getElementById('holdTypeSelect'),holdInject=document.getElementById('holdInject'),czSuccess=document.getElementById('czSuccess'),czFail=document.getElementById('czFail'),simButton=document.getElementById('simButton'),simLog=document.getElementById('simLog');
+const betButton=document.getElementById('betButton'),leverButton=document.getElementById('leverButton'),stopButtons=[...document.querySelectorAll('[data-stop]')],settingSelect=document.getElementById('settingSelect'),wantedSeek=document.getElementById('wantedSeek'),holdTypeSelect=document.getElementById('holdTypeSelect'),holdInject=document.getElementById('holdInject'),czSuccess=document.getElementById('czSuccess'),czFail=document.getElementById('czFail'),rizeEnter=document.getElementById('rizeEnter'),shinRizeEnter=document.getElementById('shinRizeEnter'),rizeBackgroundSelect=document.getElementById('rizeBackgroundSelect'),rizeBackgroundSet=document.getElementById('rizeBackgroundSet'),rizeSuccess=document.getElementById('rizeSuccess'),rizeFail=document.getElementById('rizeFail'),simButton=document.getElementById('simButton'),simLog=document.getElementById('simLog');
 betButton.addEventListener('click',()=>{core.bet();renderState(core,logger);});
 leverButton.addEventListener('click',()=>{const x=core.lever();if(x)startReelAnimation();renderState(core,logger);});
 stopButtons.forEach(b=>b.addEventListener('click',()=>{const i=Number(b.dataset.stop),o=core.stopReel(i);if(!o)return;stopReelAnimation(i,o.symbol);if(o.complete)logger.push(o.result);renderState(core,logger);}));
@@ -13,5 +13,10 @@ wantedSeek.addEventListener('click',()=>{core.seekWantedForTest();renderState(co
 holdInject.addEventListener('click',()=>{core.injectHoldForTest(holdTypeSelect.value);renderState(core,logger);});
 czSuccess.addEventListener('click',()=>{core.resolveCzForTest('SUCCESS');renderState(core,logger);});
 czFail.addEventListener('click',()=>{core.resolveCzForTest('FAIL');renderState(core,logger);});
+rizeEnter.addEventListener('click',()=>{core.startRizeForTest('RIZE');renderState(core,logger);});
+shinRizeEnter.addEventListener('click',()=>{core.startRizeForTest('SHIN_RIZE');renderState(core,logger);});
+rizeBackgroundSet.addEventListener('click',()=>{core.setRizeBackgroundForTest(rizeBackgroundSelect.value);renderState(core,logger);});
+rizeSuccess.addEventListener('click',()=>{core.resolveRizeForTest('SUCCESS');renderState(core,logger);});
+rizeFail.addEventListener('click',()=>{core.resolveRizeForTest('FAIL');renderState(core,logger);});
 simButton.addEventListener('click',()=>{simButton.disabled=true;simLog.textContent='RUNNING...';requestAnimationFrame(()=>{const r=runFastSimulation({setting:Number(settingSelect.value),games:100000,seed:0x13572468});simLog.textContent=formatSimulationReport(r);simButton.disabled=false;});});
 renderState(core,logger);
