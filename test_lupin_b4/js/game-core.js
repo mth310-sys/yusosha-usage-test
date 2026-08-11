@@ -4,7 +4,7 @@ import { getSettingProfile } from './setting-profile.js';
 import { drawRole } from './role-lottery.js';
 import { CreditSystem } from './credit.js';
 import { ReelController } from './reel-controller.js';
-import { NormalSystem } from './normal.js?v=step4d';
+import { NormalSystem } from './normal.js?v=step4e';
 
 export class GameCore {
   constructor({setting=1, seed=Date.now()} = {}) {
