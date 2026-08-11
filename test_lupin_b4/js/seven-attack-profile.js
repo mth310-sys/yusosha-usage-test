@@ -1,4 +1,7 @@
-// Step 6X: verified Seven Attack / 7-tempa fail override rules.
+import './art-return-patch.js?v=step6y';
+
+// Step 6X/6Y: verified Seven Attack / 7-tempa fail override rules.
+// Step 6Y also loads the verified ART-return lottery patch before main starts.
 // Verified facts:
 // - Seven Attack: gold 7 alignment => ART confirmed.
 // - Seven Attack success expectation: 67%.
