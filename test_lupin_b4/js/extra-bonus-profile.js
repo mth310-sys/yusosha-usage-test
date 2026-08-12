@@ -11,6 +11,21 @@ export const GOLD_CHANCE_PROFILE = Object.freeze({
   source:'CROSS_SOURCE_ANALYSIS_AVERAGE_FLOW_AND_15G_MINIMUM'
 });
 
+export function projectGoldChanceExtraGames(artRemainingGames,addedGames){
+  const remaining=Number(artRemainingGames);
+  const added=Number(addedGames);
+  if(!Number.isInteger(remaining)||remaining<0||!isVerifiedGoldChanceAddedGames(added))return null;
+  const total=remaining+added;
+  return Object.freeze({artRemainingGames:remaining,addedGames:added,totalExtraGames:total,invariantStatus:total===remaining+added?'PASS':'FAIL'});
+}
+
+export const GOLD_CHANCE_BOUNDARY_CASES = Object.freeze([
+  Object.freeze({label:'FINAL_GAME_0_REMAIN',...projectGoldChanceExtraGames(0,15)}),
+  Object.freeze({label:'ONE_GAME_REMAIN',...projectGoldChanceExtraGames(1,15)}),
+  Object.freeze({label:'NEAR_END_2_REMAIN',...projectGoldChanceExtraGames(2,15)}),
+  Object.freeze({label:'MID_SET_10_REMAIN',...projectGoldChanceExtraGames(10,15)})
+]);
+
 export const EXTRA_BONUS_PROFILE = Object.freeze({
   averageAddedGames:GOLD_CHANCE_PROFILE.averageAddedGames,
   averageGames:29.6,
