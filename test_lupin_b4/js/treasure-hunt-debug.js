@@ -1,6 +1,7 @@
 import { TREASURE_HUNT_PROFILE, getTreasureHuntHoldGuarantee, getTreasureHuntScenario } from './treasure-hunt-profile.js?v=step6z-th1';
 
-function freshState(){return {active:false,scenario:null,hold:null,result:'IDLE',destination:null,awardPoints:null,artStock:false,source:null};}
+const MAX_DISPLAY_TREASURE=1000000;
+function freshState(){return {active:false,scenario:null,hold:null,result:'IDLE',destination:null,awardPoints:null,artStock:false,carryoverPoints:0,source:null};}
 
 export function installTreasureHuntDebug({core,onChange=()=>{}}={}){
   const gt=core?.goldenTime;
@@ -15,7 +16,7 @@ export function installTreasureHuntDebug({core,onChange=()=>{}}={}){
     gt.startTreasureHuntForTest=(scenario='BRIDGE_JUMP',hold=null)=>{
       if(gt.state!=='ACTIVE_SET'||!getTreasureHuntScenario(scenario))return false;
       if(hold&&!getTreasureHuntHoldGuarantee(hold))return false;
-      gt.__treasureHuntDebug={active:true,scenario,hold,result:'ACTIVE',destination:null,awardPoints:null,artStock:false,source:'DEBUG_MANUAL_TREASURE_HUNT'};
+      gt.__treasureHuntDebug={active:true,scenario,hold,result:'ACTIVE',destination:null,awardPoints:null,artStock:false,carryoverPoints:0,source:'DEBUG_MANUAL_TREASURE_HUNT'};
       gt.state='TREASURE_HUNT_DEBUG_ACTIVE';
       gt.lastEvent=`TREASURE_HUNT_DEBUG_START_${scenario}${hold?`_${hold}`:''}`;
       return gt.snapshot();
@@ -36,10 +37,17 @@ export function installTreasureHuntDebug({core,onChange=()=>{}}={}){
       }
       const award=Number(awardPoints);const floor=guarantee?.minimumTreasurePoints??0;
       if(!Number.isFinite(award)||award<floor||award<0)return false;
-      x.active=false;x.result='SUCCESS';x.destination='TREASURE';x.awardPoints=award;x.artStock=Boolean(artStock);
-      gt.treasurePoints=(Number(gt.treasurePoints)||0)+award;
+      const base=Math.max(0,Number(gt.treasurePoints)||0);const rawTotal=base+award;
+      x.active=false;x.result=rawTotal>=MAX_DISPLAY_TREASURE?'SUCCESS_1M_GOLD_CHANCE_PENDING':'SUCCESS';x.destination='TREASURE';x.awardPoints=award;x.artStock=Boolean(artStock);x.carryoverPoints=Math.max(0,rawTotal-MAX_DISPLAY_TREASURE);
+      gt.treasurePoints=Math.min(MAX_DISPLAY_TREASURE,rawTotal);
       if(artStock)gt.recordStockAdd?.(1,'TREASURE_HUNT_DEBUG_STOCK');
-      gt.state='ACTIVE_SET';gt.lastEvent=`TREASURE_HUNT_DEBUG_SUCCESS_TREASURE_PLUS_${award}`;
+      if(rawTotal>=MAX_DISPLAY_TREASURE){
+        gt.goldChanceBaseRemainingGames=gt.remainingGames;
+        gt.state='GOLD_CHANCE_PENDING_UNVERIFIED_DISTRIBUTION';
+        gt.lastEvent=`TREASURE_HUNT_DEBUG_SUCCESS_1M_CARRYOVER_${x.carryoverPoints}_GOLD_CHANCE_PENDING`;
+      }else{
+        gt.state='ACTIVE_SET';gt.lastEvent=`TREASURE_HUNT_DEBUG_SUCCESS_TREASURE_PLUS_${award}`;
+      }
       return gt.snapshot();
     };
   }
@@ -49,11 +57,11 @@ export function installTreasureHuntDebug({core,onChange=()=>{}}={}){
   let panel=document.getElementById('treasureHuntDebugPanel');
   if(!panel){
     panel=document.createElement('section');panel.className='panel';panel.id='treasureHuntDebugPanel';
-    panel.innerHTML=`<h2>TREASURE HUNT / STEP 6Z MANUAL</h2><p class="note">自然突入率・通常成功率・成功後の直上乗せ/RUSH振り分けは未回収。確認済みの演出・保証下限・不滅の絆→RUSHだけを手動検証する。</p><div class="panel-head"><select id="treasureHuntScenario"><option value="BRIDGE_JUMP">橋を飛び越えろ</option><option value="CUT_THROUGH_WARSHIP">軍艦を斬り進め</option><option value="SHOOT_DOWN_COMBAT_HELICOPTER">戦闘ヘリを撃破せよ</option><option value="IMMORTAL_BOND">不滅の絆</option></select><select id="treasureHuntHold"><option value="">HOLDなし</option><option value="FLAME_LUPIN">炎ルパン / 成功+20万以上</option><option value="FUJIKO">不二子 / 成功+30万以上</option><option value="TAMACHAN">玉ちゃん / 成功+100万以上</option></select><button id="treasureHuntStart" type="button">START HUNT</button></div><div class="panel-head"><input id="treasureHuntAward" type="number" min="0" step="50000" value="200000" inputmode="numeric"><button id="treasureHuntFail" type="button" disabled>FAIL → ART</button><button id="treasureHuntTreasure" type="button" disabled>SUCCESS → TREASURE</button><button id="treasureHuntRush" type="button" disabled>SUCCESS → RUSH READY</button></div><pre id="treasureHuntDebugState">NOT RUN</pre>`;
+    panel.innerHTML=`<h2>TREASURE HUNT / STEP 6Z MANUAL</h2><p class="note">自然突入率・通常成功率・成功後の直上乗せ/RUSH振り分けは未回収。確認済みの演出・保証下限・不滅の絆→RUSHだけを手動検証する。直上乗せで100万T到達時はGOLD CHANCE待機へ接続する。</p><div class="panel-head"><select id="treasureHuntScenario"><option value="BRIDGE_JUMP">橋を飛び越えろ</option><option value="CUT_THROUGH_WARSHIP">軍艦を斬り進め</option><option value="SHOOT_DOWN_COMBAT_HELICOPTER">戦闘ヘリを撃破せよ</option><option value="IMMORTAL_BOND">不滅の絆</option></select><select id="treasureHuntHold"><option value="">HOLDなし</option><option value="FLAME_LUPIN">炎ルパン / 成功+20万以上</option><option value="FUJIKO">不二子 / 成功+30万以上</option><option value="TAMACHAN">玉ちゃん / 成功+100万以上</option></select><button id="treasureHuntStart" type="button">START HUNT</button></div><div class="panel-head"><input id="treasureHuntAward" type="number" min="0" step="50000" value="200000" inputmode="numeric"><button id="treasureHuntFail" type="button" disabled>FAIL → ART</button><button id="treasureHuntTreasure" type="button" disabled>SUCCESS → TREASURE</button><button id="treasureHuntRush" type="button" disabled>SUCCESS → RUSH READY</button></div><pre id="treasureHuntDebugState">NOT RUN</pre>`;
     gameLog.parentNode.insertBefore(panel,gameLog);
   }
   const scenario=document.getElementById('treasureHuntScenario'),hold=document.getElementById('treasureHuntHold'),award=document.getElementById('treasureHuntAward'),start=document.getElementById('treasureHuntStart'),fail=document.getElementById('treasureHuntFail'),treasure=document.getElementById('treasureHuntTreasure'),rush=document.getElementById('treasureHuntRush'),state=document.getElementById('treasureHuntDebugState');
-  const render=()=>{const x=gt.snapshot().treasureHuntDebug;const canStart=core.phase==='WAIT_BET'&&gt.state==='ACTIVE_SET';const active=core.phase==='WAIT_BET'&&gt.state==='TREASURE_HUNT_DEBUG_ACTIVE'&&x.active;const guaranteed=Boolean((x.hold&&getTreasureHuntHoldGuarantee(x.hold)?.successGuaranteed)||getTreasureHuntScenario(x.scenario)?.successGuaranteesTreasureRush);const rushOnly=Boolean(getTreasureHuntScenario(x.scenario)?.successGuaranteesTreasureRush);start.disabled=!canStart;fail.disabled=!active||guaranteed;treasure.disabled=!active||rushOnly;rush.disabled=!active;state.textContent=`CORE STATE  ${gt.state}\nSCENARIO    ${x.scenario??'---'}\nHOLD        ${x.hold??'---'}\nRESULT      ${x.result}\nDESTINATION ${x.destination??'---'}\nAWARD       ${x.awardPoints??'---'}\nART STOCK   ${x.artStock?'YES':'NO'}\nAUTO ENTRY  DISABLED\nAUTO RESULT DISABLED\nAUTO SPLIT  DISABLED`;};
+  const render=()=>{const x=gt.snapshot().treasureHuntDebug;const canStart=core.phase==='WAIT_BET'&&gt.state==='ACTIVE_SET';const active=core.phase==='WAIT_BET'&&gt.state==='TREASURE_HUNT_DEBUG_ACTIVE'&&x.active;const guaranteed=Boolean((x.hold&&getTreasureHuntHoldGuarantee(x.hold)?.successGuaranteed)||getTreasureHuntScenario(x.scenario)?.successGuaranteesTreasureRush);const rushOnly=Boolean(getTreasureHuntScenario(x.scenario)?.successGuaranteesTreasureRush);start.disabled=!canStart;fail.disabled=!active||guaranteed;treasure.disabled=!active||rushOnly;rush.disabled=!active;state.textContent=`CORE STATE  ${gt.state}\nSCENARIO    ${x.scenario??'---'}\nHOLD        ${x.hold??'---'}\nRESULT      ${x.result}\nDESTINATION ${x.destination??'---'}\nAWARD       ${x.awardPoints??'---'}\nCARRYOVER   ${x.carryoverPoints??0}\nART STOCK   ${x.artStock?'YES':'NO'}\nAUTO ENTRY  DISABLED\nAUTO RESULT DISABLED\nAUTO SPLIT  DISABLED`;};
   start.addEventListener('click',()=>{gt.startTreasureHuntForTest(scenario.value,hold.value||null);render();onChange();});
   fail.addEventListener('click',()=>{gt.resolveTreasureHuntForTest({success:false});render();onChange();});
   treasure.addEventListener('click',()=>{gt.resolveTreasureHuntForTest({success:true,destination:'TREASURE',awardPoints:Number(award.value)});render();onChange();});
