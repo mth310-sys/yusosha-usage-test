@@ -2,6 +2,15 @@
 // Never silently redraw later; audit the single currently outstanding reservation correctly.
 import { GameCore } from './game-core.js?v=step6w';
 
+function renderIntegrityUi(audit){
+  if(typeof document==='undefined'||!audit)return;
+  const panel=document.getElementById('nextInitialHitPanel');
+  if(!panel)return;
+  let el=document.getElementById('nextInitialHitIntegrityState');
+  if(!el){el=document.createElement('pre');el.id='nextInitialHitIntegrityState';el.textContent='INTEGRITY NOT RUN';panel.appendChild(el);}
+  el.textContent=`INTEGRITY ${audit.status}\nLIVE RESV  ${audit.hasReservation?'YES':'NO'}\nLIVE DRAW  ${audit.currentDrawNo??'---'}\nDRAWS      ${audit.draws}\nCONSUMED   ${audit.consumed}\nDRAW VALID ${audit.currentDrawValid?'YES':'NO'}\nSEQ VALID  ${audit.consumptionSequenceValid?'YES':'NO'}`;
+}
+
 if(!GameCore.prototype.__step6zNextInitialHitIntegrityPatched){
   GameCore.prototype.consumeNextInitialHit=function consumeNextInitialHitFailClosed(source){
     if(!this.nextInitialHit){this.lastInitialHitResolution={type:null,consumedBy:source,consumedNo:this.nextInitialHitConsumed,error:'MISSING_NEXT_INITIAL_HIT_RESERVATION',policy:'FAIL_CLOSED_NO_LATE_REDRAW'};return null;}
@@ -26,7 +35,7 @@ if(!GameCore.prototype.__step6zNextInitialHitIntegrityPatched){
   };
 
   const originalNextSnapshot=GameCore.prototype.nextInitialHitSnapshot;
-  GameCore.prototype.nextInitialHitSnapshot=function nextInitialHitSnapshotWithIntegrity(...args){return {...originalNextSnapshot.apply(this,args),integrity:this.nextInitialHitIntegritySnapshot()};};
+  GameCore.prototype.nextInitialHitSnapshot=function nextInitialHitSnapshotWithIntegrity(...args){const integrity=this.nextInitialHitIntegritySnapshot();renderIntegrityUi(integrity);return {...originalNextSnapshot.apply(this,args),integrity};};
 
   GameCore.prototype.__step6zNextInitialHitIntegrityPatched=true;
 }
