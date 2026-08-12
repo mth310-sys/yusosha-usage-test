@@ -10,7 +10,7 @@ export const ART_STAGE_PROFILE = Object.freeze({
     SWISS:{label:'スイス', treasureHitDenominator:12.6, special:false, rateConfidence:'PUBLISHED_ANALYSIS_CROSS_CHECKED'},
     CARIBBEAN:{label:'カリブ海', treasureHitDenominator:7.5, special:false, rateConfidence:'PUBLISHED_ANALYSIS_CROSS_CHECKED'},
     UNDERGROUND:{label:'地底都市', treasureHitDenominator:3.0, special:false, rateConfidence:'PUBLISHED_ANALYSIS_CROSS_CHECKED'},
-    IKUKAN:{label:'異空間', treasureHitDenominator:1.0, special:true, durationGames:10, minimumTreasurePerGame:50000, averageTreasurePoints:702000, rateConfidence:'PUBLISHED_ANALYSIS_CROSS_CHECKED'}
+    IKUKAN:{label:'異空間', treasureHitDenominator:1.0, special:true, durationGames:10, minimumTreasurePerGame:50000, averageTreasurePoints:700000, alternatePublishedAverageTreasurePoints:702000, averageValueStatus:'CROSS_SOURCE_700K_VS_702K_MINOR_DIFFERENCE_RECORDED', rateConfidence:'PUBLISHED_ANALYSIS_CROSS_CHECKED'}
   },
   internalRanks:Object.freeze({
     JAPAN_A:{visible:'JAPAN'}, JAPAN_B:{visible:'JAPAN'},
@@ -25,11 +25,15 @@ export const ART_STAGE_PROFILE = Object.freeze({
   transitionSteps:[1,2],
   twoStepUpgradePctByScenario:Object.freeze({A:25.0,B:37.5,C:50.0,D:75.0}),
   ikukanCanEnterAtGame30:true,
-  startStageDistribution:'PARTIALLY_PUBLISHED_BUT_NOT_YET_MODELED',
-  scenarioSelectionDistribution:'PARTIALLY_PUBLISHED_BUT_NOT_YET_MODELED',
-  normalStageTreasureAmountDistribution:'UNVERIFIED',
+  startStageDistribution:'RECOVERED_AND_MODELED_IN_ART_STAGE_SCENARIO_PROFILE',
+  scenarioSelectionDistribution:'RECOVERED_AND_MODELED_BY_SETTING_IN_ART_STAGE_SCENARIO_PROFILE',
+  scenarioSelectionConfidence:'HIGH_CROSS_SOURCE_MATCH',
+  initialStageDistributionConfidence:'HIGH_CROSS_SOURCE_MATCH',
+  normalStageTreasureAmountDistribution:'UNVERIFIED_IMAGE_TABLE_NOT_RECOVERED',
+  normalStageTreasureAveragePoints:120000,
+  normalStageTreasureAverageSource:'PUBLISHED_ANALYSIS_TEXT',
   sourceLevel:'PUBLISHED_ANALYSIS_CROSS_CHECKED',
-  automaticUsePolicy:'STAGE_HIT_RATES_AND_10G_UPGRADE_RULE_MAY_BE_MODELED; DO_NOT_SYNTHESIZE UNRESOLVED START/SCENARIO DISTRIBUTIONS'
+  automaticUsePolicy:'SCENARIO_SELECTION_INITIAL_STAGE_STAGE_HIT_RATES_AND_10G_UPGRADE_RULES_MAY_BE_MODELED; DO_NOT_SYNTHESIZE NORMAL_TREASURE_AMOUNT_DISTRIBUTION OR IKUKAN_EXIT_DESTINATION'
 });
 
 export function getArtStage(stage){return ART_STAGE_PROFILE.stages[stage]??null;}
