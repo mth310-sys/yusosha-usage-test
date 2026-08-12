@@ -31,7 +31,23 @@ Purpose: keep unresolved real-machine values separate from verified implementati
 | Revenge Chance LB/GT success destination split | UNVERIFIED | DEBUG/manual destination selection where required. |
 | Treasure-return notification route split (Revenge vs normal-stage notice) | UNVERIFIED | A confirmed return HIT pauses for explicit notification-route resolution. |
 | Treasure-return normal-stage notification waiting games | UNVERIFIED | No fabricated wait-game distribution. |
-| Treasure return rows not explicitly present in the adopted table | UNRESOLVED / source conflict | No interpolation. See `js/art-return-profile.js`. |
+| Treasure return rows not explicitly present in the adopted table | UNRESOLVED / CONFLICT | No interpolation. See `js/art-return-profile.js`. |
+| Normal Raiun detailed initial-point distribution | UNVERIFIED | Aggregate published values are retained; detailed distribution is not invented. |
+| Normal Raiun point-add distribution | UNVERIFIED | Aggregate published values are retained; detailed distribution is not invented. |
+| Raiun HIGH level distribution | UNVERIFIED | LOW/HIGH published rates remain isolated; no invented level-selection lottery. |
+| Shin Raiun ordinary per-game ART rate | UNVERIFIED | Verified LEGEND GATE 1/88.9 is separate; ordinary ART probability is not inferred. |
+| LEGEND GATE duration | UNVERIFIED | Entry denominators and medal benefits can remain modelled; duration is not invented. |
+| LEGEND GATE medal-acquisition model | UNVERIFIED | No automatic medal lottery until acquisition rules are verified. |
+| IKUKAN exit return internal/visible stage | UNRESOLVED | Stop at the 10G-window exit boundary instead of fabricating the return stage. See `js/ikukan-exit-profile.js`. |
+| IKUKAN exact per-game Treasure award distribution | UNVERIFIED | Verified 10G/every-game/minimum/average facts are retained without inventing the distribution. |
+| Normal T-alignment exact Treasure award distribution | UNVERIFIED | Published minimum/maximum/average can be retained; exact lottery is not invented. |
+| Treasure RUSH exact game-count / award distribution | UNVERIFIED / CONFLICT | Published bounds/averages remain metadata; conflicting duration descriptions and missing exact distribution are not synthesized. |
+| Treasure Hunt success destination split (direct award vs Treasure RUSH) | UNRESOLVED | Verified special-hold minimum benefits remain available; destination split stays manual/guarded. |
+| Chance-eye → Treasure RUSH exact weak/mid/strong rates | UNVERIFIED | Qualitative strength relationship is not converted into invented numeric probabilities. |
+| ART normal-continuation LUPIN RUSH vs direct-add route | CONFLICT | Current always-RUSH core route remains explicitly provisional; empirical ~70% direct-add observation is not used as an exact lottery. See `js/art-continuation-entry-profile.js`. |
+| ART normal-continuation direct-add / RUSH-type distributions | UNRESOLVED | No synthetic distribution until the original continuation-entry table is recovered. |
+| GOLD RUSH stock denominator | CONFLICT | Source disagreement is retained in profile metadata; do not silently merge denominators. |
+| GOLD RUSH breakthrough-label distributions | UNVERIFIED | Verified minimum-stock meanings are retained; label appearance distribution is not invented. |
 | Physical reel strip details still marked provisional by the test UI | UNVERIFIED | Keep integrity checks, but do not claim final real-machine strip fidelity. |
 
 ## Promotion checklist
@@ -43,5 +59,9 @@ Before changing an unresolved item to verified runtime behavior:
 3. Implement it in the smallest relevant profile/module; avoid unrelated refactors.
 4. Add or update a deterministic test for the new rule where possible.
 5. Confirm the full GitHub Browser Test passes.
+
+## Audit note
+
+This register was cross-checked against the current profile/guard modules after the Step 6Z browser scenario gate became green. It intentionally includes unresolved boundaries that are already represented safely in code, so a future implementation pass cannot mistake an omitted register row for a verified machine rule.
 
 This file is the authoritative unresolved-value register for `test_lupin_b4` until a dedicated machine-spec database replaces it.
