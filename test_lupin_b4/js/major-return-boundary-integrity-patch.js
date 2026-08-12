@@ -22,7 +22,7 @@ if(!GameCore.prototype.__step6zMajorReturnBoundaryPatched){
         revengeIdle:this.revenge?.state==='IDLE',
         resultMode:out.result.mode==='GOLDEN_TIME'
       },event);
-    }else if(event.includes('LUPIN_BONUS')&&event.includes('REVENGE_PENDING')){
+    }else if(event==='LUPIN_BONUS_LOSE_REVENGE_ENTRY_PENDING_NEXT_HIT_REDRAWN'){
       finish(this,'LB_FAIL_TO_REVENGE_PENDING',{
         lbClosed:this.lupinBonus?.state==='IDLE',
         revengeOffered:this.revenge?.state==='ENTRY_PENDING_UNVERIFIED_RATE',
