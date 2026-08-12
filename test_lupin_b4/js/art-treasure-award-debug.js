@@ -1,12 +1,13 @@
 import { TREASURE_AWARD_PROFILE, rollOreNoNaWaLupinRush } from './treasure-award-profile.js?v=step6z-award1';
 import { ART_STAGE_PROFILE } from './art-stage-profile.js?v=step6z-stage1';
-import { applyTreasureAwardToGoldChanceThreshold } from './treasure-threshold.js?v=step6z-threshold1';
+import { applyTreasureAwardToGoldChanceThreshold, installTreasureThresholdCarryoverHooks } from './treasure-threshold.js?v=step6z-threshold2';
 import { ORE_NO_NA_WA_PROFILE } from './ore-no-na-wa-profile.js?v=step6z-ore1';
 
 function freshState(){return {normalResolved:0,ikukanResolvedGames:0,lastNormalAward:null,lastIkukanAward:null,lastOreNoNaWaCarryover:null,lastResult:'IDLE'};}
 
 export function installArtTreasureAwardDebug({core,onChange=()=>{}}={}){
   const gt=core?.goldenTime;if(!gt)return {render:()=>{}};
+  installTreasureThresholdCarryoverHooks(gt);
   if(!gt.__artTreasureAwardDebug){
     gt.__artTreasureAwardDebug=freshState();
     const originalSnapshot=gt.snapshot.bind(gt);
@@ -14,10 +15,6 @@ export function installArtTreasureAwardDebug({core,onChange=()=>{}}={}){
     const originalReset=gt.reset.bind(gt);
     gt.reset=(...args)=>{const out=originalReset(...args);gt.__artTreasureAwardDebug=freshState();return out;};
 
-    // Core currently knows the verified 1/554.6 trigger and 100万T award, but its legacy
-    // path replaced the current Treasure total with 100万. Published wording is a Treasure
-    // add-on, so preserve existing Treasure and send the additive 100万 award through the
-    // same threshold/carryover helper used by the other ART award routes.
     gt.processExactTreasureEvents=()=>{
       if(!rollOreNoNaWaLupinRush(gt.rng))return false;
       gt.oreNoNaWaHits+=1;
@@ -58,9 +55,9 @@ export function installArtTreasureAwardDebug({core,onChange=()=>{}}={}){
 
   const gameLog=document.getElementById('log')?.closest('.panel');if(!gameLog)return {render:()=>{}};
   let panel=document.getElementById('artTreasureAwardDebugPanel');
-  if(!panel){panel=document.createElement('section');panel.className='panel';panel.id='artTreasureAwardDebugPanel';panel.innerHTML=`<h2>ART TREASURE AWARD / STEP 6Z MANUAL</h2><p class="note">通常T揃いは10万〜100万T、異空間は1G最低5万Tまで確認済み。正確な振り分け表は未回収なので、発生済みイベントの金額だけ手動解決する。俺の名はルパン三世RUSHは1/554.6・100万Tの確定値を維持し、既存Treasureを消さず共通100万判定へ加算する。</p><div class="panel-head"><input id="normalTreasureAward" type="number" min="100000" max="1000000" step="50000" value="100000" inputmode="numeric"><button id="normalTreasureAwardApply" type="button" disabled>RESOLVE NEXT NORMAL T</button></div><div class="panel-head"><input id="ikukanTreasureAward" type="number" min="50000" step="50000" value="50000" inputmode="numeric"><button id="ikukanTreasureAwardApply" type="button" disabled>RESOLVE NEXT IKUKAN G</button></div><pre id="artTreasureAwardDebugState">NOT RUN</pre>`;gameLog.parentNode.insertBefore(panel,gameLog);}
+  if(!panel){panel=document.createElement('section');panel.className='panel';panel.id='artTreasureAwardDebugPanel';panel.innerHTML=`<h2>ART TREASURE AWARD / STEP 6Z MANUAL</h2><p class="note">通常T揃い・異空間・俺の名はルパン三世RUSHを共通Treasure閾値へ集約。100万超過分は経路に依存せずEXTRA後の次セットへ保持する。</p><div class="panel-head"><input id="normalTreasureAward" type="number" min="100000" max="1000000" step="50000" value="100000" inputmode="numeric"><button id="normalTreasureAwardApply" type="button" disabled>RESOLVE NEXT NORMAL T</button></div><div class="panel-head"><input id="ikukanTreasureAward" type="number" min="50000" step="50000" value="50000" inputmode="numeric"><button id="ikukanTreasureAwardApply" type="button" disabled>RESOLVE NEXT IKUKAN G</button></div><pre id="artTreasureAwardDebugState">NOT RUN</pre>`;gameLog.parentNode.insertBefore(panel,gameLog);}
   const normalInput=document.getElementById('normalTreasureAward'),normalApply=document.getElementById('normalTreasureAwardApply'),ikukanInput=document.getElementById('ikukanTreasureAward'),ikukanApply=document.getElementById('ikukanTreasureAwardApply'),state=document.getElementById('artTreasureAwardDebugState');
-  const render=()=>{const x=gt.snapshot().artTreasureAwardDebug;const canNormal=core.phase==='WAIT_BET'&&gt.state==='ACTIVE_SET'&&gt.pendingTreasureAwardEvents>0;const unresolvedIkukan=Math.max(0,(gt.ikukanGameCount||0)-x.ikukanResolvedGames);const canIkukan=core.phase==='WAIT_BET'&&(gt.state==='ACTIVE_SET'||gt.state==='IKUKAN_EXIT_PENDING_RETURN_STAGE_MODEL')&&unresolvedIkukan>0;if(normalApply)normalApply.disabled=!canNormal;if(ikukanApply)ikukanApply.disabled=!canIkukan;if(state)state.textContent=`CORE STATE       ${gt.state}\nTREASURE         ${gt.treasurePoints}\nNORMAL PENDING   ${gt.pendingTreasureAwardEvents}\nNORMAL RESOLVED  ${x.normalResolved}\nNORMAL LAST      ${x.lastNormalAward??'---'}\nIKUKAN GENERATED ${gt.ikukanGameCount}\nIKUKAN RESOLVED  ${x.ikukanResolvedGames}\nIKUKAN PENDING   ${unresolvedIkukan}\nIKUKAN LAST      ${x.lastIkukanAward??'---'}\n俺の名 CARRY     ${x.lastOreNoNaWaCarryover??'---'}\nLAST RESULT      ${x.lastResult}\nAUTO AMOUNT      DISABLED`;};
+  const render=()=>{const snap=gt.snapshot(),x=snap.artTreasureAwardDebug,t=snap.treasureThreshold;const canNormal=core.phase==='WAIT_BET'&&gt.state==='ACTIVE_SET'&&gt.pendingTreasureAwardEvents>0;const unresolvedIkukan=Math.max(0,(gt.ikukanGameCount||0)-x.ikukanResolvedGames);const canIkukan=core.phase==='WAIT_BET'&&(gt.state==='ACTIVE_SET'||gt.state==='IKUKAN_EXIT_PENDING_RETURN_STAGE_MODEL')&&unresolvedIkukan>0;if(normalApply)normalApply.disabled=!canNormal;if(ikukanApply)ikukanApply.disabled=!canIkukan;if(state)state.textContent=`CORE STATE       ${gt.state}\nTREASURE         ${gt.treasurePoints}\nSHARED CARRY     ${t?.pendingCarryoverPoints??0}\nCARRY SOURCE     ${t?.lastSource??'---'}\nCHAIN PENDING    ${t?.extraChainPending?'YES':'NO'}\nNORMAL PENDING   ${gt.pendingTreasureAwardEvents}\nNORMAL RESOLVED  ${x.normalResolved}\nNORMAL LAST      ${x.lastNormalAward??'---'}\nIKUKAN GENERATED ${gt.ikukanGameCount}\nIKUKAN RESOLVED  ${x.ikukanResolvedGames}\nIKUKAN PENDING   ${unresolvedIkukan}\nIKUKAN LAST      ${x.lastIkukanAward??'---'}\n俺の名 CARRY     ${x.lastOreNoNaWaCarryover??'---'}\nLAST RESULT      ${x.lastResult}\nAUTO AMOUNT      DISABLED`;};
   normalApply?.addEventListener('click',()=>{gt.resolvePendingNormalTreasureAwardForTest(Number(normalInput.value));render();onChange();});
   ikukanApply?.addEventListener('click',()=>{gt.resolvePendingIkukanTreasureAwardForTest(Number(ikukanInput.value));render();onChange();});
   render();return {render};
