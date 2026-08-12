@@ -42,9 +42,10 @@ if (!GoldenTimeSystem.prototype.__step6yArtReturnPatched) {
     const draw = rollArtReturn(this.treasurePoints, this.rng);
     this.artReturnLast = { ...draw, timing:ART_RETURN_PROFILE.timing };
     this.lastEvent = 'TREASURE_BATTLE_G4_LOSE_ART_END';
-    const snap = originalSnapshot.call(this);
-    renderArtReturnDebug({ ...snap, artReturn:this.artReturnLast });
-    return snap;
+    const baseSnap = originalSnapshot.call(this);
+    const routedSnap = { ...baseSnap, artReturn:{ ...this.artReturnLast }, artReturnProfile:ART_RETURN_PROFILE };
+    renderArtReturnDebug(routedSnap);
+    return routedSnap;
   };
 
   GoldenTimeSystem.prototype.snapshot = function patchedSnapshot() {
