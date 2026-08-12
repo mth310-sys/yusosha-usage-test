@@ -1,7 +1,8 @@
 // Step 6Z: Treasure RUSH outline with cross-source duration confidence.
 // Multiple independent published machine-analysis pages agree on a 4-9G duration,
-// while major summary pages state 4G or more. Exact duration and award distributions
-// are still unrecovered, so automatic entry/draws remain disabled.
+// while major summary pages state 4G or more. The per-game award table itself has now
+// been located on P-GABU, but its numeric cells remain image-only and are not yet safely
+// transcribed. Automatic award draws therefore remain disabled.
 export const TREASURE_RUSH_PROFILE = Object.freeze({
   entryTrigger: 'TREASURE_HUNT_SUCCESS_OR_ART_CONTINUOUS_PERFORMANCE_SUCCESS',
   minimumGames: 4,
@@ -13,6 +14,8 @@ export const TREASURE_RUSH_PROFILE = Object.freeze({
     Object.freeze({range:'5_TO_10G',confidence:'CONFLICTING_SECONDARY',sourceGroup:'KUMAPAPA'})
   ]),
   averageTreasurePoints: 499000,
+  roundedPublishedAverageTreasurePoints: 500000,
+  averageTreasureStatus: '499K_PRECISE_WORKING_VALUE_WITH_MULTIPLE_SUMMARY_SOURCES_ROUNDING_TO_500K',
   everyGameTreasureAdd: true,
   continuationCue: 'MADAMADA',
   countdownStartsFromRemaining4Games: true,
@@ -20,7 +23,10 @@ export const TREASURE_RUSH_PROFILE = Object.freeze({
     normalMinimumPoints: 50000,
     normalMaximumPoints: 1000000,
     firstGameCanExceed1000000: true,
-    fiveOrTenManShareApprox: 'ABOUT_90_PERCENT_PUBLISHED_DESCRIPTION_ONLY'
+    fiveOrTenManShareApprox: 'ABOUT_90_PERCENT_PUBLISHED_DESCRIPTION_ONLY',
+    exactDistribution:null,
+    exactDistributionStatus:'SOURCE_IMAGE_TABLE_LOCATED_NUMERIC_CELLS_NOT_SAFELY_TRANSCRIBED',
+    exactDistributionSourceLocation:'P_GABU_TREASURE_RUSH_PER_GAME_AWARD_IMAGE_TABLE'
   }),
   presentation: Object.freeze({
     hotCharacters: Object.freeze(['LUPIN','FUJIKO']),
@@ -45,7 +51,7 @@ export const TREASURE_RUSH_PROFILE = Object.freeze({
     automaticDurationDraw: false,
     automaticAwardDraw: false,
     automaticEntry: false,
-    reason: 'EXACT_DISTRIBUTION_TABLES_NOT_RECOVERED'
+    reason: 'EXACT_DISTRIBUTION_IMAGE_TABLE_LOCATED_BUT_NUMERIC_CELLS_NOT_RECOVERED'
   }),
   policy: '4_TO_9G_WORKING_MODEL; MANUAL TESTS MAY USE VERIFIED BOUNDS; DO NOT AUTO ENTRY OR SYNTHESIZE DURATION/AWARD DISTRIBUTIONS UNTIL EXACT TABLES ARE RECOVERED'
 });
@@ -77,6 +83,11 @@ export function validateTreasureRushManualAward(points, gameIndex=1) {
   return true;
 }
 
+export function hasVerifiedTreasureRushAwardDistribution(){
+  return Array.isArray(TREASURE_RUSH_PROFILE.perGameAward.exactDistribution)
+    && TREASURE_RUSH_PROFILE.perGameAward.exactDistribution.length>0;
+}
+
 export function treasureRushSnapshot() {
   return {
     entryTrigger: TREASURE_RUSH_PROFILE.entryTrigger,
@@ -85,6 +96,7 @@ export function treasureRushSnapshot() {
     durationConfidence: TREASURE_RUSH_PROFILE.durationConfidence,
     publishedDurationClaims: TREASURE_RUSH_PROFILE.publishedDurationClaims.map(x=>({ ...x })),
     averageTreasurePoints: TREASURE_RUSH_PROFILE.averageTreasurePoints,
+    roundedPublishedAverageTreasurePoints: TREASURE_RUSH_PROFILE.roundedPublishedAverageTreasurePoints,
     everyGameTreasureAdd: TREASURE_RUSH_PROFILE.everyGameTreasureAdd,
     continuationCue: TREASURE_RUSH_PROFILE.continuationCue,
     countdownStartsFromRemaining4Games: TREASURE_RUSH_PROFILE.countdownStartsFromRemaining4Games,
