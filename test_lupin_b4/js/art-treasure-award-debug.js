@@ -1,5 +1,6 @@
 import './next-initial-hit-integrity-patch.js?v=step6z-next-hit-integrity1';
 import './result-integrity-patch.js?v=step6z-result-integrity1';
+import './normal-transition-integrity-patch.js?v=step6z-normal-transition-integrity1';
 import { renderReelIntegrity } from './reel-integrity-ui.js?v=step6z-reel-integrity-ui1';
 import { TREASURE_AWARD_PROFILE, rollOreNoNaWaLupinRush } from './treasure-award-profile.js?v=step6z-award1';
 import { ART_STAGE_PROFILE } from './art-stage-profile.js?v=step6z-stage1';
