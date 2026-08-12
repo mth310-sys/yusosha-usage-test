@@ -3,6 +3,7 @@ import { ART_STAGE_PROFILE } from './art-stage-profile.js?v=step6z-stage1';
 import { applyTreasureAwardToGoldChanceThreshold, installTreasureThresholdCarryoverHooks } from './treasure-threshold.js?v=step6z-threshold2';
 import { ORE_NO_NA_WA_PROFILE } from './ore-no-na-wa-profile.js?v=step6z-ore1';
 import { installArtChanceEyeTreasureRushDebug } from './art-chance-eye-treasure-rush-debug.js?v=step6z-ce-debug1';
+import './art-return-patch.js?v=step6z-return-wire1';
 
 function freshState(){return {normalResolved:0,ikukanResolvedGames:0,lastNormalAward:null,lastIkukanAward:null,lastOreNoNaWaCarryover:null,lastResult:'IDLE'};}
 
