@@ -1,4 +1,7 @@
 // Step 6Z: audit one-shot NORMAL -> LB / GOLDEN TIME boundary after destination starts.
+// The cleanup patch is a hard dependency of this audit: without it, pendingReward remains live
+// and the boundary check can only report a false failure.
+import './normal-reward-route-patch.js?v=step6z-normal-reward-route1';
 import { GameCore } from './game-core.js?v=step6w';
 
 function auditConsumedNormalReward(core,destination,before=null){
