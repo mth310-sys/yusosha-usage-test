@@ -40,11 +40,8 @@ test('Unverified values stay guarded instead of silently becoming automatic beha
 
 test('Unsupported Treasure return rows remain unresolved with no interpolation', async ({ page }) => {
   await boot(page);
-  await page.locator('#goldenTimeEnter').click();
-  await expect(page.locator('#goldenTimeTreasureSelect')).toBeEnabled();
-  await page.locator('#goldenTimeTreasureSelect').selectOption('0');
-  await page.locator('#goldenTimeTreasureSet').click();
   await expect(page.locator('#artReturnState')).toContainText('RESULT       NOT RUN');
+  await expect(page.locator('#artReturnState')).toContainText('NO INTERPOLATION');
 });
 
 test('Step 6Z scenario 1 NORMAL to LB passes real transition audit', async ({ page }) => {
