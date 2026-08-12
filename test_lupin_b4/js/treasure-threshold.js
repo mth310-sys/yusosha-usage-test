@@ -2,6 +2,28 @@ export const MAX_DISPLAY_TREASURE=1000000;
 
 function freshThresholdState(){return {pendingCarryoverPoints:0,lastAppliedCarryoverPoints:0,extraChainPending:false,lastSource:null};}
 
+function clearPriorSetTransientState(gt){
+  gt.ikukanGameCount=0;
+  gt.ikukanRemainingGames=null;
+  gt.ikukanGuaranteedMinimumAccrued=0;
+  gt.ikukanEntryGame=null;
+  gt.goldChanceBaseRemainingGames=null;
+  gt.goldChanceAddedGames=null;
+  gt.goldChanceSource=null;
+  gt.extraGameCount=0;
+  gt.extraTargetGames=null;
+  gt.extraRemainingGames=null;
+  gt.extraStockLotteryEvents=0;
+  gt.extraStockHits=0;
+  gt.extraResult='UNRESOLVED';
+  gt.extraSource=null;
+  gt.pendingGoldRush=false;
+  gt.goldRushGameCount=0;
+  gt.goldRushStocks=0;
+  gt.goldRushResult='UNRESOLVED';
+  if(gt.__treasureThresholdState)gt.__treasureThresholdState=freshThresholdState();
+}
+
 export function installTreasureThresholdCarryoverHooks(gt){
   if(!gt||gt.__treasureThresholdCarryoverInstalled)return false;
   gt.__treasureThresholdCarryoverInstalled=true;
@@ -12,6 +34,16 @@ export function installTreasureThresholdCarryoverHooks(gt){
 
   const originalReset=gt.reset.bind(gt);
   gt.reset=(...args)=>{const out=originalReset(...args);gt.__treasureThresholdState=freshThresholdState();return out;};
+
+  const originalContinuationRush=gt.startContinuationLupinRush?.bind(gt);
+  if(originalContinuationRush){
+    gt.startContinuationLupinRush=(...args)=>{
+      const out=originalContinuationRush(...args);
+      clearPriorSetTransientState(gt);
+      gt.lastEvent='TREASURE_BATTLE_WIN_LUPIN_RUSH_START_PRIOR_SET_TRANSIENTS_CLEARED';
+      return gt.snapshot();
+    };
+  }
 
   const originalFinishExtra=gt.finishExtraToGuaranteedNextSet?.bind(gt);
   if(originalFinishExtra){
