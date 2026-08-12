@@ -85,6 +85,50 @@ test('Verified WANTED target draws stay inside their published 32G bands and 480
   expect(result.profile.inBandDistribution).toBe('UNIFORM');
 });
 
+test('Verified CZ length/scenario tables keep boundary draws deterministic for settings 1-6', async ({ page }) => {
+  await boot(page);
+  const result=await page.evaluate(async()=>{
+    const profile=await import('/test_lupin_b4/js/cz-profile.js');
+    const rng=(value)=>({next:()=>value});
+    const rows={};
+    for(let setting=1;setting<=6;setting+=1){
+      rows[setting]={
+        lengthLow:profile.drawCzLength(setting,rng(0)),
+        lengthHigh:profile.drawCzLength(setting,rng(0.999999)),
+        scenarioLow:profile.drawCzScenario(setting,rng(0)),
+        scenarioHigh:profile.drawCzScenario(setting,rng(0.999999)),
+        lengthTable:profile.CZ_LENGTH_TABLE[setting],
+        scenarioTable:profile.CZ_SCENARIO_TABLE[setting]
+      };
+    }
+    return rows;
+  });
+  for(const row of Object.values(result)){
+    expect(row.lengthLow).toBe(10);
+    expect(row.lengthHigh).toBe(20);
+    expect(row.scenarioLow).toBe('A');
+    expect(row.scenarioHigh).toBe('D');
+    expect(row.lengthTable[10]+row.lengthTable[20]).toBeCloseTo(100,5);
+    expect(Object.values(row.scenarioTable).reduce((sum,value)=>sum+value,0)).toBeCloseTo(100,1);
+  }
+});
+
+test('SEVEN ZONE entry remains an ART guarantee without inventing a per-game success rate', async ({ page }) => {
+  await boot(page);
+  const result=await page.evaluate(async()=>{
+    const {NormalSystem}=await import('/test_lupin_b4/js/normal.js');
+    const normal=new NormalSystem({next:()=>0.5},1);
+    normal.startSevenZone('BROWSER_VERIFIED_TEST');
+    return normal.snapshot();
+  });
+  expect(result.mode).toBe('SEVEN_ZONE');
+  expect(result.cz.state).toBe('ART_GUARANTEED');
+  expect(result.cz.result).toBe('SUCCESS');
+  expect(result.cz.successModel).toBe('GUARANTEED_ON_ENTRY');
+  expect(result.pendingReward.type).toBe('GOLDEN_TIME');
+  expect(result.pendingReward.guarantee).toBe('ART_CONFIRMED');
+});
+
 test('Step 6Z scenario 1 NORMAL to LB passes real transition audit', async ({ page }) => {
   await boot(page);
   await page.locator('#normalLbScenarioRun').click();
