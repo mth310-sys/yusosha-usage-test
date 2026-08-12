@@ -2,13 +2,14 @@
 // Exact B4 reel strips are not yet verified, so non-MB stop patterns are PROVISIONAL.
 
 const MISS_SYMBOLS = ['LUPIN','JIGEN','GOEMON','BAR','CHERRY','COIN','REPLAY'];
-const KNOWN_ROLE_TRIPLETS = new Set([
-  'JIGEN|GOEMON|LUPIN',
-  'REPLAY|REPLAY|REPLAY',
-  'COIN|COIN|CHERRY',
-  'COIN|COIN|COIN',
-  'BAR|COIN|COIN'
-]);
+const ROLE_TRIPLETS = Object.freeze({
+  MB:'JIGEN|GOEMON|LUPIN',
+  REPLAY:'REPLAY|REPLAY|REPLAY',
+  '3COIN':'COIN|COIN|CHERRY',
+  '9COIN':'COIN|COIN|COIN',
+  '10COIN':'BAR|COIN|COIN'
+});
+const KNOWN_ROLE_TRIPLETS = new Set(Object.values(ROLE_TRIPLETS));
 
 function missTriplet(rng) {
   // Provisional visual-only MISS pattern. Never let it exactly imitate one of the
@@ -74,9 +75,12 @@ export class ReelController {
     const stoppedCount=this.stopped.filter(Boolean).length;
     const orderCountMatches=stoppedCount===this.stopOrder.length;
     const stoppedMatchTarget=this.result.every((symbol,i)=>this.stopped[i]?symbol===this.target[i]:symbol==='---');
-    const allStoppedConsistent=this.allStopped=== (stoppedCount===3);
-    const status=stopOrderValid&&orderCountMatches&&stoppedMatchTarget&&allStoppedConsistent?'OK':'ERROR_REEL_STATE_MISMATCH';
-    return {status,activeRole:this.activeRole,stopOrderValid,orderCountMatches,stoppedMatchTarget,allStoppedConsistent,stoppedCount};
+    const allStoppedConsistent=this.allStopped===(stoppedCount===3);
+    const completedTriplet=this.allStopped?this.result.join('|'):null;
+    const expectedTriplet=ROLE_TRIPLETS[this.activeRole]??null;
+    const roleResultConsistent=!this.allStopped?true:expectedTriplet?completedTriplet===expectedTriplet:!KNOWN_ROLE_TRIPLETS.has(completedTriplet);
+    const status=stopOrderValid&&orderCountMatches&&stoppedMatchTarget&&allStoppedConsistent&&roleResultConsistent?'OK':'ERROR_REEL_STATE_MISMATCH';
+    return {status,activeRole:this.activeRole,stopOrderValid,orderCountMatches,stoppedMatchTarget,allStoppedConsistent,roleResultConsistent,stoppedCount,completedTriplet,expectedTriplet};
   }
 
   snapshot() {
