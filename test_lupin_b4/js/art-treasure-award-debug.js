@@ -5,6 +5,7 @@ import './normal-route-entry-integrity-patch.js?v=step6z-normal-route-entry-inte
 import './normal-failure-return-patch.js?v=step6z-normal-failure-return1';
 import './wanted-cycle-integrity-patch.js?v=step6z-wanted-cycle-integrity1';
 import './wanted-countdown-integrity-patch.js?v=step6z-wanted-countdown-integrity1';
+import './hold-queue-integrity-patch.js?v=step6z-hold-queue-integrity1';
 import { renderReelIntegrity } from './reel-integrity-ui.js?v=step6z-reel-integrity-ui1';
 import { TREASURE_AWARD_PROFILE, rollOreNoNaWaLupinRush } from './treasure-award-profile.js?v=step6z-award1';
 import { ART_STAGE_PROFILE } from './art-stage-profile.js?v=step6z-stage1';
