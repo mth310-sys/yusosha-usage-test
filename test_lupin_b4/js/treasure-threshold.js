@@ -79,34 +79,60 @@ export function installTreasureThresholdCarryoverHooks(gt){
 
   const originalContinuationRush=gt.startContinuationLupinRush?.bind(gt);
   if(originalContinuationRush){
-    gt.startContinuationLupinRush=(...args)=>{
-      const out=originalContinuationRush(...args);
-      clearPriorSetTransientState(gt);
-      gt.lastEvent='TREASURE_BATTLE_WIN_LUPIN_RUSH_START_PRIOR_SET_TRANSIENTS_CLEARED';
+    gt.startContinuationLupinRush=(source='TREASURE_BATTLE_WIN',...rest)=>{
+      const postExtra=source==='VERIFIED_POST_EXTRA_TO_LUPIN_RUSH';
+      const out=originalContinuationRush(source,...rest);
+      clearPriorSetTransientState(gt,{preserveThresholdState:postExtra});
+      gt.lastEvent=postExtra
+        ?'EXTRA_BONUS_END_LUPIN_RUSH_START_CARRYOVER_DEFERRED'
+        :'TREASURE_BATTLE_WIN_LUPIN_RUSH_START_PRIOR_SET_TRANSIENTS_CLEARED';
+      return gt.snapshot();
+    };
+  }
+
+  const originalApplyRushAverage=gt.applyLupinRushAverageForTest?.bind(gt);
+  if(originalApplyRushAverage){
+    gt.applyLupinRushAverageForTest=(type,...rest)=>{
+      const postExtra=gt.battleSource==='VERIFIED_POST_EXTRA_TO_LUPIN_RUSH';
+      const pending=postExtra?Math.max(0,Number(gt.__treasureThresholdState?.pendingCarryoverPoints)||0):0;
+      const source=gt.__treasureThresholdState?.lastSource??'POST_EXTRA_CARRYOVER';
+      const out=originalApplyRushAverage(type,...rest);
+      if(!out)return out;
+      if(!postExtra||pending<=0)return out;
+      const x=gt.__treasureThresholdState;
+      x.lastAppliedCarryoverPoints=pending;
+      x.pendingCarryoverPoints=0;
+      x.extraChainPending=false;
+      const applied=applyTreasureAwardToGoldChanceThreshold(gt,pending,{eventPrefix:`POST_EXTRA_CARRYOVER_${source}`,enterGoldChance:true});
+      x.lastProjection=projectTreasureCarryover(applied?.carryoverPoints??0);
+      x.invariantStatus=applied?'PASS_POST_EXTRA_RUSH_PLUS_CARRYOVER':'MISMATCH';
+      if(applied&&!applied.reachedOneMillion)gt.lastEvent=`POST_EXTRA_LUPIN_RUSH_PLUS_CARRYOVER_${pending}_ACTIVE_SET`;
       return gt.snapshot();
     };
   }
 
   const originalFinishExtra=gt.finishExtraToGuaranteedNextSet?.bind(gt);
   if(originalFinishExtra){
-    gt.finishExtraToGuaranteedNextSet=(...args)=>{
-      const pending=Math.max(0,Number(gt.__treasureThresholdState?.pendingCarryoverPoints)||0);
-      const source=gt.__treasureThresholdState?.lastSource??null;
-      const projectionBeforeApply=projectTreasureCarryover(pending);
-      const out=originalFinishExtra(...args);
+    gt.finishExtraToGuaranteedNextSet=()=>{
+      const retainedStocks=gt.guaranteedStocks;
       const x=gt.__treasureThresholdState;
+      const pending=Math.max(0,Number(x?.pendingCarryoverPoints)||0);
+      const source=x?.lastSource??null;
+      const projection=projectTreasureCarryover(pending);
+      gt.extraResult='END_GUARANTEED_CONTINUE';
+      gt.result='CONTINUE';
+      gt.startContinuationLupinRush('VERIFIED_POST_EXTRA_TO_LUPIN_RUSH');
+      gt.guaranteedStocks=retainedStocks;
+      gt.battleResult='SKIPPED_1M_GUARANTEED';
+      gt.battleSource='VERIFIED_POST_EXTRA_TO_LUPIN_RUSH';
       x.lastSource=source;
-      x.lastProjection=projectionBeforeApply;
-      if(pending<=0){x.pendingCarryoverPoints=0;x.lastAppliedCarryoverPoints=0;x.extraChainPending=false;x.invariantStatus='PASS_NO_CARRYOVER';return gt.snapshot();}
-      gt.treasurePoints=Math.min(MAX_DISPLAY_TREASURE,pending);
-      x.lastAppliedCarryoverPoints=pending;
-      x.pendingCarryoverPoints=Math.max(0,pending-MAX_DISPLAY_TREASURE);
-      x.extraChainPending=pending>=MAX_DISPLAY_TREASURE;
-      const recomposed=(x.extraChainPending?MAX_DISPLAY_TREASURE:gt.treasurePoints)+x.pendingCarryoverPoints;
-      x.invariantStatus=recomposed===pending?'PASS':'MISMATCH';
-      gt.lastEvent=x.extraChainPending
-        ?`TREASURE_CARRYOVER_${pending}_NEXT_SET_1M_CHAIN_PENDING`
-        :`TREASURE_CARRYOVER_${pending}_APPLIED_NEXT_SET`;
+      x.lastProjection=projection;
+      x.lastAppliedCarryoverPoints=0;
+      x.extraChainPending=false;
+      x.invariantStatus=pending>0?'DEFERRED_UNTIL_POST_EXTRA_RUSH_RESULT':'PASS_NO_CARRYOVER';
+      gt.lastEvent=pending>0
+        ?`EXTRA_BONUS_END_LUPIN_RUSH_START_CARRYOVER_${pending}_DEFERRED`
+        :'EXTRA_BONUS_END_LUPIN_RUSH_START_NO_CARRYOVER';
       return gt.snapshot();
     };
   }
