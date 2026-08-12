@@ -35,6 +35,13 @@ function renderArtReturnDebug(snap) {
 if (!GoldenTimeSystem.prototype.__step6yArtReturnPatched) {
   const originalCompleteBattleGame = GoldenTimeSystem.prototype.completeBattleGame;
   const originalSnapshot = GoldenTimeSystem.prototype.snapshot;
+  const originalReset = GoldenTimeSystem.prototype.reset;
+
+  GoldenTimeSystem.prototype.reset = function patchedArtReturnReset(...args) {
+    const out = originalReset.apply(this,args);
+    this.artReturnLast = null;
+    return out;
+  };
 
   GoldenTimeSystem.prototype.completeBattleGame = function patchedCompleteBattleGame() {
     const result = originalCompleteBattleGame.call(this);
