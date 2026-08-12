@@ -2,7 +2,7 @@ export const MAX_DISPLAY_TREASURE=1000000;
 
 function freshThresholdState(){return {pendingCarryoverPoints:0,lastAppliedCarryoverPoints:0,extraChainPending:false,lastSource:null};}
 
-function clearPriorSetTransientState(gt){
+function clearPriorSetTransientState(gt,{preserveThresholdState=false}={}){
   gt.ikukanGameCount=0;
   gt.ikukanRemainingGames=null;
   gt.ikukanGuaranteedMinimumAccrued=0;
@@ -21,7 +21,7 @@ function clearPriorSetTransientState(gt){
   gt.goldRushGameCount=0;
   gt.goldRushStocks=0;
   gt.goldRushResult='UNRESOLVED';
-  if(gt.__treasureThresholdState)gt.__treasureThresholdState=freshThresholdState();
+  if(!preserveThresholdState&&gt.__treasureThresholdState)gt.__treasureThresholdState=freshThresholdState();
 }
 
 export function installTreasureThresholdCarryoverHooks(gt){
@@ -34,6 +34,16 @@ export function installTreasureThresholdCarryoverHooks(gt){
 
   const originalReset=gt.reset.bind(gt);
   gt.reset=(...args)=>{const out=originalReset(...args);gt.__treasureThresholdState=freshThresholdState();return out;};
+
+  const originalBeginNextSet=gt.beginNextSet?.bind(gt);
+  if(originalBeginNextSet){
+    gt.beginNextSet=(source,...rest)=>{
+      const preserveThresholdState=source==='INFERRED_1M_TREASURE_GUARANTEED_CONTINUATION_AFTER_EXTRA';
+      const out=originalBeginNextSet(source,...rest);
+      clearPriorSetTransientState(gt,{preserveThresholdState});
+      return out;
+    };
+  }
 
   const originalContinuationRush=gt.startContinuationLupinRush?.bind(gt);
   if(originalContinuationRush){
@@ -49,9 +59,11 @@ export function installTreasureThresholdCarryoverHooks(gt){
   if(originalFinishExtra){
     gt.finishExtraToGuaranteedNextSet=(...args)=>{
       const pending=Math.max(0,Number(gt.__treasureThresholdState?.pendingCarryoverPoints)||0);
+      const source=gt.__treasureThresholdState?.lastSource??null;
       const out=originalFinishExtra(...args);
       const x=gt.__treasureThresholdState;
-      if(pending<=0){x.lastAppliedCarryoverPoints=0;x.extraChainPending=false;return gt.snapshot();}
+      x.lastSource=source;
+      if(pending<=0){x.pendingCarryoverPoints=0;x.lastAppliedCarryoverPoints=0;x.extraChainPending=false;return gt.snapshot();}
       gt.treasurePoints=Math.min(MAX_DISPLAY_TREASURE,pending);
       x.lastAppliedCarryoverPoints=pending;
       x.pendingCarryoverPoints=Math.max(0,pending-MAX_DISPLAY_TREASURE);
