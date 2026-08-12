@@ -1,4 +1,4 @@
-// Step 6Z: completed-game audit across role attributes and reel result.
+// Step 6Z: completed-game audit across role attributes, reel result and credit flow.
 import { GameCore } from './game-core.js?v=step6w';
 
 const EXPECTED_ROLE_ATTRS=Object.freeze({
@@ -21,8 +21,22 @@ if(!GameCore.prototype.__step6zResultIntegrityPatched){
     const reelValid=reelAudit?.status==='OK';
     const completed=reelAudit?.stoppedCount===3&&this.reels?.allStopped===true;
     const resultReelsMatch=Array.isArray(result.reelResult)&&Array.isArray(this.reels?.result)&&result.reelResult.join('|')===this.reels.result.join('|');
-    const status=roleKnown&&payoutValid&&replayValid&&reelValid&&completed&&resultReelsMatch?'OK':'ERROR_RESULT_INTEGRITY';
-    return {status,role:result.role,roleKnown,payoutValid,replayValid,reelValid,completed,resultReelsMatch,expected,reelAudit};
+
+    // creditBefore is captured after BET at lever time, so settlement must be
+    // exactly creditBefore + payout. This also works for replay-funded BETs.
+    const creditBefore=Number(result.creditBefore);
+    const creditAfter=Number(result.creditAfter);
+    const expectedCreditAfter=creditBefore+Number(result.payout);
+    const creditNumbersValid=Number.isFinite(creditBefore)&&Number.isFinite(creditAfter)&&Number.isFinite(expectedCreditAfter);
+    const creditSettlementValid=creditNumbersValid&&creditAfter===expectedCreditAfter;
+    const creditState=this.creditSystem?.snapshot?.()??null;
+    const postBetCleared=creditState?.bet===0;
+    const postPayoutMatches=Number(creditState?.payout)===Number(result.payout);
+    const replayCarryValid=Boolean(creditState?.replayReady)===Boolean(result.replay);
+    const creditValid=creditSettlementValid&&postBetCleared&&postPayoutMatches&&replayCarryValid;
+
+    const status=roleKnown&&payoutValid&&replayValid&&reelValid&&completed&&resultReelsMatch&&creditValid?'OK':'ERROR_RESULT_INTEGRITY';
+    return {status,role:result.role,roleKnown,payoutValid,replayValid,reelValid,completed,resultReelsMatch,creditValid,creditSettlementValid,postBetCleared,postPayoutMatches,replayCarryValid,creditBefore,creditAfter,expectedCreditAfter,expected,reelAudit};
   };
 
   const originalStop=GameCore.prototype.stopReel;
