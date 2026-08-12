@@ -1,8 +1,8 @@
 // Step 6Z: integrity UI bridge; keeps audit display isolated from the large/minified ui.js.
-import { renderMachineScenarioTestGuide } from './machine-scenario-test-guide.js?v=step6z-scenario-guide2';
-// Load the major return-boundary wrapper after the existing module graph settles so it can
-// observe the final events produced by ART-return and other route patches.
-const majorReturnPatchReady=import('./major-return-boundary-integrity-patch.js?v=step6z-major-return1').catch(()=>null);
+import { renderMachineScenarioTestGuide } from './machine-scenario-test-guide.js?v=step6z-scenario-guide7';
+// ART-return is loaded synchronously by art-treasure-award-debug before this module; load the
+// boundary observer after that module graph so it audits the final return events.
+const majorReturnPatchReady=import('./major-return-boundary-integrity-patch.js?v=step6z-major-return2').catch(()=>null);
 const scenarioCoverage=new Map();
 function makePanel(id,title,after){let p=document.getElementById(id);if(p)return p;const anchor=after();if(!anchor)return null;p=document.createElement('section');p.className='panel';p.id=id;p.innerHTML=`<h2>${title}</h2><pre id="${id}State">NOT TESTED</pre>`;anchor.parentNode.insertBefore(p,anchor.nextSibling);return p;}
 function ensureBaseIntegrityPanel(){let p=document.getElementById('baseGameIntegrityPanel');if(p)return p;const grid=document.querySelector('.grid');if(!grid)return null;p=document.createElement('section');p.className='panel';p.id='baseGameIntegrityPanel';p.innerHTML='<h2>BASE GAME INTEGRITY / STEP 6Z</h2><pre id="baseGameIntegrityState">NO COMPLETED GAME YET</pre>';grid.parentNode.insertBefore(p,grid.nextSibling);return p;}
