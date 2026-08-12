@@ -2,9 +2,22 @@
 // Exact B4 reel strips are not yet verified, so non-MB stop patterns are PROVISIONAL.
 
 const MISS_SYMBOLS = ['LUPIN','JIGEN','GOEMON','BAR','CHERRY','COIN','REPLAY'];
+const KNOWN_ROLE_TRIPLETS = new Set([
+  'JIGEN|GOEMON|LUPIN',
+  'REPLAY|REPLAY|REPLAY',
+  'COIN|COIN|CHERRY',
+  'COIN|COIN|COIN',
+  'BAR|COIN|COIN'
+]);
 
 function missTriplet(rng) {
-  return [0,1,2].map(() => MISS_SYMBOLS[Math.floor(rng.next() * MISS_SYMBOLS.length)]);
+  // Provisional visual-only MISS pattern. Never let it exactly imitate one of the
+  // currently mapped role displays; exact B4 reel strips/control remain unverified.
+  for (let attempt=0;attempt<32;attempt+=1) {
+    const triplet=[0,1,2].map(() => MISS_SYMBOLS[Math.floor(rng.next() * MISS_SYMBOLS.length)]);
+    if(!KNOWN_ROLE_TRIPLETS.has(triplet.join('|')))return triplet;
+  }
+  return ['LUPIN','BAR','CHERRY'];
 }
 
 export class ReelController {
