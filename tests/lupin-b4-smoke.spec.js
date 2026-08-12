@@ -31,6 +31,22 @@ test('Lupin B4 boots without page errors and exposes Step 6Z', async ({ page }) 
   await expect(page.locator('#machineScenarioGuideState')).toContainText('REVENGE FAIL → NORMAL');
 });
 
+test('Unverified values stay guarded instead of silently becoming automatic behavior', async ({ page }) => {
+  await boot(page);
+  await expect(page.locator('#sevenAttackState')).toContainText('ENTRY RATE      UNVERIFIED / AUTO ENTRY DISABLED');
+  await expect(page.locator('#lcdChanceState')).toContainText('VISUAL STEP-UP DISTRIBUTION: UNVERIFIED');
+  await expect(page.locator('#revengePolicy')).toContainText('UNVERIFIED');
+});
+
+test('Unsupported Treasure return rows remain unresolved with no interpolation', async ({ page }) => {
+  await boot(page);
+  await page.locator('#goldenTimeEnter').click();
+  await expect(page.locator('#goldenTimeTreasureSelect')).toBeEnabled();
+  await page.locator('#goldenTimeTreasureSelect').selectOption('0');
+  await page.locator('#goldenTimeTreasureSet').click();
+  await expect(page.locator('#artReturnState')).toContainText('RESULT       NOT RUN');
+});
+
 test('Step 6Z scenario 1 NORMAL to LB passes real transition audit', async ({ page }) => {
   await boot(page);
   await page.locator('#normalLbScenarioRun').click();
