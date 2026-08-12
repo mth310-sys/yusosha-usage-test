@@ -80,3 +80,42 @@ test('GOLD RUSH verified floors stay fixed without synthesizing unresolved multi
   expect(result.profile.breakthroughSelectionDistribution).toBeNull();
   expect(result.profile.multiStockDistribution).toBeNull();
 });
+
+test('Integrated 1M Treasure flow reaches GOLD CHANCE, EXTRA, post-EXTRA LUPIN RUSH and applies carryover after Rush result', async ({page})=>{
+  await boot(page);
+  const result=await page.evaluate(async()=>{
+    const {GoldenTimeSystem}=await import('/test_lupin_b4/js/golden-time.js');
+    const {installTreasureThresholdCarryoverHooks}=await import('/test_lupin_b4/js/treasure-threshold.js');
+    const {installSharedGoldChanceFlow}=await import('/test_lupin_b4/js/gold-chance-shared-flow.js');
+    const rng={next:()=>0.999999};
+    const gt=new GoldenTimeSystem(rng,1);
+    installTreasureThresholdCarryoverHooks(gt);
+    installSharedGoldChanceFlow(gt);
+    gt.start({source:'BROWSER_INTEGRATION'});
+    gt.state='ACTIVE_SET';gt.setNo=1;gt.remainingGames=2;gt.treasurePoints=900000;
+    const threshold=gt.applySharedTreasureAward(300000,{source:'BROWSER_INTEGRATION'});
+    const afterThreshold=gt.snapshot();
+    const goldChance=gt.setGoldChanceAddedGamesForTest(15);
+    const extraStart=gt.startExtraBonus();
+    let extraEnd=null;
+    for(let i=0;i<17;i+=1)extraEnd=gt.completeExtraGame();
+    const afterRush=gt.applyLupinRushAverageForTest('TYPE_A');
+    return {threshold,afterThreshold,goldChance,extraStart,extraEnd,afterRush};
+  });
+  expect(result.threshold.reachedOneMillion).toBe(true);
+  expect(result.threshold.carryoverPoints).toBe(200000);
+  expect(result.afterThreshold.state).toBe('GOLD_CHANCE_PENDING_UNVERIFIED_DISTRIBUTION');
+  expect(result.goldChance.state).toBe('EXTRA_BONUS_READY');
+  expect(result.goldChance.extraTargetGames).toBe(17);
+  expect(result.extraStart.state).toBe('EXTRA_BONUS_ACTIVE');
+  expect(result.extraEnd.state).toBe('LUPIN_RUSH_ACTIVE');
+  expect(result.extraEnd.battleSource).toBe('VERIFIED_POST_EXTRA_TO_LUPIN_RUSH');
+  expect(result.extraEnd.treasureThreshold.pendingCarryoverPoints).toBe(200000);
+  expect(result.extraEnd.sharedGoldChanceFlow.phase).toBe('POST_EXTRA_LUPIN_RUSH');
+  expect(result.afterRush.state).toBe('ACTIVE_SET');
+  expect(result.afterRush.treasureThreshold.pendingCarryoverPoints).toBe(0);
+  expect(result.afterRush.treasureThreshold.lastAppliedCarryoverPoints).toBe(200000);
+  expect(result.afterRush.sharedGoldChanceFlow.phase).toBe('NEXT_SET_ACTIVE');
+  expect(result.afterRush.sharedGoldChanceFlow.carryoverAfterRush).toBe(0);
+  expect(result.afterRush.treasurePoints).toBeGreaterThanOrEqual(200000);
+});
