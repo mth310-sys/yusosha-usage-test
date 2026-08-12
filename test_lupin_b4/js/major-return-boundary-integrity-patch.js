@@ -1,4 +1,6 @@
 // Step 6Z: audit major return boundaries after all LB/GT/return-route patches have run.
+// Load ART-return first so this wrapper always observes its final rewritten event.
+import './art-return-patch.js?v=step6z-return-wire2';
 import { GameCore } from './game-core.js?v=step6w';
 
 function finish(core,type,checks,event){
