@@ -42,13 +42,7 @@ test('GOLD CHANCE EXTRA total is remaining ART plus verified minimum 15G and unk
   await boot(page);
   const result=await page.evaluate(async()=>{
     const p=await import('/test_lupin_b4/js/extra-bonus-profile.js');
-    return {
-      final:p.projectGoldChanceExtraGames(0,15),
-      one:p.projectGoldChanceExtraGames(1,15),
-      mid:p.projectGoldChanceExtraGames(10,15),
-      invalid:p.projectGoldChanceExtraGames(10,14),
-      profile:p.GOLD_CHANCE_PROFILE
-    };
+    return {final:p.projectGoldChanceExtraGames(0,15),one:p.projectGoldChanceExtraGames(1,15),mid:p.projectGoldChanceExtraGames(10,15),invalid:p.projectGoldChanceExtraGames(10,14),profile:p.GOLD_CHANCE_PROFILE};
   });
   expect(result.final.totalExtraGames).toBe(15);
   expect(result.one.totalExtraGames).toBe(16);
@@ -64,12 +58,7 @@ test('GOLD RUSH verified floors stay fixed without synthesizing unresolved multi
   await boot(page);
   const result=await page.evaluate(async()=>{
     const p=await import('/test_lupin_b4/js/extra-bonus-profile.js');
-    return {
-      profile:p.GOLD_RUSH_PROFILE,
-      absolute:p.getGoldRushBreakthroughMinimumStocks('ABSOLUTE_BREAKTHROUGH'),
-      limit:p.getGoldRushBreakthroughMinimumStocks('LIMIT_BREAKTHROUGH'),
-      unknown:p.getGoldRushBreakthroughMinimumStocks('UNKNOWN')
-    };
+    return {profile:p.GOLD_RUSH_PROFILE,absolute:p.getGoldRushBreakthroughMinimumStocks('ABSOLUTE_BREAKTHROUGH'),limit:p.getGoldRushBreakthroughMinimumStocks('LIMIT_BREAKTHROUGH'),unknown:p.getGoldRushBreakthroughMinimumStocks('UNKNOWN')};
   });
   expect(result.profile.initialGames).toBe(1);
   expect(result.profile.nextGameContinuationPct).toBe(52.6);
@@ -81,7 +70,7 @@ test('GOLD RUSH verified floors stay fixed without synthesizing unresolved multi
   expect(result.profile.multiStockDistribution).toBeNull();
 });
 
-test('Integrated 1M Treasure flow reaches GOLD CHANCE, EXTRA, post-EXTRA LUPIN RUSH and applies carryover after Rush result', async ({page})=>{
+test('Integrated 1M Treasure flow reaches GOLD CHANCE, EXTRA, 4G post-EXTRA LUPIN RUSH and applies carryover after Rush result', async ({page})=>{
   await boot(page);
   const result=await page.evaluate(async()=>{
     const {GoldenTimeSystem}=await import('/test_lupin_b4/js/golden-time.js');
@@ -99,8 +88,11 @@ test('Integrated 1M Treasure flow reaches GOLD CHANCE, EXTRA, post-EXTRA LUPIN R
     const extraStart=gt.startExtraBonus();
     let extraEnd=null;
     for(let i=0;i<17;i+=1)extraEnd=gt.completeExtraGame();
-    const afterRush=gt.applyLupinRushAverageForTest('TYPE_A');
-    return {threshold,afterThreshold,goldChance,extraStart,extraEnd,afterRush};
+    const rushGames=[];
+    for(let i=0;i<4;i+=1)rushGames.push(gt.completeGame());
+    const rushEnd=rushGames.at(-1);
+    const afterRush=gt.applyLupinRushAverageForTest('WALSER');
+    return {threshold,afterThreshold,goldChance,extraStart,extraEnd,rushEnd,afterRush};
   });
   expect(result.threshold.reachedOneMillion).toBe(true);
   expect(result.threshold.carryoverPoints).toBe(200000);
@@ -112,10 +104,12 @@ test('Integrated 1M Treasure flow reaches GOLD CHANCE, EXTRA, post-EXTRA LUPIN R
   expect(result.extraEnd.battleSource).toBe('VERIFIED_POST_EXTRA_TO_LUPIN_RUSH');
   expect(result.extraEnd.treasureThreshold.pendingCarryoverPoints).toBe(200000);
   expect(result.extraEnd.sharedGoldChanceFlow.phase).toBe('POST_EXTRA_LUPIN_RUSH');
+  expect(result.rushEnd.state).toBe('RUSH_RESULT_PENDING');
+  expect(result.rushEnd.rushGameCount).toBe(4);
   expect(result.afterRush.state).toBe('ACTIVE_SET');
   expect(result.afterRush.treasureThreshold.pendingCarryoverPoints).toBe(0);
   expect(result.afterRush.treasureThreshold.lastAppliedCarryoverPoints).toBe(200000);
   expect(result.afterRush.sharedGoldChanceFlow.phase).toBe('NEXT_SET_ACTIVE');
   expect(result.afterRush.sharedGoldChanceFlow.carryoverAfterRush).toBe(0);
-  expect(result.afterRush.treasurePoints).toBeGreaterThanOrEqual(200000);
+  expect(result.afterRush.treasurePoints).toBe(440000);
 });
