@@ -1,5 +1,5 @@
 import { TREASURE_HUNT_PROFILE, getTreasureHuntHoldGuarantee, getTreasureHuntScenario } from './treasure-hunt-profile.js?v=step6z-th1';
-import { applyTreasureAwardToGoldChanceThreshold } from './treasure-threshold.js?v=step6z-threshold1';
+import { applyTreasureAwardToGoldChanceThreshold } from './treasure-threshold.js?v=step6z-threshold2';
 
 function freshState(){return {active:false,scenario:null,hold:null,result:'IDLE',destination:null,awardPoints:null,artStock:false,carryoverPoints:0,source:null};}
 
