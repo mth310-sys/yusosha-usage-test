@@ -40,8 +40,19 @@ test('Unverified values stay guarded instead of silently becoming automatic beha
 
 test('Unsupported Treasure return rows remain unresolved with no interpolation', async ({ page }) => {
   await boot(page);
-  await expect(page.locator('#artReturnState')).toContainText('RESULT       NOT RUN');
-  await expect(page.locator('#artReturnState')).toContainText('NO INTERPOLATION');
+  const result=await page.evaluate(async()=>{
+    const profile=await import('/test_lupin_b4/js/art-return-profile.js');
+    return {
+      pct:profile.getArtReturnPct(50000),
+      confidence:profile.getArtReturnConfidence(50000),
+      policy:profile.ART_RETURN_PROFILE.unsupportedPolicy
+    };
+  });
+  expect(result).toEqual({
+    pct:null,
+    confidence:'UNRESOLVED',
+    policy:'NO_INTERPOLATION_FOR_UNLISTED_TREASURE_VALUE'
+  });
 });
 
 test('Step 6Z scenario 1 NORMAL to LB passes real transition audit', async ({ page }) => {
