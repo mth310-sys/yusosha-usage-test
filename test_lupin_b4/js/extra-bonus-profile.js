@@ -35,13 +35,25 @@ export const GOLD_RUSH_PROFILE = Object.freeze({
   redAlignmentMinimumStocks:1,
   absoluteBreakthroughMinimumStocks:1,
   limitBreakthroughMinimumStocks:2,
+  breakthroughPresentation:Object.freeze({
+    ABSOLUTE_BREAKTHROUGH:Object.freeze({minimumStocks:1,meaning:'ART_1_OR_MORE'}),
+    LIMIT_BREAKTHROUGH:Object.freeze({minimumStocks:2,meaning:'ART_2_OR_MORE'})
+  }),
+  breakthroughSelectionDistribution:null,
+  breakthroughSelectionStatus:'UNRESOLVED_DO_NOT_AUTO_ROLL',
+  multiStockDistribution:null,
+  multiStockDistributionStatus:'UNRESOLVED_DO_NOT_SYNTHESIZE_FROM_1_01_AVERAGE',
   continuationModel:'INITIAL_1G_THEN_52_6_PERCENT_NEXT_GAME_CONTINUATION',
-  source:'VERIFIED_ANALYSIS_VALUES'
+  source:'VERIFIED_ANALYSIS_VALUES_PLUS_PWORLD_PRESENTATION_FLOORS'
 });
 
 export function isVerifiedGoldChanceAddedGames(games){
   const n=Number(games);
   return Number.isInteger(n)&&n>=GOLD_CHANCE_PROFILE.minimumAddedGamesSupported;
+}
+
+export function getGoldRushBreakthroughMinimumStocks(key){
+  return GOLD_RUSH_PROFILE.breakthroughPresentation[key]?.minimumStocks??null;
 }
 
 export function rollOneIn(denominator,rng){return rng.next()<1/denominator;}
