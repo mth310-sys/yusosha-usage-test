@@ -1,7 +1,25 @@
 // Step 6Z: normal-mode reward reservations are one-shot routes.
-// Once LB/GT (or direct GT stocks) is actually started, clear NormalSystem.pendingReward so
-// returning from BONUS/ART cannot accidentally consume another NEXT INITIAL HIT reservation.
+// Once LB/GT actually starts, clear the consumed reward and normalize stale normal submode
+// state so ART/BONUS return cannot resume an old CZ/RIZE/WANTED/Legend Gate screen.
 import { GameCore } from './game-core.js?v=step6w';
+
+function normalizeNormalAfterReward(core,pending,destination){
+  const normal=core?.normal;if(!normal)return;
+  normal.pendingReward=null;
+  normal.mode='NORMAL';
+  normal.cz=null;
+  normal.rize=null;
+  normal.legendGate=null;
+  normal.closeWantedHolds?.();
+  normal.wantedChanceFrozen=false;
+  if(normal.wantedState==='SUSPENDED'||normal.wantedState==='ACTIVE'){
+    normal.wantedState='COUNTING';
+    normal.wantedChanceGameCount=0;
+    normal.wantedChanceRemaining=null;
+  }
+  normal.transitionSource=`${pending?.source??'NORMAL_REWARD'}_CONSUMED_ONCE_${destination}`;
+  normal.lastEvent=`NORMAL_REWARD_EXIT_NORMALIZED_${destination}`;
+}
 
 if(!GameCore.prototype.__step6zNormalRewardOneShotPatched){
   const originalResolveNormalInitialHitPending=GameCore.prototype.resolveNormalInitialHitPending;
@@ -9,11 +27,7 @@ if(!GameCore.prototype.__step6zNormalRewardOneShotPatched){
     const pending=this.normal?.pendingReward;
     const out=originalResolveNormalInitialHitPending.apply(this,args);
     if(!out)return out;
-    if(pending&&this.normal?.pendingReward===pending){
-      this.normal.pendingReward=null;
-      this.normal.transitionSource=`${pending.source}_CONSUMED_ONCE_${out.destination}`;
-      this.normal.lastEvent=`NORMAL_PENDING_REWARD_CONSUMED_ONCE_${out.destination}`;
-    }
+    normalizeNormalAfterReward(this,pending,out.destination);
     return out;
   };
 
@@ -22,11 +36,7 @@ if(!GameCore.prototype.__step6zNormalRewardOneShotPatched){
     const pending=this.normal?.pendingReward;
     const ok=originalStartGoldenTimeFromPending.apply(this,args);
     if(!ok)return ok;
-    if(pending&&this.normal?.pendingReward===pending){
-      this.normal.pendingReward=null;
-      this.normal.transitionSource=`${pending.source}_CONSUMED_ONCE_GOLDEN_TIME`;
-      this.normal.lastEvent='NORMAL_PENDING_GT_REWARD_CONSUMED_ONCE';
-    }
+    normalizeNormalAfterReward(this,pending,'GOLDEN_TIME');
     return ok;
   };
 
