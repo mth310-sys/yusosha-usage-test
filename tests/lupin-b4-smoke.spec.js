@@ -55,6 +55,36 @@ test('Unsupported Treasure return rows remain unresolved with no interpolation',
   });
 });
 
+test('Verified WANTED target draws stay inside their published 32G bands and 480G hard max', async ({ page }) => {
+  await boot(page);
+  const result=await page.evaluate(async()=>{
+    const profile=await import('/test_lupin_b4/js/wanted-profile.js');
+    const makeRng=(values)=>({i:0,next(){return values[this.i++%values.length];}});
+    const initialLow=profile.drawWantedInitialTarget(makeRng([0,0]));
+    const initialHigh=profile.drawWantedInitialTarget(makeRng([0.999999,0.999999]));
+    const postBySetting={};
+    for(let setting=1;setting<=6;setting+=1){
+      const low=profile.drawWantedPostWcTarget(setting,makeRng([0,0]));
+      const high=profile.drawWantedPostWcTarget(setting,makeRng([0.999999,0.999999]));
+      postBySetting[setting]={low,high};
+    }
+    return {initialLow,initialHigh,postBySetting,profile:profile.WANTED_CHANCE_PROFILE};
+  });
+  const inside=(target)=>target.game>=target.zone.min&&target.game<=target.zone.max&&target.game<=480;
+  expect(inside(result.initialLow)).toBe(true);
+  expect(inside(result.initialHigh)).toBe(true);
+  expect(result.initialLow.game).toBe(1);
+  expect(result.initialHigh.game).toBe(480);
+  for(const pair of Object.values(result.postBySetting)){
+    expect(inside(pair.low)).toBe(true);
+    expect(inside(pair.high)).toBe(true);
+  }
+  expect(result.profile.baseGames).toBe(10);
+  expect(result.profile.holdCapacity).toBe(8);
+  expect(result.profile.hardMaxGame).toBe(480);
+  expect(result.profile.inBandDistribution).toBe('UNIFORM');
+});
+
 test('Step 6Z scenario 1 NORMAL to LB passes real transition audit', async ({ page }) => {
   await boot(page);
   await page.locator('#normalLbScenarioRun').click();
