@@ -1,4 +1,5 @@
 // Step 6Z: audit changed WANTED holds route exactly once to their verified destination contract.
+import './major-return-boundary-integrity-patch.js?v=step6z-major-return-boundary1';
 import { NormalSystem } from './normal.js?v=step6w';
 
 const DIRECT=new Set(['DOROBO_ZONE','FUJIKO_ZONE','SEVEN_ZONE']);
