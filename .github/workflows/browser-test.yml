@@ -16,5 +16,12 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Check Lupin B4 module syntax
+        run: |
+          set -e
+          for f in test_lupin_b4/js/*.js; do
+            echo "CHECK $f"
+            node --input-type=module --check < "$f"
+          done
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
