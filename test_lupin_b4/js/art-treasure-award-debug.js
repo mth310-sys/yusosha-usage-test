@@ -1,3 +1,4 @@
+import './next-initial-hit-integrity-patch.js?v=step6z-next-hit-integrity1';
 import { TREASURE_AWARD_PROFILE, rollOreNoNaWaLupinRush } from './treasure-award-profile.js?v=step6z-award1';
 import { ART_STAGE_PROFILE } from './art-stage-profile.js?v=step6z-stage1';
 import { installTreasureThresholdCarryoverHooks } from './treasure-threshold.js?v=step6z-threshold3';
