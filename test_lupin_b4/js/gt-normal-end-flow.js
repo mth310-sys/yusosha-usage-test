@@ -1,3 +1,4 @@
+import './normal-reward-route-patch.js?v=step6z-reward1';
 // Step 6Z: shared normal (<1,000,000T) set-end route.
 // Native completeGame already routes 30G end; this module exposes and tracks the same route.
 export function installNormalGtEndFlow(gt){
