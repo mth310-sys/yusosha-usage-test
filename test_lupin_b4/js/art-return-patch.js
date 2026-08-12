@@ -25,14 +25,10 @@ function renderArtReturnDebug(snap) {
     el.textContent = 'TREASURE     ---\nRETURN RATE  ---\nCONFIDENCE   ---\nRESULT       NOT RUN';
     return;
   }
-  const treasure = Number.isFinite(draw.treasurePoints)
-    ? `${Math.round(draw.treasurePoints / 10000)}万`
-    : '---';
+  const treasure = Number.isFinite(draw.treasurePoints) ? `${Math.round(draw.treasurePoints / 10000)}万` : '---';
   const rate = draw.resolved && Number.isFinite(draw.pct) ? `${draw.pct}%` : 'UNRESOLVED';
   const confidence = draw.confidence ?? 'UNRESOLVED';
-  const result = !draw.resolved
-    ? 'UNRESOLVED'
-    : (draw.hit ? 'HIT → REVENGE NOTIFY / LUPIN BONUS GUARANTEED' : 'FAIL → NORMAL REVENGE ENTRY POLICY');
+  const result = !draw.resolved ? 'UNRESOLVED' : (draw.hit ? 'HIT → REVENGE NOTIFY / LUPIN BONUS GUARANTEED' : 'FAIL → NORMAL REVENGE ENTRY POLICY');
   el.textContent = `TREASURE     ${treasure}\nRETURN RATE  ${rate}\nCONFIDENCE   ${confidence}\nRESULT       ${result}`;
 }
 
@@ -42,11 +38,7 @@ if (!GoldenTimeSystem.prototype.__step6yArtReturnPatched) {
 
   GoldenTimeSystem.prototype.completeBattleGame = function patchedCompleteBattleGame() {
     const result = originalCompleteBattleGame.call(this);
-
-    if (this.state !== 'ART_END_PENDING_RETURN' || this.lastEvent !== 'TREASURE_BATTLE_G4_LOSE_ART_END') {
-      return result;
-    }
-
+    if (this.state !== 'ART_END_PENDING_RETURN' || this.lastEvent !== 'TREASURE_BATTLE_G4_LOSE_ART_END') return result;
     const draw = rollArtReturn(this.treasurePoints, this.rng);
     this.artReturnLast = { ...draw, timing:ART_RETURN_PROFILE.timing };
     this.lastEvent = 'TREASURE_BATTLE_G4_LOSE_ART_END';
@@ -57,11 +49,7 @@ if (!GoldenTimeSystem.prototype.__step6yArtReturnPatched) {
 
   GoldenTimeSystem.prototype.snapshot = function patchedSnapshot() {
     const snap = originalSnapshot.call(this);
-    const patched = {
-      ...snap,
-      artReturn: this.artReturnLast ? { ...this.artReturnLast } : null,
-      artReturnProfile: ART_RETURN_PROFILE
-    };
+    const patched = {...snap,artReturn:this.artReturnLast ? { ...this.artReturnLast } : null,artReturnProfile:ART_RETURN_PROFILE};
     renderArtReturnDebug(patched);
     return patched;
   };
@@ -75,6 +63,22 @@ if (!GameCore.prototype.__step6zArtReturnRoutePatched) {
   GameCore.prototype.stopReel = function patchedStopReel(index) {
     const out = originalStopReel.call(this,index);
     if (!out?.complete || !out.result) return out;
+
+    // When a guaranteed return Revenge Chance reaches its 10G resolution, finish the
+    // already-determined reward route instead of leaving the core stranded in SUCCESS.
+    if (this.revenge?.state==='SUCCESS' && this.revenge.guaranteedDestination==='LUPIN_BONUS') {
+      this.goldenTime.reset();
+      this.lupinBonus.reset();
+      this.lupinBonus.start('ART_RETURN_REVENGE_GUARANTEED_LUPIN_BONUS');
+      this.revenge.reset();
+      out.result.goldenTime=this.goldenTime.snapshot();
+      out.result.revenge=this.revenge.snapshot();
+      out.result.lupinBonus=this.lupinBonus.snapshot();
+      out.result.mode='LUPIN_BONUS';
+      out.result.event='ART_RETURN_REVENGE_10G_END_LUPIN_BONUS_AUTO_START';
+      return out;
+    }
+
     const draw = out.result.goldenTime?.artReturn;
     if (!draw?.resolved || !draw.hit) return out;
     if (this.revenge?.state !== 'ENTRY_PENDING_UNVERIFIED_RATE') return out;
