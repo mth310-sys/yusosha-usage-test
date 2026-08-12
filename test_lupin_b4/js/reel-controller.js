@@ -32,10 +32,12 @@ export class ReelController {
     this.stopOrder = [];
     this.result = ['---','---','---'];
     this.target = ['---','---','---'];
+    this.activeRole = null;
   }
 
   start(role) {
     this.reset();
+    this.activeRole = role?.name ?? null;
     this.spinning = [true,true,true];
     this.target = this.makeTarget(role);
   }
@@ -53,6 +55,7 @@ export class ReelController {
 
   stop(index) {
     index = Number(index);
+    if (!Number.isInteger(index) || index < 0 || index > 2) return null;
     if (!this.spinning[index] || this.stopped[index]) return null;
     this.spinning[index] = false;
     this.stopped[index] = true;
@@ -65,12 +68,27 @@ export class ReelController {
     return this.stopped.every(Boolean);
   }
 
+  integritySnapshot() {
+    const uniqueOrder=new Set(this.stopOrder);
+    const stopOrderValid=this.stopOrder.every(i=>Number.isInteger(i)&&i>=0&&i<=2)&&uniqueOrder.size===this.stopOrder.length;
+    const stoppedCount=this.stopped.filter(Boolean).length;
+    const orderCountMatches=stoppedCount===this.stopOrder.length;
+    const stoppedMatchTarget=this.result.every((symbol,i)=>this.stopped[i]?symbol===this.target[i]:symbol==='---');
+    const allStoppedConsistent=this.allStopped=== (stoppedCount===3);
+    const status=stopOrderValid&&orderCountMatches&&stoppedMatchTarget&&allStoppedConsistent?'OK':'ERROR_REEL_STATE_MISMATCH';
+    return {status,activeRole:this.activeRole,stopOrderValid,orderCountMatches,stoppedMatchTarget,allStoppedConsistent,stoppedCount};
+  }
+
   snapshot() {
     return {
       spinning:[...this.spinning],
       stopped:[...this.stopped],
       result:[...this.result],
-      stopOrder:[...this.stopOrder]
+      target:[...this.target],
+      stopOrder:[...this.stopOrder],
+      activeRole:this.activeRole,
+      allStopped:this.allStopped,
+      integrity:this.integritySnapshot()
     };
   }
 }
