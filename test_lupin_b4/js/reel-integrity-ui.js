@@ -24,9 +24,12 @@ export function renderReelIntegrity(core){
   if(!root)return;
   const boundary=snap?.lastGameBoundaryIntegrity;
   const invalid=snap?.lastInvalidOperationIntegrity;
-  const overall=boundary?.status??'NO COMPLETED GAME';
+  const boundaryStatus=boundary?.status??'NO COMPLETED GAME';
+  const invalidFailed=Boolean(invalid&&invalid.status!=='OK');
+  const overall=invalidFailed?'ERROR_BASE_GAME_INTEGRITY':boundaryStatus;
   root.textContent=[
     `OVERALL          ${overall}`,
+    `GAME BOUNDARY    ${boundaryStatus}`,
     `RESULT           ${boundary?.result?.status??'---'}`,
     `BET              ${boundary?.bet?.status??'---'}`,
     `GAME COUNTER     ${boundary?.counter?.status??'---'}`,
