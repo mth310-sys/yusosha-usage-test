@@ -10,7 +10,21 @@ export const ART_STAGE_PROFILE = Object.freeze({
     SWISS:{label:'スイス', treasureHitDenominator:12.6, special:false, rateConfidence:'PUBLISHED_ANALYSIS_CROSS_CHECKED'},
     CARIBBEAN:{label:'カリブ海', treasureHitDenominator:7.5, special:false, rateConfidence:'PUBLISHED_ANALYSIS_CROSS_CHECKED'},
     UNDERGROUND:{label:'地底都市', treasureHitDenominator:3.0, special:false, rateConfidence:'PUBLISHED_ANALYSIS_CROSS_CHECKED'},
-    IKUKAN:{label:'異空間', treasureHitDenominator:1.0, special:true, durationGames:10, minimumTreasurePerGame:50000, averageTreasurePoints:700000, alternatePublishedAverageTreasurePoints:702000, averageValueStatus:'CROSS_SOURCE_700K_VS_702K_MINOR_DIFFERENCE_RECORDED', rateConfidence:'PUBLISHED_ANALYSIS_CROSS_CHECKED'}
+    IKUKAN:{
+      label:'異空間',
+      treasureHitDenominator:1.0,
+      special:true,
+      durationGames:10,
+      minimumTreasurePerGame:50000,
+      averageTreasurePoints:700000,
+      alternatePublishedAverageTreasurePoints:702000,
+      averageValueStatus:'CROSS_SOURCE_700K_VS_702K_MINOR_DIFFERENCE_RECORDED',
+      perGameAwardDistribution:null,
+      perGameAwardDistributionStatus:'SOURCE_IMAGE_TABLE_LOCATED_NUMERIC_CELLS_NOT_SAFELY_TRANSCRIBED',
+      perGameAwardDistributionSourceLocation:'P_GABU_IKUKAN_PER_GAME_AWARD_IMAGE_TABLE',
+      fiveManShareRelativeToTreasureRush:'HIGHER_THAN_TREASURE_RUSH_PUBLISHED_DESCRIPTION',
+      rateConfidence:'PUBLISHED_ANALYSIS_CROSS_CHECKED'
+    }
   },
   internalRanks:Object.freeze({
     JAPAN_A:{visible:'JAPAN'}, JAPAN_B:{visible:'JAPAN'},
@@ -33,10 +47,11 @@ export const ART_STAGE_PROFILE = Object.freeze({
   normalStageTreasureAveragePoints:120000,
   normalStageTreasureAverageSource:'PUBLISHED_ANALYSIS_TEXT',
   sourceLevel:'PUBLISHED_ANALYSIS_CROSS_CHECKED',
-  automaticUsePolicy:'SCENARIO_SELECTION_INITIAL_STAGE_STAGE_HIT_RATES_AND_10G_UPGRADE_RULES_MAY_BE_MODELED; DO_NOT_SYNTHESIZE NORMAL_TREASURE_AMOUNT_DISTRIBUTION OR IKUKAN_EXIT_DESTINATION'
+  automaticUsePolicy:'SCENARIO_SELECTION_INITIAL_STAGE_STAGE_HIT_RATES_AND_10G_UPGRADE_RULES_MAY_BE_MODELED; DO NOT SYNTHESIZE NORMAL_TREASURE_AMOUNT_DISTRIBUTION IKUKAN_PER_GAME_DISTRIBUTION OR IKUKAN_EXIT_DESTINATION'
 });
 
 export function getArtStage(stage){return ART_STAGE_PROFILE.stages[stage]??null;}
 export function getInternalArtStage(rank){return ART_STAGE_PROFILE.internalRanks[rank]??null;}
 export function rollStageTreasureHit(stage,rng){const row=getArtStage(stage);if(!row)return false;return rng.next()<1/row.treasureHitDenominator;}
 export function rollTwoStepStageUpgrade(scenario,rng){const pct=ART_STAGE_PROFILE.twoStepUpgradePctByScenario[scenario];if(pct==null)return null;return rng.next()<pct/100?2:1;}
+export function hasVerifiedIkukanAwardDistribution(){const x=ART_STAGE_PROFILE.stages.IKUKAN.perGameAwardDistribution;return Array.isArray(x)&&x.length>0;}
