@@ -1,6 +1,7 @@
 // Step 6Z: verified next initial-hit type is selected at BONUS / ART end.
 // Never silently redraw later; audit the single currently outstanding reservation correctly.
 import { GameCore } from './game-core.js?v=step6w';
+import { drawNextInitialHit } from './next-initial-hit-profile.js?v=step6w';
 
 function renderIntegrityUi(audit){
   if(typeof document==='undefined'||!audit)return;
@@ -12,6 +13,13 @@ function renderIntegrityUi(audit){
 }
 
 if(!GameCore.prototype.__step6zNextInitialHitIntegrityPatched){
+  GameCore.prototype.drawNextInitialHitReservation=function drawNextInitialHitReservationFailClosed(source='BONUS_OR_ART_END'){
+    const draw=drawNextInitialHit(this.setting,this.rng);
+    if(!draw){this.nextInitialHit=null;return null;}
+    this.nextInitialHit={...draw,reservationSource:source,drawNo:++this.nextInitialHitDraws};
+    return this.nextInitialHit;
+  };
+
   GameCore.prototype.consumeNextInitialHit=function consumeNextInitialHitFailClosed(source){
     if(!this.nextInitialHit){this.lastInitialHitResolution={type:null,consumedBy:source,consumedNo:this.nextInitialHitConsumed,error:'MISSING_NEXT_INITIAL_HIT_RESERVATION',policy:'FAIL_CLOSED_NO_LATE_REDRAW'};return null;}
     const reservation={...this.nextInitialHit};this.nextInitialHit=null;this.nextInitialHitConsumed+=1;this.lastInitialHitResolution={...reservation,consumedBy:source,consumedNo:this.nextInitialHitConsumed};return this.lastInitialHitResolution;
