@@ -20,12 +20,14 @@ export const CZ_SCENARIO_TABLE = Object.freeze({
 });
 
 export function drawCzLength(setting, rng) {
-  const row = CZ_LENGTH_TABLE[Number(setting)] ?? CZ_LENGTH_TABLE[1];
+  const row = CZ_LENGTH_TABLE[Number(setting)];
+  if (!row) return null;
   return rng.next() < row[10] / 100 ? 10 : 20;
 }
 
 export function drawCzScenario(setting, rng) {
-  const row = CZ_SCENARIO_TABLE[Number(setting)] ?? CZ_SCENARIO_TABLE[1];
+  const row = CZ_SCENARIO_TABLE[Number(setting)];
+  if (!row) return null;
   const entries = Object.entries(row);
   const total = entries.reduce((sum, [, weight]) => sum + weight, 0);
   let value = rng.next() * total;
