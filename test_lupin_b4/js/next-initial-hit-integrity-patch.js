@@ -1,8 +1,10 @@
 // Step 6Z: verified next initial-hit type is selected at BONUS / ART end.
 // Never silently redraw later; audit the single currently outstanding reservation correctly.
 import { GameCore } from './game-core.js?v=step6w';
+import { NormalSystem } from './normal.js?v=step6w';
 import { drawNextInitialHit } from './next-initial-hit-profile.js?v=step6w';
 import { getSettingProfile } from './setting-profile.js';
+import { CZ_LENGTH_TABLE, CZ_SCENARIO_TABLE } from './cz-profile.js?v=step6s';
 
 function renderIntegrityUi(audit){
   if(typeof document==='undefined'||!audit)return;
@@ -11,6 +13,16 @@ function renderIntegrityUi(audit){
   let el=document.getElementById('nextInitialHitIntegrityState');
   if(!el){el=document.createElement('pre');el.id='nextInitialHitIntegrityState';el.textContent='INTEGRITY NOT RUN';panel.appendChild(el);}
   el.textContent=`INTEGRITY ${audit.status}\nLIVE RESV  ${audit.hasReservation?'YES':'NO'}\nLIVE DRAW  ${audit.currentDrawNo??'---'}\nDRAWS      ${audit.draws}\nCONSUMED   ${audit.consumed}\nDRAW VALID ${audit.currentDrawValid?'YES':'NO'}\nSEQ VALID  ${audit.consumptionSequenceValid?'YES':'NO'}`;
+}
+
+if(!NormalSystem.prototype.__step6zCzSettingGuardPatched){
+  const originalStartCz=NormalSystem.prototype.startCz;
+  NormalSystem.prototype.startCz=function startCzFailClosed(type,...args){
+    const setting=Number(this.setting);
+    if(!CZ_LENGTH_TABLE[setting]||!CZ_SCENARIO_TABLE[setting])return false;
+    return originalStartCz.call(this,type,...args);
+  };
+  NormalSystem.prototype.__step6zCzSettingGuardPatched=true;
 }
 
 if(!GameCore.prototype.__step6zNextInitialHitIntegrityPatched){
