@@ -27,6 +27,12 @@ if(!GameCore.prototype.__step6zNextInitialHitIntegrityPatched){
     return originalSetSetting.call(this,setting,...args);
   };
 
+  const originalBet=GameCore.prototype.bet;
+  GameCore.prototype.bet=function betFailClosedForUnsupportedSetting(...args){
+    if(!this.profile)return false;
+    return originalBet.apply(this,args);
+  };
+
   GameCore.prototype.consumeNextInitialHit=function consumeNextInitialHitFailClosed(source){
     if(!this.nextInitialHit){this.lastInitialHitResolution={type:null,consumedBy:source,consumedNo:this.nextInitialHitConsumed,error:'MISSING_NEXT_INITIAL_HIT_RESERVATION',policy:'FAIL_CLOSED_NO_LATE_REDRAW'};return null;}
     const reservation={...this.nextInitialHit};this.nextInitialHit=null;this.nextInitialHitConsumed+=1;this.lastInitialHitResolution={...reservation,consumedBy:source,consumedNo:this.nextInitialHitConsumed};return this.lastInitialHitResolution;
