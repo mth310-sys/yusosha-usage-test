@@ -33,7 +33,7 @@ export const ART_STAGE_PROFILE = Object.freeze({
 
 export function getArtStage(stage){return ART_STAGE_PROFILE.stages[stage]??null;}
 export function getInternalArtStage(rank){return ART_STAGE_PROFILE.internalRanks[rank]??null;}
-export function rollStageTreasureHit(stage,rng){const row=getArtStage(stage);if(!row)return false;return rng.next()<1/row.treasureHitDenominator;}
+export function rollStageTreasureHit(stage,rng){const row=getArtStage(stage);if(!row)return null;return rng.next()<1/row.treasureHitDenominator;}
 export function rollTwoStepStageUpgrade(scenario,rng){const pct=ART_STAGE_PROFILE.twoStepUpgradePctByScenario[scenario];if(pct==null)return null;return rng.next()<pct/100?2:1;}
 export function hasVerifiedIkukanAwardDistribution(){const x=ART_STAGE_PROFILE.stages.IKUKAN.perGameAwardDistribution;return isTreasureDistributionReady('ikukanPerGame')&&Array.isArray(x)&&x.length>0;}
 export function canAutoDrawIkukanAward(){return hasVerifiedIkukanAwardDistribution();}
