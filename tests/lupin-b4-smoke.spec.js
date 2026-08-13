@@ -75,6 +75,28 @@ test('Verified CZ length/scenario tables keep boundary draws deterministic for s
   for(const row of Object.values(result)){expect(row.lengthLow).toBe(10);expect(row.lengthHigh).toBe(20);expect(row.scenarioLow).toBe('A');expect(row.scenarioHigh).toBe('D');expect(row.lengthTable[10]+row.lengthTable[20]).toBeCloseTo(100,5);expect(Object.values(row.scenarioTable).reduce((sum,value)=>sum+value,0)).toBeCloseTo(100,1);}
 });
 
+test('ART stage scenario helpers reject unsupported inputs instead of inventing fallback values', async ({ page }) => {
+  await boot(page);
+  const result=await page.evaluate(async()=>{
+    const profile=await import('/test_lupin_b4/js/art-stage-scenario-profile.js');
+    const rng={next:()=>0};
+    return {
+      invalidSetting:profile.drawArtStageScenario(0,rng),
+      invalidScenarioStage:profile.drawInitialInternalStage('UNKNOWN',rng),
+      invalidScenarioUpgrade:profile.drawStageUpgradeSteps('UNKNOWN',rng),
+      setting1:profile.drawArtStageScenario(1,rng),
+      scenarioAStage:profile.drawInitialInternalStage('A',rng),
+      scenarioAUpgrade:profile.drawStageUpgradeSteps('A',rng)
+    };
+  });
+  expect(result.invalidSetting).toBeNull();
+  expect(result.invalidScenarioStage).toBeNull();
+  expect(result.invalidScenarioUpgrade).toBeNull();
+  expect(result.setting1).toBe('A');
+  expect(result.scenarioAStage).toEqual({index:0,key:'JAPAN_A'});
+  expect(result.scenarioAUpgrade).toBe(2);
+});
+
 test('SEVEN ZONE entry remains an ART guarantee without inventing a per-game success rate', async ({ page }) => {
   await boot(page);
   const result=await page.evaluate(async()=>{const {NormalSystem}=await import('/test_lupin_b4/js/normal.js');const normal=new NormalSystem({next:()=>0.5},1);normal.startSevenZone('BROWSER_VERIFIED_TEST');return normal.snapshot();});
