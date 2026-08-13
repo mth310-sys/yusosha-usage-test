@@ -12,5 +12,5 @@ export const SETTING_PROFILES = Object.freeze({
 });
 
 export function getSettingProfile(setting) {
-  return SETTING_PROFILES[Number(setting)] ?? SETTING_PROFILES[1];
+  return SETTING_PROFILES[Number(setting)] ?? null;
 }
