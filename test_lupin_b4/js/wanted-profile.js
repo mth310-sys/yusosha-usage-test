@@ -68,4 +68,8 @@ function targetFromZone(zone,rng,cycle){
 
 export function drawWantedInitialZone(rng){return drawWeightedZone(WANTED_INITIAL_ZONES,rng);}
 export function drawWantedInitialTarget(rng){return targetFromZone(drawWeightedZone(WANTED_INITIAL_ZONES,rng),rng,'INITIAL');}
-export function drawWantedPostWcTarget(setting,rng){const s=Math.min(6,Math.max(1,Number(setting)||1));return targetFromZone(drawWeightedZone(WANTED_POST_WC_ZONES[s],rng),rng,'POST_WC_FAILURE');}
+export function drawWantedPostWcTarget(setting,rng){
+  const rows=WANTED_POST_WC_ZONES[Number(setting)];
+  if(!rows)return null;
+  return targetFromZone(drawWeightedZone(rows,rng),rng,'POST_WC_FAILURE');
+}
