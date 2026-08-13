@@ -1,5 +1,6 @@
 // Step 6Z: audit the verified WANTED failure -> next-cycle draw -> re-entry loop.
 import { NormalSystem } from './normal.js?v=step6w';
+import { WANTED_POST_WC_ZONES } from './wanted-profile.js?v=step6s';
 
 function store(normal,stage,checks,extra={}){
   const failed=Object.entries(checks).filter(([,v])=>v!==true).map(([k])=>k);
@@ -9,6 +10,7 @@ function store(normal,stage,checks,extra={}){
 if(!NormalSystem.prototype.__step6zWantedCycleIntegrityPatched){
   const originalReset=NormalSystem.prototype.resetAfterWantedFailure;
   NormalSystem.prototype.resetAfterWantedFailure=function(...args){
+    if(!WANTED_POST_WC_ZONES[Number(this.setting)])return null;
     const previousTarget=this.wantedTargetGame;
     const out=originalReset.apply(this,args);
     const target=Number(this.wantedTargetGame),zone=this.wantedTargetZone;
