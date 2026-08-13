@@ -6,6 +6,7 @@ import { RAIUN_PROFILE, rollRaiunArtCalibrated, rollShinRaiunLegendGate } from '
 
 export function runFastSimulation({setting=1, games=100000, seed=0x13572468} = {}) {
   const profile = getSettingProfile(setting);
+  if (profile == null) return null;
   const rng = new RNG(seed);
   const counts = { REPLAY:0, MB:0, '3COIN':0, '9COIN':0, '10COIN':0, MISS:0 };
   let payout = 0;
