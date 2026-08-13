@@ -71,5 +71,9 @@ export function getGoldRushBreakthroughMinimumStocks(key){
   return GOLD_RUSH_PROFILE.breakthroughPresentation[key]?.minimumStocks??null;
 }
 
-export function rollOneIn(denominator,rng){return rng.next()<1/denominator;}
+export function rollOneIn(denominator,rng){
+  const d=Number(denominator);
+  if(!Number.isFinite(d)||d<=0)return null;
+  return rng.next()<1/d;
+}
 export function rollGoldRushContinuation(rng){return rng.next()<GOLD_RUSH_PROFILE.nextGameContinuationPct/100;}
