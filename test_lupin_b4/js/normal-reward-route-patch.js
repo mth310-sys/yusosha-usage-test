@@ -39,8 +39,8 @@ if(!GameCore.prototype.__step6zNormalRewardOneShotPatched){
       return out;
     }
     if(pending?.type==='GOLDEN_TIME_STOCKS'){
-      const minStocks=Math.max(0,Math.floor(Number(pending.minStocks)||0));
-      if(minStocks<=0)return null;
+      const minStocks=Number(pending.minStocks);
+      if(!Number.isInteger(minStocks)||minStocks<=0)return null;
       this.goldenTime.reset();
       this.goldenTime.start({guaranteedStocks:minStocks,source:`${pending.source}_VERIFIED_MIN_STOCKS`});
       const out={destination:'GOLDEN_TIME',event:`LEGEND_GATE_GOLDEN_TIME_AUTO_START_MIN_${minStocks}_STOCKS`,guaranteedStocks:minStocks,stockModel:'VERIFIED_MINIMUM_ONLY_UNRESOLVED_ABOVE_MIN'};
