@@ -15,8 +15,10 @@ export const NEXT_INITIAL_HIT_PROFILE = Object.freeze({
 });
 
 export function drawNextInitialHit(setting,rng){
-  const row=NEXT_INITIAL_HIT_PROFILE[Number(setting)] ?? NEXT_INITIAL_HIT_PROFILE[1];
+  const normalizedSetting=Number(setting);
+  const row=NEXT_INITIAL_HIT_PROFILE[normalizedSetting];
+  if(!row) return null;
   const artPct=row.GOLDEN_TIME;
   const type=rng.next()<artPct/100?'GOLDEN_TIME':'LUPIN_BONUS';
-  return {type,setting:Number(setting),bonusPct:row.LUPIN_BONUS,artPct,source:NEXT_INITIAL_HIT_PROFILE.source};
+  return {type,setting:normalizedSetting,bonusPct:row.LUPIN_BONUS,artPct,source:NEXT_INITIAL_HIT_PROFILE.source};
 }
