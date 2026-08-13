@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 test('Legend Gate stock rewards reject invalid counts and keep verified integer count', async ({ page }) => {
   await page.goto('/test_lupin_b4/');
   const result = await page.evaluate(async () => {
-    const { GameCore } = await import('./js/game-core.js?v=test-legend-stock-guard');
     await import('./js/normal-reward-route-patch.js?v=test-legend-stock-guard');
+    const { GameCore } = await import('./js/game-core.js?v=step6w');
 
     const makeCore = () => new GameCore();
     const run = (minStocks) => {
