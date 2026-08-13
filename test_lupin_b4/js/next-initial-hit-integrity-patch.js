@@ -2,6 +2,7 @@
 // Never silently redraw later; audit the single currently outstanding reservation correctly.
 import { GameCore } from './game-core.js?v=step6w';
 import { drawNextInitialHit } from './next-initial-hit-profile.js?v=step6w';
+import { getSettingProfile } from './setting-profile.js';
 
 function renderIntegrityUi(audit){
   if(typeof document==='undefined'||!audit)return;
@@ -20,6 +21,12 @@ if(!GameCore.prototype.__step6zNextInitialHitIntegrityPatched){
     return this.nextInitialHit;
   };
 
+  const originalSetSetting=GameCore.prototype.setSetting;
+  GameCore.prototype.setSetting=function setSettingFailClosed(setting,...args){
+    if(!getSettingProfile(setting))return false;
+    return originalSetSetting.call(this,setting,...args);
+  };
+
   GameCore.prototype.consumeNextInitialHit=function consumeNextInitialHitFailClosed(source){
     if(!this.nextInitialHit){this.lastInitialHitResolution={type:null,consumedBy:source,consumedNo:this.nextInitialHitConsumed,error:'MISSING_NEXT_INITIAL_HIT_RESERVATION',policy:'FAIL_CLOSED_NO_LATE_REDRAW'};return null;}
     const reservation={...this.nextInitialHit};this.nextInitialHit=null;this.nextInitialHitConsumed+=1;this.lastInitialHitResolution={...reservation,consumedBy:source,consumedNo:this.nextInitialHitConsumed};return this.lastInitialHitResolution;
@@ -30,8 +37,6 @@ if(!GameCore.prototype.__step6zNextInitialHitIntegrityPatched){
 
   GameCore.prototype.nextInitialHitIntegritySnapshot=function nextInitialHitIntegritySnapshot(){
     const draws=Number(this.nextInitialHitDraws)||0,consumed=Number(this.nextInitialHitConsumed)||0,hasReservation=!!this.nextInitialHit;
-    // draws is historical and includes legitimate replacement redraws at setting change / BONUS / ART end.
-    // Therefore draws-consumed is not an outstanding-reservation count. Audit the live reservation itself.
     const currentDrawNo=hasReservation?Number(this.nextInitialHit.drawNo)||null:null;
     const currentDrawValid=!hasReservation||(Number.isInteger(currentDrawNo)&&currentDrawNo>=1&&currentDrawNo<=draws);
     const missingReservation=!hasReservation&&this.normal?.pendingReward?.type==='LB_OR_GT';
