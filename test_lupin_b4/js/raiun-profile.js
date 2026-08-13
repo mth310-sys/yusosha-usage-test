@@ -33,11 +33,12 @@ export const RAIUN_PROFILE = Object.freeze({
 });
 
 export function getRaiunHighProfile(level='LOW') {
-  return RAIUN_PROFILE.high[level] ?? RAIUN_PROFILE.high.LOW;
+  return RAIUN_PROFILE.high[level] ?? null;
 }
 
 export function rollRaiunHighEntry(level, rng) {
   const row = getRaiunHighProfile(level);
+  if(!row)return null;
   return rng.next() < 1 / row.denominator;
 }
 
