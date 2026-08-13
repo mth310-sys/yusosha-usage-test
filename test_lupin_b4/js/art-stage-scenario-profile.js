@@ -40,17 +40,21 @@ function weightedIndex(weights,rng){
 }
 
 export function drawArtStageScenario(setting,rng){
-  return weightedKey(ART_STAGE_SCENARIO_PROFILE.scenarioBySetting[Number(setting)]??ART_STAGE_SCENARIO_PROFILE.scenarioBySetting[1],rng);
+  const table=ART_STAGE_SCENARIO_PROFILE.scenarioBySetting[Number(setting)];
+  if(!table)return null;
+  return weightedKey(table,rng);
 }
 
 export function drawInitialInternalStage(scenario,rng){
   const weights=ART_STAGE_SCENARIO_PROFILE.initialInternalStagePct[scenario];
+  if(!weights)return null;
   const index=weightedIndex(weights,rng);
   return {index,key:ART_STAGE_SCENARIO_PROFILE.internalOrder[index]};
 }
 
 export function drawStageUpgradeSteps(scenario,rng){
-  const p2=ART_STAGE_SCENARIO_PROFILE.twoStepUpgradePct[scenario]??25;
+  const p2=ART_STAGE_SCENARIO_PROFILE.twoStepUpgradePct[scenario];
+  if(p2==null)return null;
   return rng.next()<p2/100?2:1;
 }
 
