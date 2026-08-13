@@ -19,4 +19,4 @@ export const HOLD_CATALOG=Object.freeze({
  PREMIUM:{type:'PREMIUM',guarantee:'PREMIUM_CONFIRMED',reservedEvent:'PREMIUM',source:'VERIFIED_PREMIUM_HOLD_ONLY',destination:'UNVERIFIED',policy:'DO_NOT_ASSUME_LB_OR_GT_OR_GT_BENEFIT'}
 });
 export const DEBUG_HOLD_TYPES=Object.freeze(['GOLD','TAMACHAN','FUJIKO_TIGER','SEVEN_ZONE','DOROBO_ZONE','FUJIKO_ZONE','PREMIUM']);
-export function getHoldDefinition(type){return{...(HOLD_CATALOG[type]??HOLD_CATALOG.NORMAL)};}
+export function getHoldDefinition(type){const def=HOLD_CATALOG[type];return def?{...def}:null;}
