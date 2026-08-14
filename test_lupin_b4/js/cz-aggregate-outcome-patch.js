@@ -3,6 +3,7 @@
 // The real per-game hit mechanism and the success LB/GT destination split remain unresolved.
 import './ceiling-runtime-patch.js?v=step6ab-ceiling1';
 import './wanted-cycle-reset-patch.js?v=step6ac-wanted-reset1';
+import './normal-stage-runtime-patch.js?v=step6ad-normal-stage1';
 import { NormalSystem } from './normal.js?v=step6w';
 import { rollCzAggregateSuccess } from './cz-profile.js?v=step6aa-cz1';
 
