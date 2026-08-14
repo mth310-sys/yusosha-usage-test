@@ -32,6 +32,20 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
     return originalRecordStockAdd.call(this,count,...args);
   };
 
+  const originalConsumeStock=GoldenTimeSystem.prototype.consumeStock;
+  GoldenTimeSystem.prototype.consumeStock=function consumeStockFailClosed(...args){
+    const current=this.guaranteedStocks;
+    if(typeof current!=='number'||!Number.isInteger(current)||current<0)return false;
+    return originalConsumeStock.apply(this,args);
+  };
+
+  const originalExpireStocksAtBattle=GoldenTimeSystem.prototype.expireStocksAtBattle;
+  GoldenTimeSystem.prototype.expireStocksAtBattle=function expireStocksAtBattleFailClosed(...args){
+    const current=this.guaranteedStocks;
+    if(typeof current!=='number'||!Number.isInteger(current)||current<0)return 0;
+    return originalExpireStocksAtBattle.apply(this,args);
+  };
+
   GoldenTimeSystem.prototype.__step6zStartInputGuardPatched=true;
 }
 
