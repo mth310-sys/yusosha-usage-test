@@ -58,6 +58,8 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
     if(this.state!=='ACTIVE_SET')return null;
     const current=this.guaranteedStocks;
     if(typeof current!=='number'||!Number.isInteger(current)||current<0)return null;
+    const treasure=this.treasurePoints;
+    if(typeof treasure!=='number'||!Number.isFinite(treasure)||!Number.isInteger(treasure)||treasure<0)return null;
     return originalStartTreasureBattle.apply(this,args);
   };
 
