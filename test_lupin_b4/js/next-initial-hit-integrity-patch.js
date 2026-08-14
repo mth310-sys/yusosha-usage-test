@@ -85,6 +85,12 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
     return originalCompleteExtraGame.apply(this,args);
   };
 
+  const originalCompleteGoldRushGame=GoldenTimeSystem.prototype.completeGoldRushGame;
+  GoldenTimeSystem.prototype.completeGoldRushGame=function completeGoldRushGameFailClosedForInvalidState(...args){
+    if(this.state!=='GOLD_RUSH_ACTIVE')return null;
+    return originalCompleteGoldRushGame.apply(this,args);
+  };
+
   GoldenTimeSystem.prototype.__step6zStartInputGuardPatched=true;
 }
 
