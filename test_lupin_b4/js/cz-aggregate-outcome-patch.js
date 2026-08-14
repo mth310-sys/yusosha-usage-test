@@ -1,6 +1,7 @@
 // Step 6AA: resolve DOROBO/FUJIKO CZ only at the verified aggregate end boundary.
 // Published setting-specific total expectations are used as one aggregate draw.
 // The real per-game hit mechanism and the success LB/GT destination split remain unresolved.
+import './ceiling-runtime-patch.js?v=step6ab-ceiling1';
 import { NormalSystem } from './normal.js?v=step6w';
 import { rollCzAggregateSuccess } from './cz-profile.js?v=step6aa-cz1';
 
