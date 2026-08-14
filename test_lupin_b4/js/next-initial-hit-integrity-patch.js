@@ -69,8 +69,8 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
   GoldenTimeSystem.prototype.start=function startFailClosedForInvalidInputs(options={}){
     const setting=Number(this.setting);
     if(!getSettingProfile(setting))return false;
-    const guaranteedStocks=Number(options?.guaranteedStocks??0);
-    if(!Number.isInteger(guaranteedStocks)||guaranteedStocks<0)return false;
+    const guaranteedStocks=options?.guaranteedStocks??0;
+    if(typeof guaranteedStocks!=='number'||!Number.isFinite(guaranteedStocks)||!Number.isInteger(guaranteedStocks)||guaranteedStocks<0)return false;
     return originalStart.call(this,{...options,guaranteedStocks});
   };
 
