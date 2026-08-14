@@ -41,6 +41,13 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
     if(typeof count!=='number'||!Number.isInteger(count)||count<=0)return 0;
     const addedTotal=this.stockAddedTotal;
     if(typeof addedTotal!=='number'||!Number.isFinite(addedTotal)||!Number.isInteger(addedTotal)||addedTotal<0)return 0;
+    const source=args[0];
+    const sourceCounts=this.stockSourceCounts;
+    if(!sourceCounts||typeof sourceCounts!=='object'||Array.isArray(sourceCounts))return 0;
+    if(Object.prototype.hasOwnProperty.call(sourceCounts,source)){
+      const sourceCount=sourceCounts[source];
+      if(typeof sourceCount!=='number'||!Number.isFinite(sourceCount)||!Number.isInteger(sourceCount)||sourceCount<0)return 0;
+    }
     return originalRecordStockAdd.call(this,count,...args);
   };
 
