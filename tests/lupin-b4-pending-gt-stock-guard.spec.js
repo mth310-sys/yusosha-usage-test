@@ -11,6 +11,7 @@ test('pending GOLDEN_TIME_STOCKS rejects invalid minimum stock counts before GT 
       pendingReward: core.normal.pendingReward ? { ...core.normal.pendingReward } : null,
       transitionSource: core.normal.transitionSource,
       lastEvent: core.normal.lastEvent,
+      guaranteedStocks: core.goldenTime.guaranteedStocks,
       goldenTime: core.goldenTime.snapshot()
     });
 
@@ -62,5 +63,5 @@ test('pending GOLDEN_TIME_STOCKS rejects invalid minimum stock counts before GT 
   expect(result.valid.after.normalMode).toBe('NORMAL');
   expect(result.valid.after.pendingReward).toBeNull();
   expect(result.valid.after.goldenTime.state).not.toBe('IDLE');
-  expect(result.valid.after.goldenTime.stock).toBe(2);
+  expect(result.valid.after.guaranteedStocks).toBe(2);
 });
