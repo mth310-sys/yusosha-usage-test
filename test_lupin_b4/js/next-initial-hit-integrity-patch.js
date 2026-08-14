@@ -60,6 +60,12 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
     return originalStartTreasureBattle.apply(this,args);
   };
 
+  const originalCompleteBattleGame=GoldenTimeSystem.prototype.completeBattleGame;
+  GoldenTimeSystem.prototype.completeBattleGame=function completeBattleGameFailClosedForInvalidState(...args){
+    if(this.state!=='BATTLE_ACTIVE')return null;
+    return originalCompleteBattleGame.apply(this,args);
+  };
+
   GoldenTimeSystem.prototype.__step6zStartInputGuardPatched=true;
 }
 
