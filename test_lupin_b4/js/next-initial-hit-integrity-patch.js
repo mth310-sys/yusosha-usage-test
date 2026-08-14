@@ -8,6 +8,7 @@ import { getSettingProfile } from './setting-profile.js';
 import { CZ_LENGTH_TABLE, CZ_SCENARIO_TABLE } from './cz-profile.js?v=step6s';
 import { TREASURE_BATTLE_PROFILE } from './treasure-battle-profile.js?v=step6l';
 import { LUPIN_RUSH_PROFILE } from './lupin-rush-profile.js?v=step6l';
+import { GOLDEN_TIME_PROFILE } from './golden-time-profile.js?v=step6l';
 
 function renderIntegrityUi(audit){
   if(typeof document==='undefined'||!audit)return;
@@ -108,7 +109,7 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
   };
 
   const originalCompleteGame=GoldenTimeSystem.prototype.completeGame;
-  GoldenTimeSystem.prototype.completeGame=function completeGameFailClosedForInvalidLupinRushState(...args){
+  GoldenTimeSystem.prototype.completeGame=function completeGameFailClosedForInvalidProgressionState(...args){
     if(this.state==='LUPIN_RUSH_ACTIVE'){
       const gameCount=this.rushGameCount;
       const remaining=this.rushRemainingGames;
@@ -116,6 +117,15 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
       if(typeof remaining!=='number'||!Number.isFinite(remaining)||!Number.isInteger(remaining)||remaining<=0)return null;
       if(gameCount>=LUPIN_RUSH_PROFILE.games)return null;
       if(gameCount+remaining!==LUPIN_RUSH_PROFILE.games)return null;
+    }
+    if(this.state==='ACTIVE_SET'){
+      const gameCount=this.gameInSet;
+      const remaining=this.remainingGames;
+      const total=GOLDEN_TIME_PROFILE.activeSetGames;
+      if(typeof gameCount!=='number'||!Number.isFinite(gameCount)||!Number.isInteger(gameCount)||gameCount<0)return null;
+      if(typeof remaining!=='number'||!Number.isFinite(remaining)||!Number.isInteger(remaining)||remaining<=0)return null;
+      if(gameCount>=total)return null;
+      if(gameCount+remaining!==total)return null;
     }
     return originalCompleteGame.apply(this,args);
   };
