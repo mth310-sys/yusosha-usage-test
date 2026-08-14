@@ -7,6 +7,7 @@ import { drawNextInitialHit } from './next-initial-hit-profile.js?v=step6w';
 import { getSettingProfile } from './setting-profile.js';
 import { CZ_LENGTH_TABLE, CZ_SCENARIO_TABLE } from './cz-profile.js?v=step6s';
 import { TREASURE_BATTLE_PROFILE } from './treasure-battle-profile.js?v=step6l';
+import { LUPIN_RUSH_PROFILE } from './lupin-rush-profile.js?v=step6l';
 
 function renderIntegrityUi(audit){
   if(typeof document==='undefined'||!audit)return;
@@ -104,6 +105,19 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
     if(typeof gameCount!=='number'||!Number.isFinite(gameCount)||!Number.isInteger(gameCount)||gameCount<0)return null;
     if(typeof stocks!=='number'||!Number.isFinite(stocks)||!Number.isInteger(stocks)||stocks<0)return null;
     return originalCompleteGoldRushGame.apply(this,args);
+  };
+
+  const originalCompleteGame=GoldenTimeSystem.prototype.completeGame;
+  GoldenTimeSystem.prototype.completeGame=function completeGameFailClosedForInvalidLupinRushState(...args){
+    if(this.state==='LUPIN_RUSH_ACTIVE'){
+      const gameCount=this.rushGameCount;
+      const remaining=this.rushRemainingGames;
+      if(typeof gameCount!=='number'||!Number.isFinite(gameCount)||!Number.isInteger(gameCount)||gameCount<0)return null;
+      if(typeof remaining!=='number'||!Number.isFinite(remaining)||!Number.isInteger(remaining)||remaining<=0)return null;
+      if(gameCount>=LUPIN_RUSH_PROFILE.games)return null;
+      if(gameCount+remaining!==LUPIN_RUSH_PROFILE.games)return null;
+    }
+    return originalCompleteGame.apply(this,args);
   };
 
   GoldenTimeSystem.prototype.__step6zStartInputGuardPatched=true;
