@@ -32,6 +32,7 @@ Purpose: keep unresolved real-machine values separate from verified implementati
 | Treasure-return notification route split (Revenge vs normal-stage notice) | UNVERIFIED | A confirmed return HIT pauses for explicit notification-route resolution. |
 | Treasure-return normal-stage notification waiting games | UNVERIFIED | No fabricated wait-game distribution. |
 | Treasure return rows not explicitly present in the adopted table | UNRESOLVED / CONFLICT | No interpolation. See `js/art-return-profile.js`. |
+| Game-count ceiling reached during non-plain-NORMAL special context | UNRESOLVED / SOURCE-DEPENDENT | Setting-specific 499G/999G selection and plain NORMAL ceiling → LUPIN BONUS are verified. Special-context arrival is recorded as `SPECIAL_CONTEXT_PENDING`; do not generalize Raiun/premonition-specific benefits to every context. See `js/ceiling-runtime-patch.js`. |
 | Normal Raiun detailed initial-point distribution | UNVERIFIED | Aggregate published values are retained; detailed distribution is not invented. |
 | Normal Raiun point-add distribution | UNVERIFIED | Aggregate published values are retained; detailed distribution is not invented. |
 | Raiun HIGH level distribution | UNVERIFIED | LOW/HIGH published rates remain isolated; no invented level-selection lottery. |
