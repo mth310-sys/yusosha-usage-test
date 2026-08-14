@@ -53,7 +53,8 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
   };
 
   const originalStartTreasureBattle=GoldenTimeSystem.prototype.startTreasureBattle;
-  GoldenTimeSystem.prototype.startTreasureBattle=function startTreasureBattleFailClosedForInvalidStock(...args){
+  GoldenTimeSystem.prototype.startTreasureBattle=function startTreasureBattleFailClosedForInvalidEntry(...args){
+    if(this.state!=='ACTIVE_SET')return null;
     const current=this.guaranteedStocks;
     if(typeof current!=='number'||!Number.isInteger(current)||current<0)return null;
     return originalStartTreasureBattle.apply(this,args);
