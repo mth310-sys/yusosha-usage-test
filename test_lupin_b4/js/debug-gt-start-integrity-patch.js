@@ -1,4 +1,5 @@
 // Step 6Z: keep DEBUG Golden Time entry/setters from coercing invalid numeric inputs.
+import './mb-runtime-patch.js?v=step6ad-mb1';
 import { GameCore } from './game-core.js?v=step6w';
 import { GoldenTimeSystem } from './golden-time.js?v=step6w';
 
