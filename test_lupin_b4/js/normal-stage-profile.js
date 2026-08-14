@@ -4,7 +4,7 @@ export const NORMAL_STAGE_PROFILE = Object.freeze({
   settings1to3:Object.freeze({LUPIN:33.3,JIGEN:33.3,GOEMON:33.3}),
   settings4to6:Object.freeze({LUPIN:41.7,JIGEN:25.0,GOEMON:33.3}),
   trigger:'PREMONITION_STAGE_END',
-  source:'CROSS_SOURCE_PUBLISHED_NORMAL_STAGE_SELECTION'
+  source:'SOURCE_ONLY_HAZUSE_PUBLISHED_NORMAL_STAGE_SELECTION'
 });
 
 function tableForSetting(setting){
