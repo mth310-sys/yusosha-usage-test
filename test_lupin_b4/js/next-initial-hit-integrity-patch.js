@@ -79,6 +79,12 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
     return originalCompleteBattleGame.apply(this,args);
   };
 
+  const originalCompleteExtraGame=GoldenTimeSystem.prototype.completeExtraGame;
+  GoldenTimeSystem.prototype.completeExtraGame=function completeExtraGameFailClosedForInvalidState(...args){
+    if(this.state!=='EXTRA_BONUS_ACTIVE')return null;
+    return originalCompleteExtraGame.apply(this,args);
+  };
+
   GoldenTimeSystem.prototype.__step6zStartInputGuardPatched=true;
 }
 
