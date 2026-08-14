@@ -82,6 +82,8 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
   const originalCompleteExtraGame=GoldenTimeSystem.prototype.completeExtraGame;
   GoldenTimeSystem.prototype.completeExtraGame=function completeExtraGameFailClosedForInvalidState(...args){
     if(this.state!=='EXTRA_BONUS_ACTIVE')return null;
+    const counters=[this.extraGameCount,this.extraRemainingGames,this.extraStockLotteryEvents,this.extraStockHits];
+    if(counters.some((value)=>typeof value!=='number'||!Number.isFinite(value)||!Number.isInteger(value)||value<0))return null;
     return originalCompleteExtraGame.apply(this,args);
   };
 
