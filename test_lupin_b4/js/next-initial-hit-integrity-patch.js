@@ -66,6 +66,7 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
     if(this.state!=='BATTLE_ACTIVE')return null;
     const gameCount=this.battleGameCount;
     if(typeof gameCount!=='number'||!Number.isInteger(gameCount)||gameCount<0||gameCount>=TREASURE_BATTLE_PROFILE.totalGames)return null;
+    if(this.battleHiddenOutcome!=='WIN'&&this.battleHiddenOutcome!=='LOSE')return null;
     return originalCompleteBattleGame.apply(this,args);
   };
 
