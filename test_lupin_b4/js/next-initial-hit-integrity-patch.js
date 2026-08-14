@@ -82,8 +82,17 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
   const originalCompleteExtraGame=GoldenTimeSystem.prototype.completeExtraGame;
   GoldenTimeSystem.prototype.completeExtraGame=function completeExtraGameFailClosedForInvalidState(...args){
     if(this.state!=='EXTRA_BONUS_ACTIVE')return null;
-    const counters=[this.extraGameCount,this.extraRemainingGames,this.extraStockLotteryEvents,this.extraStockHits];
+    const gameCount=this.extraGameCount;
+    const remaining=this.extraRemainingGames;
+    const target=this.extraTargetGames;
+    const lotteryEvents=this.extraStockLotteryEvents;
+    const stockHits=this.extraStockHits;
+    const counters=[gameCount,remaining,target,lotteryEvents,stockHits];
     if(counters.some((value)=>typeof value!=='number'||!Number.isFinite(value)||!Number.isInteger(value)||value<0))return null;
+    if(target<=0||remaining<=0||gameCount>=target)return null;
+    if(gameCount+remaining!==target)return null;
+    if(lotteryEvents!==gameCount)return null;
+    if(stockHits>lotteryEvents)return null;
     return originalCompleteExtraGame.apply(this,args);
   };
 
