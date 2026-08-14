@@ -35,7 +35,8 @@ Purpose: keep unresolved real-machine values separate from verified implementati
 | Game-count ceiling reached during non-plain-NORMAL special context | PARTIAL: RAIUN VERIFIED / OTHERS UNRESOLVED | Plain NORMAL ceiling → LUPIN BONUS is verified. RAIUN_MODE ceiling → SHIN_RAIUN + LEGEND_GATE is now cross-source confirmed and automatic. Other special contexts such as RIZE/CZ/REVENGE remain `SPECIAL_CONTEXT_PENDING`; do not generalize the Raiun benefit. See `js/ceiling-runtime-patch.js`. |
 | Normal Raiun detailed initial-point distribution | UNVERIFIED | Aggregate published values are retained; detailed distribution is not invented. |
 | Normal Raiun point-add distribution | UNVERIFIED | Aggregate published values are retained; detailed distribution is not invented. |
-| Raiun HIGH level distribution | UNVERIFIED | LOW/HIGH published rates remain isolated; no invented level-selection lottery. |
+| Raiun RED counter post-promotion behavior | CROSS_SOURCE_CONFIRMED | RED uses HIGH at 100pt (1/13.3, ~40%), survives LUPIN BONUS, and clears on GOLDEN TIME entry. Natural BLUE→RED promotion probability remains unimplemented. See `js/raiun-red-counter-patch.js`. |
+| Raiun BLUE counter LOW/HIGH selection / natural RED promotion rate | UNVERIFIED | BLUE-side rank selection and the chance of becoming RED after a missed high are not invented. |
 | Shin Raiun ordinary per-game ART rate | UNVERIFIED | Verified LEGEND GATE 1/88.9 is separate; ordinary ART probability is not inferred. |
 | LEGEND GATE duration | UNVERIFIED | Entry denominators and medal benefits can remain modelled; duration is not invented. |
 | LEGEND GATE medal-acquisition model | UNVERIFIED | No automatic medal lottery until acquisition rules are verified. |
