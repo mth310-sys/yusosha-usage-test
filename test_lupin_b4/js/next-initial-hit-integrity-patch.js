@@ -9,6 +9,7 @@ import { CZ_LENGTH_TABLE, CZ_SCENARIO_TABLE } from './cz-profile.js?v=step6s';
 import { TREASURE_BATTLE_PROFILE } from './treasure-battle-profile.js?v=step6l';
 import { LUPIN_RUSH_PROFILE } from './lupin-rush-profile.js?v=step6l';
 import { GOLDEN_TIME_PROFILE } from './golden-time-profile.js?v=step6l';
+import { ART_STAGE_PROFILE } from './art-stage-profile.js?v=step6l';
 
 function renderIntegrityUi(audit){
   if(typeof document==='undefined'||!audit)return;
@@ -126,6 +127,18 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
       if(typeof remaining!=='number'||!Number.isFinite(remaining)||!Number.isInteger(remaining)||remaining<=0)return null;
       if(gameCount>=total)return null;
       if(gameCount+remaining!==total)return null;
+      if(this.stage==='IKUKAN'){
+        const ikukan=ART_STAGE_PROFILE.stages.IKUKAN;
+        const ikukanGameCount=this.ikukanGameCount;
+        const ikukanRemaining=this.ikukanRemainingGames;
+        const minimumAccrued=this.ikukanGuaranteedMinimumAccrued;
+        if(typeof ikukanGameCount!=='number'||!Number.isFinite(ikukanGameCount)||!Number.isInteger(ikukanGameCount)||ikukanGameCount<0)return null;
+        if(typeof ikukanRemaining!=='number'||!Number.isFinite(ikukanRemaining)||!Number.isInteger(ikukanRemaining)||ikukanRemaining<=0)return null;
+        if(typeof minimumAccrued!=='number'||!Number.isFinite(minimumAccrued)||!Number.isInteger(minimumAccrued)||minimumAccrued<0)return null;
+        if(ikukanGameCount>=ikukan.durationGames)return null;
+        if(ikukanGameCount+ikukanRemaining!==ikukan.durationGames)return null;
+        if(minimumAccrued!==ikukanGameCount*ikukan.minimumTreasurePerGame)return null;
+      }
     }
     return originalCompleteGame.apply(this,args);
   };
