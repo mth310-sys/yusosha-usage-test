@@ -22,6 +22,16 @@ if(!NormalSystem.prototype.__step6zCzSettingGuardPatched){
     if(!CZ_LENGTH_TABLE[setting]||!CZ_SCENARIO_TABLE[setting])return false;
     return originalStartCz.call(this,type,...args);
   };
+
+  const originalApplyConsumedHold=NormalSystem.prototype.applyConsumedHold;
+  NormalSystem.prototype.applyConsumedHold=function applyConsumedHoldFailClosedForCz(hold,...args){
+    if(hold?.reservedEvent==='DOROBO_ZONE'||hold?.reservedEvent==='FUJIKO_ZONE'){
+      const setting=Number(this.setting);
+      if(!CZ_LENGTH_TABLE[setting]||!CZ_SCENARIO_TABLE[setting])return false;
+    }
+    return originalApplyConsumedHold.call(this,hold,...args);
+  };
+
   NormalSystem.prototype.__step6zCzSettingGuardPatched=true;
 }
 
