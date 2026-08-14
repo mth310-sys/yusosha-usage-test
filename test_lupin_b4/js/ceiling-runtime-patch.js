@@ -1,5 +1,6 @@
 // LUPIN B4 ceiling runtime.
-// Keep special-context ceiling benefits unresolved rather than inventing a route.
+// Plain NORMAL ceiling and verified Raiun-mode ceiling benefits are automatic.
+// Other special-context ceiling benefits remain unresolved rather than invented.
 import './next-initial-hit-integrity-patch.js?v=step6z-ceiling-dependency1';
 import { GameCore } from './game-core.js?v=step6w';
 import { drawCeilingGame, CEILING_PROFILE } from './ceiling-profile.js?v=step6ab-ceiling1';
@@ -44,6 +45,32 @@ function plainNormalCeilingHit(core,result){
   }
 }
 
+function raiunCeilingHit(core,result){
+  const beforeVariant=core.normal?.raiun?.variant??null;
+  if(core.normal?.raiun){
+    core.normal.raiun.variant='SHIN_RAIUN';
+    core.normal.raiun.result='CEILING_SHIN_RAIUN';
+    core.normal.raiun.resultSource='VERIFIED_RAIUN_MODE_CEILING';
+    core.normal.raiun.successModel='CEILING_FORCED_SHIN_RAIUN_TO_LEGEND_GATE';
+  }
+  core.normal.startLegendGate('VERIFIED_RAIUN_MODE_CEILING_SHIN_RAIUN');
+  core.ceiling.reached=true;
+  core.ceiling.reachedMode='RAIUN_MODE';
+  core.ceiling.resolution='SHIN_RAIUN_LEGEND_GATE';
+  if(result){
+    result.mode='LEGEND_GATE';
+    result.event='CEILING_RAIUN_TO_SHIN_RAIUN_LEGEND_GATE_AUTO';
+    result.normal=core.normal.snapshot();
+    result.pendingReward=core.normal.pendingReward;
+    result.ceilingRaiunBenefit={
+      priorVariant:beforeVariant,
+      promotedVariant:'SHIN_RAIUN',
+      legendGateGuaranteed:true,
+      source:'VERIFIED_RAIUN_MODE_CEILING'
+    };
+  }
+}
+
 if(!GameCore.prototype.__step6abCeilingRuntimePatched){
   const originalDrawNextInitialHitReservation=GameCore.prototype.drawNextInitialHitReservation;
   GameCore.prototype.drawNextInitialHitReservation=function drawNextInitialHitReservationWithCeiling(source='BONUS_OR_ART_END',...args){
@@ -71,6 +98,8 @@ if(!GameCore.prototype.__step6abCeilingRuntimePatched){
           ceiling.resolution='SUPERSEDED_BY_SAME_GAME_INITIAL_HIT';
         }else if(this.normal?.mode==='NORMAL'&&this.revenge?.state==='IDLE'){
           plainNormalCeilingHit(this,result);
+        }else if(this.normal?.mode==='RAIUN_MODE'&&this.revenge?.state==='IDLE'){
+          raiunCeilingHit(this,result);
         }else{
           ceiling.reached=true;
           ceiling.reachedMode=this.normal?.mode??(this.revenge?.state==='ACTIVE'?'REVENGE_CHANCE':'UNKNOWN');
