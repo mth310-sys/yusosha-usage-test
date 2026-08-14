@@ -60,7 +60,14 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
     if(typeof current!=='number'||!Number.isInteger(current)||current<0)return null;
     const treasure=this.treasurePoints;
     if(typeof treasure!=='number'||!Number.isFinite(treasure)||!Number.isInteger(treasure)||treasure<0)return null;
-    return originalStartTreasureBattle.apply(this,args);
+    const result=originalStartTreasureBattle.apply(this,args);
+    if(this.state==='BATTLE_PENDING_UNVERIFIED_TREASURE_POINT'){
+      this.battleGameCount=0;
+      this.battlePhase=null;
+      this.battleOpponent=null;
+      this.battleHiddenOutcome=null;
+    }
+    return result;
   };
 
   const originalCompleteBattleGame=GoldenTimeSystem.prototype.completeBattleGame;
