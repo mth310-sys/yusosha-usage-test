@@ -1,5 +1,7 @@
-// Step 4B: verified CZ duration + scenario tables for DOROBO_ZONE / FUJIKO_ZONE.
-// Source: published analysis. Values are percentages.
+// Step 4B/6AA: verified CZ duration + stage scenario + aggregate success tables
+// for DOROBO_ZONE / FUJIKO_ZONE. Values are published analysis percentages.
+// Aggregate success is intentionally resolved only at the CZ end boundary; the
+// real per-game hit mechanism and LB/GT destination split remain unresolved.
 
 export const CZ_LENGTH_TABLE = Object.freeze({
   1:{10:62.50,20:37.50},
@@ -19,6 +21,11 @@ export const CZ_SCENARIO_TABLE = Object.freeze({
   6:{A:51.56,B:39.06,C:6.25,D:3.13}
 });
 
+export const CZ_AGGREGATE_SUCCESS_TABLE = Object.freeze({
+  DOROBO_ZONE:Object.freeze({1:39.9,2:39.6,3:40.2,4:42.6,5:42.5,6:43.2}),
+  FUJIKO_ZONE:Object.freeze({1:58.8,2:58.9,3:59.2,4:62.7,5:62.1,6:63.2})
+});
+
 export function drawCzLength(setting, rng) {
   const row = CZ_LENGTH_TABLE[Number(setting)];
   if (!row) return null;
@@ -36,4 +43,17 @@ export function drawCzScenario(setting, rng) {
     if (value < 0) return scenario;
   }
   return 'D';
+}
+
+export function getCzAggregateSuccessPct(type,setting){
+  const row=CZ_AGGREGATE_SUCCESS_TABLE[type];
+  if(!row)return null;
+  const value=row[Number(setting)];
+  return typeof value==='number'&&Number.isFinite(value)?value:null;
+}
+
+export function rollCzAggregateSuccess(type,setting,rng){
+  const pct=getCzAggregateSuccessPct(type,setting);
+  if(pct==null)return null;
+  return rng.next() < pct/100;
 }
