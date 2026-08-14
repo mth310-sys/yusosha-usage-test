@@ -1,4 +1,5 @@
 // Step 6Z: integrity UI bridge; keeps audit display isolated from the large/minified ui.js.
+import './debug-gt-start-integrity-patch.js?v=step6z-debug-gt-start1';
 import { renderMachineScenarioTestGuide } from './machine-scenario-test-guide.js?v=step6z-completion-gate1';
 // ART-return is loaded synchronously by art-treasure-award-debug before this module; load the
 // boundary observer after that module graph so it audits the final return events.
