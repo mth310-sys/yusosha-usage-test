@@ -6,6 +6,7 @@ import { GoldenTimeSystem } from './golden-time.js?v=step6w';
 import { drawNextInitialHit } from './next-initial-hit-profile.js?v=step6w';
 import { getSettingProfile } from './setting-profile.js';
 import { CZ_LENGTH_TABLE, CZ_SCENARIO_TABLE } from './cz-profile.js?v=step6s';
+import { TREASURE_BATTLE_PROFILE } from './treasure-battle-profile.js?v=step6l';
 
 function renderIntegrityUi(audit){
   if(typeof document==='undefined'||!audit)return;
@@ -63,6 +64,8 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
   const originalCompleteBattleGame=GoldenTimeSystem.prototype.completeBattleGame;
   GoldenTimeSystem.prototype.completeBattleGame=function completeBattleGameFailClosedForInvalidState(...args){
     if(this.state!=='BATTLE_ACTIVE')return null;
+    const gameCount=this.battleGameCount;
+    if(typeof gameCount!=='number'||!Number.isInteger(gameCount)||gameCount<0||gameCount>=TREASURE_BATTLE_PROFILE.totalGames)return null;
     return originalCompleteBattleGame.apply(this,args);
   };
 
