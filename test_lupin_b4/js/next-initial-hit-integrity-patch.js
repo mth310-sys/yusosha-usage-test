@@ -88,6 +88,10 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
   const originalCompleteGoldRushGame=GoldenTimeSystem.prototype.completeGoldRushGame;
   GoldenTimeSystem.prototype.completeGoldRushGame=function completeGoldRushGameFailClosedForInvalidState(...args){
     if(this.state!=='GOLD_RUSH_ACTIVE')return null;
+    const gameCount=this.goldRushGameCount;
+    const stocks=this.goldRushStocks;
+    if(typeof gameCount!=='number'||!Number.isFinite(gameCount)||!Number.isInteger(gameCount)||gameCount<0)return null;
+    if(typeof stocks!=='number'||!Number.isFinite(stocks)||!Number.isInteger(stocks)||stocks<0)return null;
     return originalCompleteGoldRushGame.apply(this,args);
   };
 
