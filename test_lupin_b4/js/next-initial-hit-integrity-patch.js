@@ -39,20 +39,26 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
   const originalRecordStockAdd=GoldenTimeSystem.prototype.recordStockAdd;
   GoldenTimeSystem.prototype.recordStockAdd=function recordStockAddFailClosed(count,...args){
     if(typeof count!=='number'||!Number.isInteger(count)||count<=0)return 0;
+    const addedTotal=this.stockAddedTotal;
+    if(typeof addedTotal!=='number'||!Number.isFinite(addedTotal)||!Number.isInteger(addedTotal)||addedTotal<0)return 0;
     return originalRecordStockAdd.call(this,count,...args);
   };
 
   const originalConsumeStock=GoldenTimeSystem.prototype.consumeStock;
   GoldenTimeSystem.prototype.consumeStock=function consumeStockFailClosed(...args){
     const current=this.guaranteedStocks;
+    const consumedTotal=this.stockConsumedTotal;
     if(typeof current!=='number'||!Number.isInteger(current)||current<0)return false;
+    if(typeof consumedTotal!=='number'||!Number.isFinite(consumedTotal)||!Number.isInteger(consumedTotal)||consumedTotal<0)return false;
     return originalConsumeStock.apply(this,args);
   };
 
   const originalExpireStocksAtBattle=GoldenTimeSystem.prototype.expireStocksAtBattle;
   GoldenTimeSystem.prototype.expireStocksAtBattle=function expireStocksAtBattleFailClosed(...args){
     const current=this.guaranteedStocks;
+    const expiredTotal=this.stockExpiredOnBattle;
     if(typeof current!=='number'||!Number.isInteger(current)||current<0)return 0;
+    if(typeof expiredTotal!=='number'||!Number.isFinite(expiredTotal)||!Number.isInteger(expiredTotal)||expiredTotal<0)return 0;
     return originalExpireStocksAtBattle.apply(this,args);
   };
 
