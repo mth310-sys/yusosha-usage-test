@@ -25,6 +25,13 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
     if(!Number.isInteger(guaranteedStocks)||guaranteedStocks<0)return false;
     return originalStart.call(this,{...options,guaranteedStocks});
   };
+
+  const originalRecordStockAdd=GoldenTimeSystem.prototype.recordStockAdd;
+  GoldenTimeSystem.prototype.recordStockAdd=function recordStockAddFailClosed(count,...args){
+    if(typeof count!=='number'||!Number.isInteger(count)||count<=0)return 0;
+    return originalRecordStockAdd.call(this,count,...args);
+  };
+
   GoldenTimeSystem.prototype.__step6zStartInputGuardPatched=true;
 }
 
