@@ -1,5 +1,6 @@
 // Verified B4 MB behavior: after an MB stop, the next two games are 10-coin roles.
 // This patch only models the two-game MB continuation; exact non-MB reel control remains provisional.
+import './raiun-setting-reset-patch.js?v=step6ae-raiun-reset1';
 import { GameCore } from './game-core.js?v=step6w';
 
 const MB_CONTINUATION_GAMES=2;
