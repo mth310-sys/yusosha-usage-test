@@ -20,6 +20,44 @@ function renderIntegrityUi(audit){
   el.textContent=`INTEGRITY ${audit.status}\nLIVE RESV  ${audit.hasReservation?'YES':'NO'}\nLIVE DRAW  ${audit.currentDrawNo??'---'}\nDRAWS      ${audit.draws}\nCONSUMED   ${audit.consumed}\nDRAW VALID ${audit.currentDrawValid?'YES':'NO'}\nSEQ VALID  ${audit.consumptionSequenceValid?'YES':'NO'}`;
 }
 
+function isNonNegativeInteger(value){return typeof value==='number'&&Number.isFinite(value)&&Number.isInteger(value)&&value>=0;}
+function isPositiveInteger(value){return isNonNegativeInteger(value)&&value>0;}
+function goldenTimeCompletionPreflight(gt){
+  if(!gt||gt.state==='IDLE')return true;
+  if(gt.state==='LUPIN_RUSH_ACTIVE'){
+    return isNonNegativeInteger(gt.rushGameCount)
+      &&isPositiveInteger(gt.rushRemainingGames)
+      &&gt.rushGameCount<LUPIN_RUSH_PROFILE.games
+      &&gt.rushGameCount+gt.rushRemainingGames===LUPIN_RUSH_PROFILE.games;
+  }
+  if(gt.state==='ACTIVE_SET'){
+    const total=GOLDEN_TIME_PROFILE.activeSetGames;
+    if(!isNonNegativeInteger(gt.gameInSet)||!isPositiveInteger(gt.remainingGames)||gt.gameInSet>=total||gt.gameInSet+gt.remainingGames!==total)return false;
+    if(gt.stage==='IKUKAN'){
+      const ikukan=ART_STAGE_PROFILE.stages.IKUKAN;
+      if(!isNonNegativeInteger(gt.ikukanGameCount)||!isPositiveInteger(gt.ikukanRemainingGames)||!isNonNegativeInteger(gt.ikukanGuaranteedMinimumAccrued))return false;
+      if(gt.ikukanGameCount>=ikukan.durationGames||gt.ikukanGameCount+gt.ikukanRemainingGames!==ikukan.durationGames)return false;
+      if(gt.ikukanGuaranteedMinimumAccrued!==gt.ikukanGameCount*ikukan.minimumTreasurePerGame)return false;
+    }
+    return true;
+  }
+  if(gt.state==='EXTRA_BONUS_ACTIVE'){
+    const values=[gt.extraGameCount,gt.extraRemainingGames,gt.extraTargetGames,gt.extraStockLotteryEvents,gt.extraStockHits];
+    if(values.some((value)=>!isNonNegativeInteger(value)))return false;
+    if(gt.extraTargetGames<=0||gt.extraRemainingGames<=0||gt.extraGameCount>=gt.extraTargetGames)return false;
+    if(gt.extraGameCount+gt.extraRemainingGames!==gt.extraTargetGames)return false;
+    if(gt.extraStockLotteryEvents!==gt.extraGameCount||gt.extraStockHits>gt.extraStockLotteryEvents)return false;
+    return true;
+  }
+  if(gt.state==='GOLD_RUSH_ACTIVE')return isNonNegativeInteger(gt.goldRushGameCount)&&isNonNegativeInteger(gt.goldRushStocks);
+  if(gt.state==='BATTLE_ACTIVE'){
+    return isNonNegativeInteger(gt.battleGameCount)
+      &&gt.battleGameCount<TREASURE_BATTLE_PROFILE.totalGames
+      &&(gt.battleHiddenOutcome==='WIN'||gt.battleHiddenOutcome==='LOSE');
+  }
+  return true;
+}
+
 if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
   const originalSetSetting=GoldenTimeSystem.prototype.setSetting;
   GoldenTimeSystem.prototype.setSetting=function setSettingFailClosed(setting,...args){
@@ -124,35 +162,7 @@ if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
 
   const originalCompleteGame=GoldenTimeSystem.prototype.completeGame;
   GoldenTimeSystem.prototype.completeGame=function completeGameFailClosedForInvalidProgressionState(...args){
-    if(this.state==='LUPIN_RUSH_ACTIVE'){
-      const gameCount=this.rushGameCount;
-      const remaining=this.rushRemainingGames;
-      if(typeof gameCount!=='number'||!Number.isFinite(gameCount)||!Number.isInteger(gameCount)||gameCount<0)return null;
-      if(typeof remaining!=='number'||!Number.isFinite(remaining)||!Number.isInteger(remaining)||remaining<=0)return null;
-      if(gameCount>=LUPIN_RUSH_PROFILE.games)return null;
-      if(gameCount+remaining!==LUPIN_RUSH_PROFILE.games)return null;
-    }
-    if(this.state==='ACTIVE_SET'){
-      const gameCount=this.gameInSet;
-      const remaining=this.remainingGames;
-      const total=GOLDEN_TIME_PROFILE.activeSetGames;
-      if(typeof gameCount!=='number'||!Number.isFinite(gameCount)||!Number.isInteger(gameCount)||gameCount<0)return null;
-      if(typeof remaining!=='number'||!Number.isFinite(remaining)||!Number.isInteger(remaining)||remaining<=0)return null;
-      if(gameCount>=total)return null;
-      if(gameCount+remaining!==total)return null;
-      if(this.stage==='IKUKAN'){
-        const ikukan=ART_STAGE_PROFILE.stages.IKUKAN;
-        const ikukanGameCount=this.ikukanGameCount;
-        const ikukanRemaining=this.ikukanRemainingGames;
-        const minimumAccrued=this.ikukanGuaranteedMinimumAccrued;
-        if(typeof ikukanGameCount!=='number'||!Number.isFinite(ikukanGameCount)||!Number.isInteger(ikukanGameCount)||ikukanGameCount<0)return null;
-        if(typeof ikukanRemaining!=='number'||!Number.isFinite(ikukanRemaining)||!Number.isInteger(ikukanRemaining)||ikukanRemaining<=0)return null;
-        if(typeof minimumAccrued!=='number'||!Number.isFinite(minimumAccrued)||!Number.isInteger(minimumAccrued)||minimumAccrued<0)return null;
-        if(ikukanGameCount>=ikukan.durationGames)return null;
-        if(ikukanGameCount+ikukanRemaining!==ikukan.durationGames)return null;
-        if(minimumAccrued!==ikukanGameCount*ikukan.minimumTreasurePerGame)return null;
-      }
-    }
+    if(!goldenTimeCompletionPreflight(this))return null;
     return originalCompleteGame.apply(this,args);
   };
 
@@ -197,6 +207,20 @@ if(!GameCore.prototype.__step6zNextInitialHitIntegrityPatched){
   GameCore.prototype.bet=function betFailClosedForUnsupportedSetting(...args){
     if(!this.profile)return false;
     return originalBet.apply(this,args);
+  };
+
+  const originalStopReel=GameCore.prototype.stopReel;
+  GameCore.prototype.stopReel=function stopReelFailClosedForInvalidGoldenTime(index,...args){
+    const isFinalStop=this.phase==='SPINNING'
+      &&Array.isArray(this.reels?.stopped)
+      &&this.reels.stopped.filter(Boolean).length===2
+      &&Number.isInteger(Number(index))
+      &&Number(index)>=0
+      &&Number(index)<=2
+      &&this.reels.spinning?.[Number(index)]===true
+      &&this.reels.stopped[Number(index)]===false;
+    if(isFinalStop&&this.goldenTime?.state!=='IDLE'&&!goldenTimeCompletionPreflight(this.goldenTime))return null;
+    return originalStopReel.call(this,index,...args);
   };
 
   GameCore.prototype.consumeNextInitialHit=function consumeNextInitialHitFailClosed(source){
