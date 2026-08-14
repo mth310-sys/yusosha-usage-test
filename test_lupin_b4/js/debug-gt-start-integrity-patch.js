@@ -19,3 +19,12 @@ if(!GoldenTimeSystem.prototype.__step6zDebugTreasureInputGuardPatched){
   };
   GoldenTimeSystem.prototype.__step6zDebugTreasureInputGuardPatched=true;
 }
+
+if(!GoldenTimeSystem.prototype.__step6zDebugGoldChanceAddedGameInputGuardPatched){
+  const originalSetGoldChanceAddedGamesForTest=GoldenTimeSystem.prototype.setGoldChanceAddedGamesForTest;
+  GoldenTimeSystem.prototype.setGoldChanceAddedGamesForTest=function setGoldChanceAddedGamesForTestFailClosed(games,...args){
+    if(typeof games!=='number'||!Number.isFinite(games)||!Number.isInteger(games))return false;
+    return originalSetGoldChanceAddedGamesForTest.call(this,games,...args);
+  };
+  GoldenTimeSystem.prototype.__step6zDebugGoldChanceAddedGameInputGuardPatched=true;
+}
