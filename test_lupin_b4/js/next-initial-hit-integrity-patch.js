@@ -17,6 +17,12 @@ function renderIntegrityUi(audit){
 }
 
 if(!GoldenTimeSystem.prototype.__step6zStartInputGuardPatched){
+  const originalSetSetting=GoldenTimeSystem.prototype.setSetting;
+  GoldenTimeSystem.prototype.setSetting=function setSettingFailClosed(setting,...args){
+    if(!getSettingProfile(setting))return false;
+    return originalSetSetting.call(this,setting,...args);
+  };
+
   const originalStart=GoldenTimeSystem.prototype.start;
   GoldenTimeSystem.prototype.start=function startFailClosedForInvalidInputs(options={}){
     const setting=Number(this.setting);
