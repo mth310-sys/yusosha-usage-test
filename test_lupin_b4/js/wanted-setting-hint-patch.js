@@ -1,5 +1,6 @@
 // Attach verified setting-confirmation metadata only to POST_WC_FAILURE WANTED cycles.
 import { NormalSystem } from './normal.js?v=step6w';
+import { GameCore } from './game-core.js?v=step6w';
 import { WANTED_SETTING_HINT_PROFILE, getWantedSettingHintForTarget } from './wanted-setting-hint-profile.js?v=step6aj-wanted-hint1';
 
 if(!NormalSystem.prototype.__wantedSettingHintPatched){
@@ -21,4 +22,17 @@ if(!NormalSystem.prototype.__wantedSettingHintPatched){
   };
 
   NormalSystem.prototype.__wantedSettingHintPatched=true;
+}
+
+if(!GameCore.prototype.__wantedSettingHintResultPatched){
+  const originalStopReel=GameCore.prototype.stopReel;
+  GameCore.prototype.stopReel=function stopReelWithWantedSettingHint(index){
+    const out=originalStopReel.call(this,index);
+    if(out?.complete&&out.result){
+      const hint=this.normal.snapshot().wantedTargetSettingHint;
+      out.result.wantedTargetSettingHint=hint?{...hint}:null;
+    }
+    return out;
+  };
+  GameCore.prototype.__wantedSettingHintResultPatched=true;
 }
