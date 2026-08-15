@@ -1,7 +1,12 @@
-// Verified normal-state LCD setting hints (526 / 634 / 456).
+// Verified normal-state setting hints: LCD numerals and machine-description windows.
 // Presentation RNG is isolated so visual hints do not perturb gameplay lotteries.
 import { GameCore } from './game-core.js?v=step6w';
-import { LCD_SETTING_HINT_PROFILE, drawLcdSettingHint } from './setting-hint-profile.js?v=step6ag-hint1';
+import {
+  LCD_SETTING_HINT_PROFILE,
+  MACHINE_DESCRIPTION_HINT_PROFILE,
+  drawLcdSettingHint,
+  drawMachineDescriptionSettingHint
+} from './setting-hint-profile.js?v=step6ah-hint2';
 
 function ensurePresentationRng(core){
   if(core.__lcdSettingHintRng)return core.__lcdSettingHintRng;
@@ -28,29 +33,44 @@ function isPlainNormalGame(core){
 
 if(!GameCore.prototype.__lcdSettingHintPatched){
   const originalLever=GameCore.prototype.lever;
-  GameCore.prototype.lever=function leverWithLcdSettingHint(...args){
+  GameCore.prototype.lever=function leverWithSettingHints(...args){
     const eligible=isPlainNormalGame(this);
     const out=originalLever.apply(this,args);
     if(!out)return out;
-    this.__pendingLcdSettingHint=eligible?drawLcdSettingHint(this.setting,ensurePresentationRng(this)):null;
+    if(eligible){
+      const presentationRng=ensurePresentationRng(this);
+      this.__pendingLcdSettingHint=drawLcdSettingHint(this.setting,presentationRng);
+      this.__pendingMachineDescriptionSettingHint=drawMachineDescriptionSettingHint(this.setting,presentationRng);
+    }else{
+      this.__pendingLcdSettingHint=null;
+      this.__pendingMachineDescriptionSettingHint=null;
+    }
     return out;
   };
 
   const originalStopReel=GameCore.prototype.stopReel;
-  GameCore.prototype.stopReel=function stopReelWithLcdSettingHint(index){
+  GameCore.prototype.stopReel=function stopReelWithSettingHints(index){
     const out=originalStopReel.call(this,index);
     if(!out?.complete||!out.result)return out;
-    const hint=this.__pendingLcdSettingHint?{...this.__pendingLcdSettingHint,gameNo:out.result.gameNo}:null;
-    this.__lastLcdSettingHint=hint;
+    const lcdHint=this.__pendingLcdSettingHint?{...this.__pendingLcdSettingHint,gameNo:out.result.gameNo}:null;
+    const machineDescriptionHint=this.__pendingMachineDescriptionSettingHint?{...this.__pendingMachineDescriptionSettingHint,gameNo:out.result.gameNo}:null;
+    this.__lastLcdSettingHint=lcdHint;
+    this.__lastMachineDescriptionSettingHint=machineDescriptionHint;
     this.__pendingLcdSettingHint=null;
-    out.result.settingHint=hint;
+    this.__pendingMachineDescriptionSettingHint=null;
+    out.result.settingHint=lcdHint;
+    out.result.machineDescriptionSettingHint=machineDescriptionHint;
     return out;
   };
 
   const originalSnapshot=GameCore.prototype.snapshot;
-  GameCore.prototype.snapshot=function snapshotWithLcdSettingHint(...args){
+  GameCore.prototype.snapshot=function snapshotWithSettingHints(...args){
     const snap=originalSnapshot.apply(this,args);
-    return {...snap,lcdSettingHint:{last:this.__lastLcdSettingHint?{...this.__lastLcdSettingHint}:null,pending:this.__pendingLcdSettingHint?{...this.__pendingLcdSettingHint}:null,profile:LCD_SETTING_HINT_PROFILE}};
+    return {
+      ...snap,
+      lcdSettingHint:{last:this.__lastLcdSettingHint?{...this.__lastLcdSettingHint}:null,pending:this.__pendingLcdSettingHint?{...this.__pendingLcdSettingHint}:null,profile:LCD_SETTING_HINT_PROFILE},
+      machineDescriptionSettingHint:{last:this.__lastMachineDescriptionSettingHint?{...this.__lastMachineDescriptionSettingHint}:null,pending:this.__pendingMachineDescriptionSettingHint?{...this.__pendingMachineDescriptionSettingHint}:null,profile:MACHINE_DESCRIPTION_HINT_PROFILE}
+    };
   };
 
   GameCore.prototype.__lcdSettingHintPatched=true;
