@@ -1,5 +1,5 @@
 // Verified normal-state setting hints for Lupin B4.
-// Published denominators are cross-source consistent for LCD numerals and machine-description windows.
+// Published denominators are cross-source consistent for LCD numerals, machine-description windows, and the typewriter setting hint.
 const LCD_SETTING_HINT_ORDER=Object.freeze(['526','634','456']);
 const MACHINE_DESCRIPTION_HINT_ORDER=Object.freeze(['GOOD_MACHINE','INCREDIBLE_FIND']);
 
@@ -26,6 +26,14 @@ export const MACHINE_DESCRIPTION_HINT_PROFILE = Object.freeze({
       denominatorBySetting:Object.freeze({1:null,2:null,3:null,4:null,5:null,6:12000.8})
     })
   })
+});
+
+export const TYPEWRITER_SETTING_HINT_PROFILE = Object.freeze({
+  source:'CROSS_SOURCE_PUBLISHED_TYPEWRITER_SETTING_HINT_RATES',
+  id:'GODDESS_PRESENT',
+  text:'女神がくれたプレゼント',
+  meaning:'SETTING_4_OR_5_OR_6_CONFIRMED',
+  denominatorBySetting:Object.freeze({1:null,2:null,3:null,4:382442,5:402459,6:389997})
 });
 
 export function getLcdSettingHintEntries(setting){
@@ -72,4 +80,25 @@ export function drawMachineDescriptionSettingHint(setting,rng){
     x-=p;
   }
   return null;
+}
+
+export function getTypewriterSettingHint(setting){
+  const n=Number(setting);
+  if(!Number.isInteger(n)||n<1||n>6)return null;
+  const denominator=TYPEWRITER_SETTING_HINT_PROFILE.denominatorBySetting[n];
+  if(!Number.isFinite(denominator)||denominator<=0)return null;
+  return {
+    id:TYPEWRITER_SETTING_HINT_PROFILE.id,
+    text:TYPEWRITER_SETTING_HINT_PROFILE.text,
+    meaning:TYPEWRITER_SETTING_HINT_PROFILE.meaning,
+    denominator
+  };
+}
+
+export function drawTypewriterSettingHint(setting,rng){
+  const entry=getTypewriterSettingHint(setting);
+  if(!entry||!rng?.next)return null;
+  return rng.next()<(1/entry.denominator)
+    ? {...entry,source:TYPEWRITER_SETTING_HINT_PROFILE.source}
+    : null;
 }
