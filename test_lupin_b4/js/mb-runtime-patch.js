@@ -1,5 +1,6 @@
 // Verified B4 MB behavior: after an MB stop, the next two games are 10-coin roles.
-// This patch only models the two-game MB continuation; exact non-MB reel control remains provisional.
+// Setting change/reset cancels an outstanding MB continuation; this is the published reset-check behavior.
+// Exact non-MB reel control remains provisional.
 import './raiun-setting-reset-patch.js?v=step6ae-raiun-reset1';
 import './raiun-red-counter-patch.js?v=step6af-red1';
 import './setting-hint-runtime-patch.js?v=step6ag-hint1';
@@ -10,6 +11,15 @@ const MB_CONTINUATION_GAMES=2;
 const MB_FORCED_ROLE=Object.freeze({name:'10COIN',payout:10,replay:false,source:'VERIFIED_MB_2G_CONTINUATION'});
 
 if(!GameCore.prototype.__mbTwoGameContinuationPatched){
+  const originalSetSetting=GameCore.prototype.setSetting;
+  GameCore.prototype.setSetting=function setSettingWithMbReset(...args){
+    const ok=originalSetSetting.apply(this,args);
+    if(!ok)return ok;
+    this.__mbRemainingGames=0;
+    this.__mbForcedThisGame=false;
+    return ok;
+  };
+
   const originalLever=GameCore.prototype.lever;
   GameCore.prototype.lever=function leverWithMbContinuation(...args){
     const forceMbContinuation=this.phase==='WAIT_LEVER'&&Number(this.__mbRemainingGames)>0;
