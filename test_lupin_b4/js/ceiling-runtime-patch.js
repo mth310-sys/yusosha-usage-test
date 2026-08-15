@@ -8,7 +8,8 @@ import { drawCeilingGame, CEILING_PROFILE } from './ceiling-profile.js?v=step6ab
 const RESET_SOURCES=new Set([
   'BOOTSTRAP_USING_VERIFIED_END_TABLE',
   'LUPIN_BONUS_END_VERIFIED_TIMING',
-  'ART_END_VERIFIED_TIMING'
+  'ART_END_VERIFIED_TIMING',
+  'SETTING_CHANGE_DEBUG_REDRAW'
 ]);
 
 function drawCeiling(core,source){
