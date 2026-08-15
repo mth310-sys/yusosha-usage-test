@@ -26,6 +26,7 @@ export class GameLogger {
       r.goldenTime?.state!=='IDLE' ? `GT ${r.goldenTime.state} SET_${r.goldenTime.setNo} G_${r.goldenTime.gameInSet}/${r.goldenTime.profile.setGamesApprox} REM_${r.goldenTime.remainingGames} STOCK_${r.goldenTime.guaranteedStocks}` : '',
       r.event ? `EVENT ${r.event}` : '',
       r.wantedEntrySource ? `WANTED_SRC ${r.wantedEntrySource}` : '',
+      r.wantedTargetSettingHint ? `HINT_WANTED G${r.wantedTargetSettingHint.targetGame} / ${r.wantedTargetSettingHint.meaning}` : '',
       r.settingHint ? `HINT_LCD ${r.settingHint.digits} / ${r.settingHint.meaning}` : '',
       r.machineDescriptionSettingHint ? `HINT_DESC ${r.machineDescriptionSettingHint.text} / ${r.machineDescriptionSettingHint.meaning}` : '',
       r.typewriterSettingHint ? `HINT_TYPEWRITER ${r.typewriterSettingHint.text} / ${r.typewriterSettingHint.meaning}` : '',
