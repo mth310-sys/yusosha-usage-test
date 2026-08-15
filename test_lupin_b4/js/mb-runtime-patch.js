@@ -2,6 +2,7 @@
 // This patch only models the two-game MB continuation; exact non-MB reel control remains provisional.
 import './raiun-setting-reset-patch.js?v=step6ae-raiun-reset1';
 import './raiun-red-counter-patch.js?v=step6af-red1';
+import './setting-hint-runtime-patch.js?v=step6ag-hint1';
 import { GameCore } from './game-core.js?v=step6w';
 
 const MB_CONTINUATION_GAMES=2;
