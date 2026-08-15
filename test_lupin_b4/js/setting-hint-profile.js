@@ -1,5 +1,7 @@
 // Verified normal-state LCD setting-hint numerals for Lupin B4.
 // Published denominators are cross-source consistent for 526 / 634 / 456.
+const LCD_SETTING_HINT_ORDER=Object.freeze(['526','634','456']);
+
 export const LCD_SETTING_HINT_PROFILE = Object.freeze({
   source:'CROSS_SOURCE_PUBLISHED_LCD_SETTING_HINT_RATES',
   hints:Object.freeze({
@@ -12,8 +14,11 @@ export const LCD_SETTING_HINT_PROFILE = Object.freeze({
 export function getLcdSettingHintEntries(setting){
   const n=Number(setting);
   if(!Number.isInteger(n)||n<1||n>6)return [];
-  return Object.entries(LCD_SETTING_HINT_PROFILE.hints)
-    .map(([digits,meta])=>({digits,meaning:meta.meaning,denominator:meta.denominatorBySetting[n]}))
+  return LCD_SETTING_HINT_ORDER
+    .map(digits=>{
+      const meta=LCD_SETTING_HINT_PROFILE.hints[digits];
+      return {digits,meaning:meta.meaning,denominator:meta.denominatorBySetting[n]};
+    })
     .filter(entry=>Number.isFinite(entry.denominator)&&entry.denominator>0);
 }
 
