@@ -5,7 +5,6 @@ import './raiun-setting-reset-patch.js?v=step6ae-raiun-reset1';
 import './raiun-red-counter-patch.js?v=step6af-red1';
 import './setting-hint-runtime-patch.js?v=step6ag-hint1';
 import './wanted-setting-hint-patch.js?v=step6aj-wanted-hint1';
-import './wanted-lcd-chance-runtime-patch.js?v=step6ak-wanted-lcd1';
 import { GameCore } from './game-core.js?v=step6w';
 
 const MB_CONTINUATION_GAMES=2;
