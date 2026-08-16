@@ -15,7 +15,7 @@ const bonusGetEl=document.getElementById('bonusGet');
 const payoutEl=document.getElementById('payout');
 const creditEl=document.getElementById('credit');
 
-/* Side LED V5: LINE | CIRCLE | LINE, covered by a transparent faceted lens. */
+/* Side LED V6: segmented BLOCK | CIRCLE | BLOCK, covered by a clear faceted lens. */
 const ledStudyStyle=document.createElement('style');
 ledStudyStyle.textContent=`
 .shell-svg g[fill="#111"] path{
@@ -52,28 +52,31 @@ ledStudyStyle.textContent=`
   z-index:24;
   pointer-events:none;
   background:
-    /* clear covers - upper left/right */
+    /* clear covers */
     linear-gradient(105deg,rgba(255,255,255,.20),rgba(206,229,238,.05) 32%,rgba(255,255,255,.16) 50%,rgba(194,220,233,.04) 72%,rgba(255,255,255,.18)) 15px 110px/46px 108px no-repeat,
     linear-gradient(75deg,rgba(255,255,255,.18),rgba(194,220,233,.04) 28%,rgba(255,255,255,.16) 50%,rgba(206,229,238,.05) 68%,rgba(255,255,255,.20)) 329px 110px/46px 108px no-repeat,
-    /* clear covers - lower left/right */
     linear-gradient(105deg,rgba(255,255,255,.16),rgba(185,222,241,.05) 32%,rgba(255,255,255,.14) 50%,rgba(165,211,237,.05) 72%,rgba(255,255,255,.16)) 13px 219px/49px 137px no-repeat,
     linear-gradient(75deg,rgba(255,255,255,.16),rgba(165,211,237,.05) 28%,rgba(255,255,255,.14) 50%,rgba(185,222,241,.05) 68%,rgba(255,255,255,.16)) 328px 219px/49px 137px no-repeat,
-    /* upper LINE | circles | LINE */
-    linear-gradient(#ffffff,#dff6ff 42%,#ffffff) 21px 119px/4px 90px no-repeat,
-    linear-gradient(#ffffff,#dff6ff 42%,#ffffff) 49px 119px/4px 90px no-repeat,
-    linear-gradient(#ffffff,#dff6ff 42%,#ffffff) 337px 119px/4px 90px no-repeat,
-    linear-gradient(#ffffff,#dff6ff 42%,#ffffff) 365px 119px/4px 90px no-repeat,
-    /* lower LINE | circles | LINE */
-    linear-gradient(#8fd8ff,#46b9f5 48%,#9de0ff) 19px 232px/4px 111px no-repeat,
-    linear-gradient(#8fd8ff,#46b9f5 48%,#9de0ff) 51px 232px/4px 111px no-repeat,
-    linear-gradient(#8fd8ff,#46b9f5 48%,#9de0ff) 335px 232px/4px 111px no-repeat,
-    linear-gradient(#8fd8ff,#46b9f5 48%,#9de0ff) 367px 232px/4px 111px no-repeat;
-  filter:drop-shadow(0 0 3px rgba(225,246,255,.5));
-  opacity:.92;
+
+    /* upper left: BLOCK | circle | BLOCK */
+    repeating-linear-gradient(to bottom,#ffffff 0 18px,transparent 18px 33px) 20px 127px/7px 92px no-repeat,
+    repeating-linear-gradient(to bottom,#ffffff 0 18px,transparent 18px 33px) 49px 127px/7px 92px no-repeat,
+    /* upper right */
+    repeating-linear-gradient(to bottom,#ffffff 0 18px,transparent 18px 33px) 334px 127px/7px 92px no-repeat,
+    repeating-linear-gradient(to bottom,#ffffff 0 18px,transparent 18px 33px) 363px 127px/7px 92px no-repeat,
+
+    /* lower left */
+    repeating-linear-gradient(to bottom,#7fd1fb 0 20px,transparent 20px 41px) 18px 237px/8px 123px no-repeat,
+    repeating-linear-gradient(to bottom,#7fd1fb 0 20px,transparent 20px 41px) 50px 237px/8px 123px no-repeat,
+    /* lower right */
+    repeating-linear-gradient(to bottom,#7fd1fb 0 20px,transparent 20px 41px) 332px 237px/8px 123px no-repeat,
+    repeating-linear-gradient(to bottom,#7fd1fb 0 20px,transparent 20px 41px) 364px 237px/8px 123px no-repeat;
+  filter:drop-shadow(0 0 3px rgba(225,246,255,.48));
+  opacity:.94;
 }
-.machine:not(.led-off)::after{animation:sideRailPulse 2s ease-in-out infinite alternate}
-@keyframes sideRailPulse{to{filter:drop-shadow(0 0 5px rgba(220,244,255,.78));opacity:1}}
-.machine.led-off::after{opacity:.14;filter:none;animation:none}
+.machine:not(.led-off)::after{animation:sideBlockPulse 2s ease-in-out infinite alternate}
+@keyframes sideBlockPulse{to{filter:drop-shadow(0 0 5px rgba(220,244,255,.78));opacity:1}}
+.machine.led-off::after{opacity:.13;filter:none;animation:none}
 .machine.led-off .shell-svg g[fill="url(#lpLamp)"] circle{opacity:.16!important;filter:none!important;fill:#596269!important}
 `;
 document.head.appendChild(ledStudyStyle);
