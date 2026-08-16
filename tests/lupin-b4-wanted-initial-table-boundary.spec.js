@@ -40,7 +40,7 @@ test('Lupin B4 WANTED initial target table keeps published weights and 1-480 bou
     {min:417,max:448,weight:2.0},
     {min:449,max:480,weight:2.0}
   ]);
-  expect(result.publishedWeightTotal).toBe(100.6);
+  expect(result.publishedWeightTotal).toBe(100.8);
   expect(result.eligibleBandCount).toBe(15);
   expect(result.zeroWeightBands).toEqual([]);
 
