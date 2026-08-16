@@ -4,6 +4,9 @@
 import { NormalSystem } from './normal.js?v=step6w';
 import { rollLcdChance } from './lcd-chance-profile.js?v=step6u';
 
+const WANTED_LCD_SOURCE='VERIFIED_WANTED_LCD_CHANCE_APPEARANCE_EXPECTATION_DESTINATION_TABLE';
+const WANTED_LCD_VISUAL_POLICY='VISUAL_STEPUP_DISTRIBUTION_UNVERIFIED';
+
 function makeWantedHold(normal){
   const queue=normal?.holdQueue;
   if(!queue)return null;
@@ -46,11 +49,21 @@ function replaceNewestRefill(normal){
 }
 
 if(!NormalSystem.prototype.__wantedLcdChanceRuntimePatched){
+  const originalSnapshot=NormalSystem.prototype.snapshot;
+  NormalSystem.prototype.snapshot=function snapshotWithWantedLcdAudit(...args){
+    const out=originalSnapshot.apply(this,args);
+    return {
+      ...out,
+      wantedLcdChanceSource:this.wantedLcdChanceSource??null,
+      wantedLcdVisualPolicy:WANTED_LCD_VISUAL_POLICY
+    };
+  };
+
   const originalStartWantedChance=NormalSystem.prototype.startWantedChance;
   NormalSystem.prototype.startWantedChance=function startWantedChanceWithNaturalLcd(...args){
     const out=originalStartWantedChance.apply(this,args);
     seedWantedQueue(this);
-    this.wantedLcdChanceSource='VERIFIED_WANTED_LCD_CHANCE_APPEARANCE_EXPECTATION_DESTINATION_TABLE';
+    this.wantedLcdChanceSource=WANTED_LCD_SOURCE;
     return out;
   };
 
