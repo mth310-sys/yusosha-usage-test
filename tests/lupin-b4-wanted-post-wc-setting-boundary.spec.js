@@ -4,7 +4,7 @@ test('Lupin B4 WANTED post-WC setting tables keep final-band availability bounda
   await page.goto('/test_lupin_b4/');
 
   const result = await page.evaluate(async () => {
-    const { WANTED_POST_WC_ZONES, drawWantedPostWcTarget } = await import('/test_lupin_b4/js/wanted-profile.js?v=step6bd-wanted-post-wc-setting-boundary3');
+    const { WANTED_POST_WC_ZONES, drawWantedPostWcTarget } = await import('/test_lupin_b4/js/wanted-profile.js?v=step6be-wanted-post-wc-setting-boundary4');
 
     const drawWith = (setting, values) => {
       const seq=[...values];
@@ -21,12 +21,33 @@ test('Lupin B4 WANTED post-WC setting tables keep final-band availability bounda
       })
     );
 
+    const tableStats=Object.fromEntries(
+      [1,2,3,4,5,6].map(setting=>{
+        const rows=WANTED_POST_WC_ZONES[setting];
+        return [setting,{
+          publishedWeightTotal:Number(rows.reduce((sum,row)=>sum+row.weight,0).toFixed(1)),
+          eligibleBandCount:rows.filter(row=>row.weight>0).length,
+          zeroWeightBands:rows.filter(row=>row.weight===0).map(row=>`${row.min}-${row.max}`)
+        }];
+      })
+    );
+
     return {
+      tableStats,
       midLateBandWeights:bandWeights(353,384),
       finalBandWeights:bandWeights(449,480),
       low:[1,2,3,4,5,6].map(setting=>drawWith(setting,[0.0,0.0])),
       high:[1,2,3,4,5,6].map(setting=>drawWith(setting,[0.999999,0.999999]))
     };
+  });
+
+  expect(result.tableStats).toEqual({
+    1:{publishedWeightTotal:100.1,eligibleBandCount:13,zeroWeightBands:['353-384','449-480']},
+    2:{publishedWeightTotal:100.2,eligibleBandCount:14,zeroWeightBands:['449-480']},
+    3:{publishedWeightTotal:100.2,eligibleBandCount:14,zeroWeightBands:['449-480']},
+    4:{publishedWeightTotal:100.2,eligibleBandCount:15,zeroWeightBands:[]},
+    5:{publishedWeightTotal:100.1,eligibleBandCount:15,zeroWeightBands:[]},
+    6:{publishedWeightTotal:100.1,eligibleBandCount:15,zeroWeightBands:[]}
   });
 
   expect(result.midLateBandWeights).toEqual({
