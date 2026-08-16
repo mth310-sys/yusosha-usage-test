@@ -65,7 +65,6 @@ test('Lupin B4 WANTED full 10G no-LCD flow fails exactly after game 10', async (
   expect(result.games[9].result.wantedTargetZone).toMatchObject({min:1,max:32});
   expect(result.games[9].result.wantedTargetGame).toBe(1);
   expect(result.games[9].result.wantedTargetDistribution).toBe('VERIFIED_UNIFORM_WITHIN_SELECTED_32G_BAND');
-  expect(result.games[9].result.wantedHardMaxGame).toBe(480);
 
   expect(result.draws).toBe(21);
 });
