@@ -8,11 +8,7 @@ test('Lupin B4 WANTED final countdown resolves verified LB route before failure'
     const { GameCore } = await import('/test_lupin_b4/js/game-core.js?v=step6w');
 
     const core = new GameCore({ setting:1, seed:12345 });
-    const seq = [
-      0.0,           // game 1 role: REPLAY
-      0.0,0.0,0.0,   // weak-blue LCD appearance + win + LB_OR_GT
-      0.0            // game 2 role: REPLAY
-    ];
+    const seq = [0.0,0.0,0.0,0.0,0.0];
     let draws=0;
     const fixedRng={next:()=>{draws+=1;return seq.shift() ?? 0.999999;}};
     core.rng=fixedRng;
@@ -67,11 +63,9 @@ test('Lupin B4 WANTED final countdown resolves verified LB route before failure'
   expect(result.second.result.wantedChanceResult).toBe('SUCCESS_ROUTE');
   expect(result.second.result.transitionSource).toBe('HOLD_CHANCE_BLUE');
   expect(result.second.result.event).toBe('NEXT_INITIAL_HIT_LUPIN_BONUS_AUTO');
-  expect(result.second.result.nextInitialHit.consumed).toBe(1);
-  expect(result.second.result.nextInitialHit.lastResolution.type).toBe('LUPIN_BONUS');
+  expect(result.second.result.nextInitialHit.integrity.consumed).toBe(1);
+  expect(result.second.result.nextInitialHit.integrity.lastResolution.type).toBe('LUPIN_BONUS');
   expect(result.second.result.pendingReward).toBeNull();
 
-  // game1 role + LCD appearance/win/destination + game2 role.
-  // Success must resolve before any post-WC failure target draw or extra WANTED LCD lottery.
   expect(result.draws).toBe(5);
 });
