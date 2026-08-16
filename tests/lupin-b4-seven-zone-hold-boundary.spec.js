@@ -71,7 +71,7 @@ test('Lupin B4 SEVEN ZONE stays verified manual/debug hold route and is not an L
   expect(result.afterConsume.wantedState).toBe('SUSPENDED');
   expect(result.afterConsume.wantedChanceResult).toBe('SUCCESS_ROUTE');
   expect(result.afterConsume.holdCapacity).toBeNull();
-  expect(result.afterConsume.holdQueue).toBeNull();
+  expect(result.afterConsume.holdQueue).toEqual([]);
   expect(result.afterConsume.transitionSource).toBe('HOLD_SEVEN_ZONE');
   expect(result.afterConsume.lastEvent).toBe('ENTER_SEVEN_ZONE_ART_GUARANTEED');
   expect(result.afterConsume.cz).toMatchObject({
