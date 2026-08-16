@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-test('Lupin B4 WANTED LCD miss holds freeze countdown once and do not route', async ({ page }) => {
+test('Lupin B4 WANTED LCD miss holds freeze countdown once and resume on following normal hold', async ({ page }) => {
   await page.goto('/test_lupin_b4/');
 
   const result = await page.evaluate(async () => {
-    await import('/test_lupin_b4/js/mb-runtime-patch.js?v=step6aq-wanted-lcd-miss-flow1');
+    await import('/test_lupin_b4/js/mb-runtime-patch.js?v=step6ar-wanted-lcd-miss-resume1');
     const { GameCore } = await import('/test_lupin_b4/js/game-core.js?v=step6w');
 
     const run = (appearanceRoll) => {
@@ -13,7 +13,9 @@ test('Lupin B4 WANTED LCD miss holds freeze countdown once and do not route', as
         0.0,                    // game 1 role: REPLAY
         appearanceRoll,0.999999,// verified LCD appearance + expectation miss
         0.0,                    // game 2 role: REPLAY
-        0.999999                // next-game LCD appearance: none
+        0.999999,               // post-game-2 LCD appearance: none
+        0.0,                    // game 3 role: REPLAY
+        0.999999                // post-game-3 LCD appearance: none
       ];
       let draws=0;
       const fixedRng={next:()=>{draws+=1;return seq.shift() ?? 0.999999;}};
@@ -32,7 +34,8 @@ test('Lupin B4 WANTED LCD miss holds freeze countdown once and do not route', as
 
       const first=playOne();
       const second=playOne();
-      return {draws,first,second};
+      const third=playOne();
+      return {draws,first,second,third};
     };
 
     return {
@@ -86,7 +89,22 @@ test('Lupin B4 WANTED LCD miss holds freeze countdown once and do not route', as
     expect(branch.second.result.lcdChance.totalHits).toBe(1);
     expect(branch.second.result.lcdChance.wantedHits).toBe(1);
 
-    // game1 role + LCD appearance/expectation miss + game2 role + next LCD no-appearance.
-    expect(branch.draws).toBe(5);
+    expect(branch.third.lever.role).toBe('REPLAY');
+    expect(branch.third.result.consumedHold).toMatchObject({
+      type:'NORMAL',
+      source:'BASE',
+      reservedEvent:null
+    });
+    expect(branch.third.result.mode).toBe('WANTED_CHANCE');
+    expect(branch.third.result.wantedChanceRemaining).toBe(8);
+    expect(branch.third.result.wantedChanceFrozen).toBe(false);
+    expect(branch.third.result.wantedChanceResult).toBe('UNRESOLVED');
+    expect(branch.third.result.pendingReward).toBeNull();
+    expect(branch.third.result.event).toBe('WANTED_CHANCE_GAME_COUNTDOWN_MINUS_1');
+    expect(branch.third.result.lcdChance.totalHits).toBe(1);
+    expect(branch.third.result.lcdChance.wantedHits).toBe(1);
+
+    // game1 role + LCD appearance/expectation miss + game2 role/no-LCD + game3 role/no-LCD.
+    expect(branch.draws).toBe(7);
   }
 });
