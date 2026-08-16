@@ -4,13 +4,14 @@ test('Lupin B4 WANTED initial target table keeps published weights and 1-480 bou
   await page.goto('/test_lupin_b4/');
 
   const result = await page.evaluate(async () => {
-    const { WANTED_INITIAL_ZONES, drawWantedInitialTarget } = await import('/test_lupin_b4/js/wanted-profile.js?v=step6bf-wanted-initial-table-boundary1');
+    const { WANTED_INITIAL_ZONES, drawWantedInitialTarget } = await import('/test_lupin_b4/js/wanted-profile.js?v=step6bf-wanted-initial-table-boundary2');
 
     const drawWith = (values) => {
       const seq=[...values];
       let draws=0;
       const rng={next:()=>{draws+=1;return seq.shift() ?? 0.999999;}};
-      return {draws,target:drawWantedInitialTarget(rng)};
+      const target=drawWantedInitialTarget(rng);
+      return {draws,target};
     };
 
     return {
