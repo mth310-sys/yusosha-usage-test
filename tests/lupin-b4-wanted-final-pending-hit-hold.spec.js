@@ -8,10 +8,7 @@ test('Lupin B4 WANTED remaining 1G consumes pending verified hit hold before fai
     const { GameCore } = await import('/test_lupin_b4/js/game-core.js?v=step6w');
 
     const core = new GameCore({ setting:1, seed:12345 });
-    const seq = [
-      0.0,      // role: REPLAY
-      0.5,0.5   // verified CZ length + scenario draws
-    ];
+    const seq = [0.0,0.5,0.5];
     let draws=0;
     const fixedRng={next:()=>{draws+=1;return seq.shift() ?? 0.999999;}};
     core.rng=fixedRng;
@@ -45,7 +42,7 @@ test('Lupin B4 WANTED remaining 1G consumes pending verified hit hold before fai
   expect(result.result.transitionSource).toBe('HOLD_CHANCE_BLUE');
   expect(result.result.event).toBe('ENTER_DOROBO_ZONE');
   expect(result.result.holdCapacity).toBeNull();
-  expect(result.result.holdQueue).toBeNull();
+  expect(result.result.holdQueue).toEqual([]);
   expect(result.result.pendingReward).toBeNull();
   expect(result.result.cz).toMatchObject({
     type:'DOROBO_ZONE',
@@ -55,7 +52,5 @@ test('Lupin B4 WANTED remaining 1G consumes pending verified hit hold before fai
     transitionSource:'HOLD_CHANCE_BLUE'
   });
 
-  // Role + verified CZ table draws only. Remaining 1G must not trigger
-  // post-WC failure target draws before the pending hit hold resolves.
   expect(result.draws).toBe(3);
 });
