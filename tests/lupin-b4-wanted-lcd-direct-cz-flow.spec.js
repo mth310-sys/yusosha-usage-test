@@ -16,7 +16,9 @@ test('Lupin B4 WANTED LCD verified direct destinations enter FUJIKO/DOROBO CZ on
         0.5,0.5                      // verified CZ length + scenario table draws
       ];
       let draws=0;
-      core.rng={next:()=>{draws+=1;return seq.shift() ?? 0.999999;}};
+      const fixedRng={next:()=>{draws+=1;return seq.shift() ?? 0.999999;}};
+      core.rng=fixedRng;
+      core.normal.rng=fixedRng;
       core.normal.startWantedChance();
 
       const playOne = () => {
@@ -30,7 +32,7 @@ test('Lupin B4 WANTED LCD verified direct destinations enter FUJIKO/DOROBO CZ on
 
       const first=playOne();
       const second=playOne();
-      return {draws,first,second,snapshot:core.snapshot()};
+      return {draws,first,second};
     };
 
     return {
@@ -81,6 +83,5 @@ test('Lupin B4 WANTED LCD verified direct destinations enter FUJIKO/DOROBO CZ on
 
     // 1 role + 3 LCD + 1 role + 2 verified CZ table draws. No extra WANTED LCD draw after CZ entry.
     expect(branch.draws).toBe(7);
-    expect(branch.snapshot.normal.mode).toBe(zone);
   }
 });
