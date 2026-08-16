@@ -60,7 +60,7 @@ test('Lupin B4 WANTED two miss holds extend full countdown to game 12', async ({
   expect(result.games[1].result.wantedChanceRemaining).toBe(9);
   expect(result.games[1].result.wantedChanceFrozen).toBe(true);
   expect(result.games[1].result.wantedChanceResult).toBe('UNRESOLVED');
-  expect(result.games[1].result.event).toBe('WANTED_CHANCE_COUNTDOWN_FROZEN_CHANGED_HOLD_PENDING');
+  expect(result.games[1].result.event).toBe('LCD_CHANCE_WANTED_CHANCE_WEAK_BLUE_MISS');
   expect(result.games[1].result.lcdChance.totalHits).toBe(2);
   expect(result.games[1].result.holdQueue[0]).toMatchObject({
     type:'CHANCE_BLUE',source:'VERIFIED_WANTED_LCD_CHANCE_AUTO',reservedEvent:null
