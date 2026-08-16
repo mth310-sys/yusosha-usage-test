@@ -10,6 +10,8 @@ const WANTED_LCD_VISUAL_POLICY='VISUAL_STEPUP_DISTRIBUTION_UNVERIFIED';
 if(!GameCore.prototype.__wantedLcdChanceRuntimePatched){
   GameCore.prototype.processWantedLcdChance=function processWantedLcdChanceVerified(){
     if(this.normal?.mode!=='WANTED_CHANCE'||!this.normal.holdQueue)return null;
+    if(this.normal.wantedChanceResult==='SUCCESS_ROUTE'||this.normal.pendingReward)return null;
+
     const hit=rollLcdChance('WANTED_CHANCE',this.rng);
     if(!hit)return null;
 
