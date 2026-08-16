@@ -73,7 +73,7 @@ test('Lupin B4 WANTED LCD verified direct destinations enter FUJIKO/DOROBO CZ on
       state:'ACTIVE',
       result:'UNRESOLVED',
       successModel:'UNIMPLEMENTED_PER_GAME_RATE_UNKNOWN',
-      transitionSource:'HOLD_CHANCE_BLUE'
+      transitionSource:`HOLD_CHANCE_BLUE__${zone}`
     });
     expect(branch.second.result.pendingReward).toBeNull();
     expect(branch.second.result.lcdChance.totalHits).toBe(1);
