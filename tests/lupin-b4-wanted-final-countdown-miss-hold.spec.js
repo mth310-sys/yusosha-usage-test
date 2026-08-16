@@ -9,12 +9,12 @@ test('Lupin B4 WANTED final countdown waits for changed miss hold before failure
 
     const core = new GameCore({ setting:1, seed:12345 });
     const seq = [
-      0.0,             // game 1 role: REPLAY
-      0.0,0.999999,    // weak-blue LCD appearance + expectation miss
-      0.0,             // game 2 role: REPLAY
-      0.999999,        // post-game-2 WANTED LCD: no appearance
-      0.0,             // game 3 role: REPLAY
-      0.0,0.0          // verified post-WC zone draw + uniform target game draw
+      0.0,
+      0.0,0.999999,
+      0.0,
+      0.999999,
+      0.0,
+      0.0,0.0
     ];
     let draws=0;
     const fixedRng={next:()=>{draws+=1;return seq.shift() ?? 0.999999;}};
@@ -66,9 +66,9 @@ test('Lupin B4 WANTED final countdown waits for changed miss hold before failure
   expect(result.second.result.pendingReward).toBeNull();
 
   expect(result.third.lever.role).toBe('REPLAY');
-  expect(result.third.result.consumedHold).toMatchObject({
-    type:'NORMAL',source:'BASE',reservedEvent:null
-  });
+  // resetAfterWantedFailure() intentionally clears the last-consumed audit field
+  // after the final NORMAL hold advances the countdown to zero.
+  expect(result.third.result.consumedHold).toBeNull();
   expect(result.third.result.mode).toBe('NORMAL');
   expect(result.third.result.wantedChanceRemaining).toBeNull();
   expect(result.third.result.wantedChanceFrozen).toBe(false);
@@ -79,9 +79,8 @@ test('Lupin B4 WANTED final countdown waits for changed miss hold before failure
   expect(result.third.result.transitionSource).toBe('POST_WC_VERIFIED_SETTING_TABLE');
   expect(result.third.result.event).toBe('WANTED_CHANCE_FAIL_NEXT_CYCLE_DRAWN_SETTING_TABLE');
   expect(result.third.result.holdCapacity).toBeNull();
-  expect(result.third.result.holdQueue).toBeNull();
+  expect(result.third.result.holdQueue).toEqual([]);
   expect(result.third.result.pendingReward).toBeNull();
 
-  // game1 role + LCD appearance/miss + game2 role/no-LCD + game3 role + verified post-WC target draws.
   expect(result.draws).toBe(8);
 });
