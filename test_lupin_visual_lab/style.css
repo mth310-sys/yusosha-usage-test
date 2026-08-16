@@ -7,3 +7,8 @@
 .shell-svg>circle:nth-of-type(2){fill:none;stroke:#d8c08c;stroke-width:3;opacity:.9}
 .shell-svg>circle:nth-of-type(3){fill:#050505;stroke:#29231a;stroke-width:2}
 .shell-svg g[fill="#fff5cf"] circle{fill:#ffd66d;stroke:#7e4512;filter:drop-shadow(0 0 2px #ff9f28)}
+/* Upper mechanical unit proportion pass: smaller round monitor and reels share one center line. */
+.shell-svg>circle:nth-of-type(1),.shell-svg>circle:nth-of-type(2),.shell-svg>circle:nth-of-type(3),.shell-svg g[fill="#fff5cf"]{transform-box:view-box;transform-origin:108px 73px;transform:translate(4px,-3px) scale(.86)}
+.reel-window{left:53.5%;top:6.3%;width:26.5%;height:10.7%}
+.reel-led{left:52.8%;top:5.8%;width:28%;height:11.8%}
+.shell-svg path[d^="M166 49"],.shell-svg path[d^="M178 57"]{transform-box:fill-box;transform-origin:center;transform:translate(2px,-2px) scale(.97,.88)}
