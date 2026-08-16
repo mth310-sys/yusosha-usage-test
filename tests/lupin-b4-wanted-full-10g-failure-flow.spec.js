@@ -10,11 +10,11 @@ test('Lupin B4 WANTED full 10G no-LCD flow fails exactly after game 10', async (
     const core = new GameCore({ setting:1, seed:12345 });
     const seq = [];
     for(let game=1;game<=9;game+=1){
-      seq.push(0.0);       // role: REPLAY
-      seq.push(0.999999);  // post-game WANTED LCD: no appearance
+      seq.push(0.0);
+      seq.push(0.999999);
     }
-    seq.push(0.0);         // game 10 role: REPLAY
-    seq.push(0.0,0.0);     // verified post-WC zone draw + uniform target game draw
+    seq.push(0.0);
+    seq.push(0.0,0.0);
 
     let draws=0;
     const fixedRng={next:()=>{draws+=1;return seq.shift() ?? 0.999999;}};
@@ -60,15 +60,12 @@ test('Lupin B4 WANTED full 10G no-LCD flow fails exactly after game 10', async (
   expect(result.games[9].result.transitionSource).toBe('POST_WC_VERIFIED_SETTING_TABLE');
   expect(result.games[9].result.event).toBe('WANTED_CHANCE_FAIL_NEXT_CYCLE_DRAWN_SETTING_TABLE');
   expect(result.games[9].result.holdCapacity).toBeNull();
-  expect(result.games[9].result.holdQueue).toBeNull();
+  expect(result.games[9].result.holdQueue).toEqual([]);
   expect(result.games[9].result.pendingReward).toBeNull();
   expect(result.games[9].result.wantedTargetZone).toMatchObject({min:1,max:32});
   expect(result.games[9].result.wantedTargetGame).toBe(1);
   expect(result.games[9].result.wantedTargetDistribution).toBe('VERIFIED_UNIFORM_WITHIN_SELECTED_32G_BAND');
   expect(result.games[9].result.wantedHardMaxGame).toBe(480);
 
-  // Games 1-9: role + no-LCD = 18 draws.
-  // Game 10: role + verified post-WC target zone/game = 3 draws.
-  // No post-game WANTED LCD draw is allowed after game 10 changes mode to NORMAL.
   expect(result.draws).toBe(21);
 });
