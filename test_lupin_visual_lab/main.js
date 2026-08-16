@@ -15,18 +15,66 @@ const bonusGetEl=document.getElementById('bonusGet');
 const payoutEl=document.getElementById('payout');
 const creditEl=document.getElementById('credit');
 
-/* LED study pass: turn the six-dot side plaques into recessed prismatic light towers without changing cabinet/game geometry. */
+/* Side LED V5: LINE | CIRCLE | LINE, covered by a transparent faceted lens. */
 const ledStudyStyle=document.createElement('style');
 ledStudyStyle.textContent=`
-.shell-svg g[fill="#111"] path{fill:rgba(235,244,247,.10)!important;stroke-width:5!important;filter:drop-shadow(0 1px 2px #000) drop-shadow(0 0 2px rgba(255,255,255,.45))}
-.shell-svg g[fill="url(#lpLamp)"] circle{transform-box:fill-box;transform-origin:center;transform:scale(.54)!important;stroke:rgba(245,250,255,.92)!important;stroke-width:2.4!important;opacity:.9}
-.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(-n+3),.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(n+7):nth-child(-n+9){fill:#eef8ff!important;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 6px rgba(190,225,255,.9))!important}
-.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(n+4):nth-child(-n+6),.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(n+10){fill:#9fdcff!important;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 7px rgba(50,150,255,.95))!important}
-.machine:not(.led-off) .shell-svg g[fill="#111"] path{filter:drop-shadow(0 1px 2px #000) drop-shadow(0 0 4px rgba(190,225,255,.55))}
-.machine:not(.led-off) .shell-svg g[fill="url(#lpLamp)"] circle{animation:sideLedBreath 1.8s ease-in-out infinite alternate}
-.machine:not(.led-off) .shell-svg g[fill="url(#lpLamp)"] circle:nth-child(2n){animation-delay:-.6s}
-.machine.led-off .shell-svg g[fill="url(#lpLamp)"] circle{fill:#586068!important;filter:none!important;opacity:.22}
-@keyframes sideLedBreath{from{opacity:.62}to{opacity:1}}
+.shell-svg g[fill="#111"] path{
+  fill:rgba(28,34,38,.22)!important;
+  stroke:url(#lpChrome)!important;
+  stroke-width:5!important;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.9))!important;
+}
+.shell-svg g[fill="url(#lpLamp)"] circle{
+  transform-box:fill-box;
+  transform-origin:center;
+  transform:scale(.62)!important;
+  stroke:rgba(245,250,255,.92)!important;
+  stroke-width:2.2!important;
+  opacity:.96!important;
+}
+.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(1),
+.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(7){fill:#d9509c!important}
+.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(2),
+.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(8){fill:#ef713d!important}
+.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(3),
+.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(9){fill:#f6c83f!important}
+.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(4),
+.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(10){fill:#7d9cd1!important}
+.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(5),
+.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(11){fill:#48b8c8!important}
+.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(6),
+.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(12){fill:#3c9ee9!important}
+
+.machine::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:24;
+  pointer-events:none;
+  background:
+    /* clear covers - upper left/right */
+    linear-gradient(105deg,rgba(255,255,255,.20),rgba(206,229,238,.05) 32%,rgba(255,255,255,.16) 50%,rgba(194,220,233,.04) 72%,rgba(255,255,255,.18)) 15px 110px/46px 108px no-repeat,
+    linear-gradient(75deg,rgba(255,255,255,.18),rgba(194,220,233,.04) 28%,rgba(255,255,255,.16) 50%,rgba(206,229,238,.05) 68%,rgba(255,255,255,.20)) 329px 110px/46px 108px no-repeat,
+    /* clear covers - lower left/right */
+    linear-gradient(105deg,rgba(255,255,255,.16),rgba(185,222,241,.05) 32%,rgba(255,255,255,.14) 50%,rgba(165,211,237,.05) 72%,rgba(255,255,255,.16)) 13px 219px/49px 137px no-repeat,
+    linear-gradient(75deg,rgba(255,255,255,.16),rgba(165,211,237,.05) 28%,rgba(255,255,255,.14) 50%,rgba(185,222,241,.05) 68%,rgba(255,255,255,.16)) 328px 219px/49px 137px no-repeat,
+    /* upper LINE | circles | LINE */
+    linear-gradient(#ffffff,#dff6ff 42%,#ffffff) 21px 119px/4px 90px no-repeat,
+    linear-gradient(#ffffff,#dff6ff 42%,#ffffff) 49px 119px/4px 90px no-repeat,
+    linear-gradient(#ffffff,#dff6ff 42%,#ffffff) 337px 119px/4px 90px no-repeat,
+    linear-gradient(#ffffff,#dff6ff 42%,#ffffff) 365px 119px/4px 90px no-repeat,
+    /* lower LINE | circles | LINE */
+    linear-gradient(#8fd8ff,#46b9f5 48%,#9de0ff) 19px 232px/4px 111px no-repeat,
+    linear-gradient(#8fd8ff,#46b9f5 48%,#9de0ff) 51px 232px/4px 111px no-repeat,
+    linear-gradient(#8fd8ff,#46b9f5 48%,#9de0ff) 335px 232px/4px 111px no-repeat,
+    linear-gradient(#8fd8ff,#46b9f5 48%,#9de0ff) 367px 232px/4px 111px no-repeat;
+  filter:drop-shadow(0 0 3px rgba(225,246,255,.5));
+  opacity:.92;
+}
+.machine:not(.led-off)::after{animation:sideRailPulse 2s ease-in-out infinite alternate}
+@keyframes sideRailPulse{to{filter:drop-shadow(0 0 5px rgba(220,244,255,.78));opacity:1}}
+.machine.led-off::after{opacity:.14;filter:none;animation:none}
+.machine.led-off .shell-svg g[fill="url(#lpLamp)"] circle{opacity:.16!important;filter:none!important;fill:#596269!important}
 `;
 document.head.appendChild(ledStudyStyle);
 
