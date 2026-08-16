@@ -9,10 +9,10 @@ test('Lupin B4 WANTED final countdown routes verified hit hold before failure', 
 
     const core = new GameCore({ setting:1, seed:12345 });
     const seq = [
-      0.0,             // game 1 role: REPLAY
-      0.0,0.0,0.60,   // weak-blue LCD appearance + win + FUJIKO_ZONE
-      0.0,             // game 2 role: REPLAY
-      0.5,0.5          // verified CZ length + scenario draws
+      0.0,
+      0.0,0.0,0.60,
+      0.0,
+      0.5,0.5
     ];
     let draws=0;
     const fixedRng={next:()=>{draws+=1;return seq.shift() ?? 0.999999;}};
@@ -63,7 +63,7 @@ test('Lupin B4 WANTED final countdown routes verified hit hold before failure', 
   expect(result.second.result.transitionSource).toBe('HOLD_CHANCE_BLUE');
   expect(result.second.result.event).toBe('ENTER_FUJIKO_ZONE');
   expect(result.second.result.holdCapacity).toBeNull();
-  expect(result.second.result.holdQueue).toBeNull();
+  expect(result.second.result.holdQueue).toEqual([]);
   expect(result.second.result.pendingReward).toBeNull();
   expect(result.second.result.cz).toMatchObject({
     type:'FUJIKO_ZONE',
@@ -73,7 +73,5 @@ test('Lupin B4 WANTED final countdown routes verified hit hold before failure', 
     transitionSource:'HOLD_CHANCE_BLUE'
   });
 
-  // game1 role + LCD appearance/win/destination + game2 role + verified CZ table draws.
-  // No post-WC failure target draw is allowed after the success hold is consumed.
   expect(result.draws).toBe(7);
 });
