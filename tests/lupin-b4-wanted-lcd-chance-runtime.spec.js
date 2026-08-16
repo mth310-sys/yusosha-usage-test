@@ -4,7 +4,7 @@ test('Lupin B4 WANTED CHANCE naturally generates verified LCD chance holds', asy
   await page.goto('/test_lupin_b4/');
 
   const result = await page.evaluate(async () => {
-    await import('/test_lupin_b4/js/wanted-lcd-chance-runtime-patch.js?v=step6ak-wanted-lcd1');
+    await import('/test_lupin_b4/js/wanted-lcd-chance-runtime-patch.js?v=step6al-wanted-lcd-audit1');
     const { NormalSystem } = await import('/test_lupin_b4/js/normal.js?v=step6w');
 
     const makeNormal = () => new NormalSystem({ next: () => 0.999999 }, 1);
@@ -38,7 +38,9 @@ test('Lupin B4 WANTED CHANCE naturally generates verified LCD chance holds', asy
         lastConsumedHold:winAfter.lastConsumedHold,
         wantedChanceResult:winAfter.wantedChanceResult,
         remaining:winAfter.wantedChanceRemaining,
-        queue:winAfter.holdQueue
+        queue:winAfter.holdQueue,
+        source:winAfter.wantedLcdChanceSource,
+        visualPolicy:winAfter.wantedLcdVisualPolicy
       },
       miss: {
         firstHold:missBefore[0],
@@ -47,7 +49,9 @@ test('Lupin B4 WANTED CHANCE naturally generates verified LCD chance holds', asy
         wantedChanceResult:missAfter.wantedChanceResult,
         frozen:missAfter.wantedChanceFrozen,
         remaining:missAfter.wantedChanceRemaining,
-        queue:missAfter.holdQueue
+        queue:missAfter.holdQueue,
+        source:missAfter.wantedLcdChanceSource,
+        visualPolicy:missAfter.wantedLcdVisualPolicy
       }
     };
   });
@@ -62,6 +66,8 @@ test('Lupin B4 WANTED CHANCE naturally generates verified LCD chance holds', asy
   expect(result.win.wantedChanceResult).toBe('SUCCESS_ROUTE');
   expect(result.win.remaining).toBe(10);
   expect(result.win.queue).toHaveLength(8);
+  expect(result.win.source).toBe('VERIFIED_WANTED_LCD_CHANCE_APPEARANCE_EXPECTATION_DESTINATION_TABLE');
+  expect(result.win.visualPolicy).toBe('VISUAL_STEPUP_DISTRIBUTION_UNVERIFIED');
 
   expect(result.miss.firstHold.type).toBe('CHANCE_BLUE');
   expect(result.miss.firstHold.reservedEvent).toBeNull();
@@ -74,4 +80,6 @@ test('Lupin B4 WANTED CHANCE naturally generates verified LCD chance holds', asy
   expect(result.miss.frozen).toBe(true);
   expect(result.miss.remaining).toBe(10);
   expect(result.miss.queue).toHaveLength(8);
+  expect(result.miss.source).toBe('VERIFIED_WANTED_LCD_CHANCE_APPEARANCE_EXPECTATION_DESTINATION_TABLE');
+  expect(result.miss.visualPolicy).toBe('VISUAL_STEPUP_DISTRIBUTION_UNVERIFIED');
 });
