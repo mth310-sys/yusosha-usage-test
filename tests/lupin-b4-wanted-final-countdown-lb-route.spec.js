@@ -58,10 +58,10 @@ test('Lupin B4 WANTED final countdown resolves verified LB route before failure'
     reservedEvent:'LB_OR_GT'
   });
   expect(result.second.result.mode).toBe('LUPIN_BONUS');
-  expect(result.second.result.wantedChanceRemaining).toBe(1);
-  expect(result.second.result.wantedChanceFrozen).toBe(true);
+  expect(result.second.result.wantedChanceRemaining).toBeNull();
+  expect(result.second.result.wantedChanceFrozen).toBe(false);
   expect(result.second.result.wantedChanceResult).toBe('SUCCESS_ROUTE');
-  expect(result.second.result.transitionSource).toBe('HOLD_CHANCE_BLUE');
+  expect(result.second.result.transitionSource).toBe('HOLD_CHANCE_BLUE_CONSUMED_ONCE_LUPIN_BONUS');
   expect(result.second.result.event).toBe('NEXT_INITIAL_HIT_LUPIN_BONUS_AUTO');
   expect(result.second.result.nextInitialHit.integrity.consumed).toBe(1);
   expect(result.second.result.nextInitialHit.integrity.lastResolution.type).toBe('LUPIN_BONUS');
