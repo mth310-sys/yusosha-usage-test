@@ -15,6 +15,21 @@ const bonusGetEl=document.getElementById('bonusGet');
 const payoutEl=document.getElementById('payout');
 const creditEl=document.getElementById('credit');
 
+/* LED study pass: turn the six-dot side plaques into recessed prismatic light towers without changing cabinet/game geometry. */
+const ledStudyStyle=document.createElement('style');
+ledStudyStyle.textContent=`
+.shell-svg g[fill="#111"] path{fill:rgba(235,244,247,.10)!important;stroke-width:5!important;filter:drop-shadow(0 1px 2px #000) drop-shadow(0 0 2px rgba(255,255,255,.45))}
+.shell-svg g[fill="url(#lpLamp)"] circle{transform-box:fill-box;transform-origin:center;transform:scale(.54)!important;stroke:rgba(245,250,255,.92)!important;stroke-width:2.4!important;opacity:.9}
+.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(-n+3),.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(n+7):nth-child(-n+9){fill:#eef8ff!important;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 6px rgba(190,225,255,.9))!important}
+.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(n+4):nth-child(-n+6),.shell-svg g[fill="url(#lpLamp)"] circle:nth-child(n+10){fill:#9fdcff!important;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 7px rgba(50,150,255,.95))!important}
+.machine:not(.led-off) .shell-svg g[fill="#111"] path{filter:drop-shadow(0 1px 2px #000) drop-shadow(0 0 4px rgba(190,225,255,.55))}
+.machine:not(.led-off) .shell-svg g[fill="url(#lpLamp)"] circle{animation:sideLedBreath 1.8s ease-in-out infinite alternate}
+.machine:not(.led-off) .shell-svg g[fill="url(#lpLamp)"] circle:nth-child(2n){animation-delay:-.6s}
+.machine.led-off .shell-svg g[fill="url(#lpLamp)"] circle{fill:#586068!important;filter:none!important;opacity:.22}
+@keyframes sideLedBreath{from{opacity:.62}to{opacity:1}}
+`;
+document.head.appendChild(ledStudyStyle);
+
 const SYMBOLS=['seven','bell','cherry','replay','bar'];
 const SMALL=['bell','cherry','replay','bar'];
 const LABEL={seven:'7',bell:'BELL',cherry:'CHERRY',replay:'REPLAY',bar:'BAR'};
@@ -29,16 +44,8 @@ function symbolSvg(type){
   if(type==='replay')return `<svg viewBox="0 0 100 70" aria-label="リプレイ"><circle cx="50" cy="35" r="25" fill="#e8f7ff" stroke="#1786d2" stroke-width="4"/><path d="M67 28A19 19 0 1 0 66 45" fill="none" stroke="#1777d2" stroke-width="7" stroke-linecap="round"/><path d="M66 19l17 9-17 10Z" fill="#1777d2"/><circle cx="50" cy="35" r="7" fill="#8bd3ff"/></svg>`;
   return `<svg viewBox="0 0 100 70" aria-label="BAR"><defs><linearGradient id="sb" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#444"/><stop offset=".5" stop-color="#080808"/><stop offset="1" stop-color="#555"/></linearGradient></defs><rect x="9" y="17" width="82" height="36" rx="6" fill="url(#sb)" stroke="#c9c9c9" stroke-width="3"/><text x="50" y="43" text-anchor="middle" font-size="25" font-weight="900" fill="#fff" font-family="Arial,sans-serif">BAR</text></svg>`;
 }
-
-function randomSymbol(exclude=null){
-  const pool=exclude?SYMBOLS.filter(s=>s!==exclude):SYMBOLS;
-  return pool[Math.floor(Math.random()*pool.length)];
-}
-function renderReel(i,center){
-  const cells=Array.from({length:9},()=>randomSymbol());
-  cells[4]=center;
-  reels[i].innerHTML=`<div class="reel-strip">${cells.map(s=>`<div class="symbol-cell">${symbolSvg(s)}</div>`).join('')}</div>`;
-}
+function randomSymbol(exclude=null){const pool=exclude?SYMBOLS.filter(s=>s!==exclude):SYMBOLS;return pool[Math.floor(Math.random()*pool.length)];}
+function renderReel(i,center){const cells=Array.from({length:9},()=>randomSymbol());cells[4]=center;reels[i].innerHTML=`<div class="reel-strip">${cells.map(s=>`<div class="symbol-cell">${symbolSvg(s)}</div>`).join('')}</div>`;}
 function renderAll(outcome=currentOutcome){outcome.forEach((s,i)=>renderReel(i,s));updateDomCount();}
 function updateDomCount(){domEl.textContent=document.querySelectorAll('*').length;}
 function setMessage(text){message.textContent=text;}
@@ -46,89 +53,24 @@ function setBet(v){bet=Math.max(0,Math.min(3,v));document.getElementById('bet').
 function setPayout(v){payout=v;payoutEl.textContent=v;}
 function setCredit(v){credit=Math.max(0,v);creditEl.textContent=credit;}
 function setBonusGet(v){bonusGet=Math.min(240,Math.max(0,v));bonusGetEl.textContent=bonusGet;}
-
-function chooseOutcome(){
-  if(bonusActive){
-    const win=SMALL[Math.floor(Math.random()*SMALL.length)];
-    return [win,win,win];
-  }
-  const r=Math.random();
-  if(r<.10)return ['seven','seven','seven'];
-  if(r<.45){const win=SMALL[Math.floor(Math.random()*SMALL.length)];return [win,win,win];}
-  let out=[randomSymbol(),randomSymbol(),randomSymbol()];
-  while(out[0]===out[1]&&out[1]===out[2])out=[randomSymbol(),randomSymbol(),randomSymbol()];
-  return out;
-}
-
-function updateDisplayIdle(){
-  if(bonusActive){displayText.innerHTML='BONUS<br><span>3 COIN AWARD</span>';return;}
-  if(fullLoad){displayText.innerHTML='MAX<br><span>FULL LOAD</span>';return;}
-  displayText.innerHTML='F7<br><span>PERFORMANCE TEST</span>';
-}
-function enterBonus(){
-  bonusActive=true;setBonusGet(0);setPayout(0);machine.classList.add('bonus-mode');bonusMeter.hidden=false;
-  displayText.innerHTML='777<br><span>BONUS START</span>';setMessage('777 BONUS START');
-}
-function endBonus(){
-  bonusActive=false;machine.classList.remove('bonus-mode');bonusMeter.hidden=true;
-  displayText.innerHTML='240 GET<br><span>BONUS END</span>';setMessage('BONUS END / 240 GET');
-}
-function evaluateOutcome(){
-  const [a,b,c]=currentOutcome;
-  const win=a===b&&b===c;
-  if(bonusActive){
-    if(win){setPayout(3);setCredit(credit+3);setBonusGet(bonusGet+3);setMessage(`${LABEL[a]} 入賞 +3 / ${bonusGet} GET`);}
-    else{setPayout(0);setMessage('BONUS MISS');}
-    if(bonusGet>=240)endBonus();else updateDisplayIdle();
-    return;
-  }
-  if(win&&a==='seven'){setPayout(0);enterBonus();return;}
-  if(win){setPayout(0);setMessage(`${LABEL[a]} 入賞 / PAY 0`);displayText.innerHTML=`${LABEL[a]}<br><span>SMALL ROLE / PAY 0</span>`;return;}
-  setPayout(0);setMessage('MISS / PAY 0');displayText.innerHTML='MISS<br><span>NO PAYOUT</span>';
-}
-
-function spinAll(fast=false){
-  if(isSpinning)return;
-  currentOutcome=chooseOutcome();reelStopped=[false,false,false];isSpinning=true;setPayout(0);
-  reels.forEach((r,i)=>{renderReel(i,randomSymbol());r.classList.add('spinning');r.classList.toggle('fast',fast);});
-  setMessage(fast?'FULL LOAD SPIN':'SPINNING');
-  displayText.innerHTML=bonusActive?'BONUS<br><span>REEL DRIVE</span>':'GO<br><span>REEL DRIVE</span>';
-}
-function stopReel(i,evaluate=true){
-  if(!isSpinning||reelStopped[i])return;
-  reelStopped[i]=true;reels[i].classList.remove('spinning','fast');renderReel(i,currentOutcome[i]);
-  if(reelStopped.every(Boolean)){
-    isSpinning=false;
-    if(evaluate)evaluateOutcome();
-  }
-}
-function stopAll(evaluate=false){
-  if(!isSpinning)return;
-  reelStopped.forEach((stopped,i)=>{if(!stopped){reelStopped[i]=true;reels[i].classList.remove('spinning','fast');renderReel(i,currentOutcome[i]);}});
-  isSpinning=false;if(evaluate)evaluateOutcome();
-}
-
+function chooseOutcome(){if(bonusActive){const win=SMALL[Math.floor(Math.random()*SMALL.length)];return [win,win,win];}const r=Math.random();if(r<.10)return ['seven','seven','seven'];if(r<.45){const win=SMALL[Math.floor(Math.random()*SMALL.length)];return [win,win,win];}let out=[randomSymbol(),randomSymbol(),randomSymbol()];while(out[0]===out[1]&&out[1]===out[2])out=[randomSymbol(),randomSymbol(),randomSymbol()];return out;}
+function updateDisplayIdle(){if(bonusActive){displayText.innerHTML='BONUS<br><span>3 COIN AWARD</span>';return;}if(fullLoad){displayText.innerHTML='MAX<br><span>FULL LOAD</span>';return;}displayText.innerHTML='F7<br><span>PERFORMANCE TEST</span>';}
+function enterBonus(){bonusActive=true;setBonusGet(0);setPayout(0);machine.classList.add('bonus-mode');bonusMeter.hidden=false;displayText.innerHTML='777<br><span>BONUS START</span>';setMessage('777 BONUS START');}
+function endBonus(){bonusActive=false;machine.classList.remove('bonus-mode');bonusMeter.hidden=true;displayText.innerHTML='240 GET<br><span>BONUS END</span>';setMessage('BONUS END / 240 GET');}
+function evaluateOutcome(){const [a,b,c]=currentOutcome;const win=a===b&&b===c;if(bonusActive){if(win){setPayout(3);setCredit(credit+3);setBonusGet(bonusGet+3);setMessage(`${LABEL[a]} 入賞 +3 / ${bonusGet} GET`);}else{setPayout(0);setMessage('BONUS MISS');}if(bonusGet>=240)endBonus();else updateDisplayIdle();return;}if(win&&a==='seven'){setPayout(0);enterBonus();return;}if(win){setPayout(0);setMessage(`${LABEL[a]} 入賞 / PAY 0`);displayText.innerHTML=`${LABEL[a]}<br><span>SMALL ROLE / PAY 0</span>`;return;}setPayout(0);setMessage('MISS / PAY 0');displayText.innerHTML='MISS<br><span>NO PAYOUT</span>';}
+function spinAll(fast=false){if(isSpinning)return;currentOutcome=chooseOutcome();reelStopped=[false,false,false];isSpinning=true;setPayout(0);reels.forEach((r,i)=>{renderReel(i,randomSymbol());r.classList.add('spinning');r.classList.toggle('fast',fast);});setMessage(fast?'FULL LOAD SPIN':'SPINNING');displayText.innerHTML=bonusActive?'BONUS<br><span>REEL DRIVE</span>':'GO<br><span>REEL DRIVE</span>';}
+function stopReel(i,evaluate=true){if(!isSpinning||reelStopped[i])return;reelStopped[i]=true;reels[i].classList.remove('spinning','fast');renderReel(i,currentOutcome[i]);if(reelStopped.every(Boolean)){isSpinning=false;if(evaluate)evaluateOutcome();}}
+function stopAll(evaluate=false){if(!isSpinning)return;reelStopped.forEach((stopped,i)=>{if(!stopped){reelStopped[i]=true;reels[i].classList.remove('spinning','fast');renderReel(i,currentOutcome[i]);}});isSpinning=false;if(evaluate)evaluateOutcome();}
 function measureInput(){const t=performance.now();requestAnimationFrame(()=>{inputEl.textContent=`${(performance.now()-t).toFixed(1)} ms`;});}
 document.addEventListener('pointerdown',measureInput,{passive:true});
-
 document.getElementById('maxBet').addEventListener('click',()=>{if(credit<=0)return;setBet(3);setMessage('MAX BET');});
 document.getElementById('start').addEventListener('click',()=>{if(bet===0)setBet(3);if(!isSpinning)spinAll(fullLoad);});
 stops.forEach((b,i)=>b.addEventListener('click',()=>stopReel(i,true)));
 document.getElementById('ledToggle').addEventListener('click',()=>{ledOn=!ledOn;machine.classList.toggle('led-off',!ledOn);setMessage(ledOn?'LED ON':'LED OFF');});
 document.getElementById('displayLoad').addEventListener('click',()=>{displayHeavy=!displayHeavy;machine.classList.toggle('display-heavy',displayHeavy||fullLoad);setMessage(displayHeavy?'DISPLAY LOAD ON':'DISPLAY LOAD OFF');});
 document.getElementById('reelLoad').addEventListener('click',()=>{if(isSpinning)stopAll(false);else spinAll(true);});
-document.getElementById('resetTest').addEventListener('click',()=>{
-  fullLoad=false;displayHeavy=false;ledOn=true;bonusActive=false;setBonusGet(0);setPayout(0);setCredit(99);setBet(0);
-  machine.className='machine';bonusMeter.hidden=true;fullLoadBtn.classList.remove('active');stopAll(false);modeEl.textContent='NORMAL';
-  currentOutcome=['bar','seven','bell'];renderAll();displayText.innerHTML='F7<br><span>PERFORMANCE TEST</span>';setMessage('READY');
-});
-
-fullLoadBtn.addEventListener('click',()=>{
-  fullLoad=!fullLoad;fullLoadBtn.classList.toggle('active',fullLoad);machine.classList.toggle('full-load',fullLoad);machine.classList.toggle('display-heavy',fullLoad||displayHeavy);modeEl.textContent=fullLoad?'FULL':'NORMAL';
-  if(fullLoad){ledOn=true;machine.classList.remove('led-off');if(!isSpinning)spinAll(true);setMessage('MAXIMUM LOAD');}
-  else{stopAll(false);machine.classList.toggle('display-heavy',displayHeavy);updateDisplayIdle();setMessage(bonusActive?'BONUS LOAD':'NORMAL LOAD');}
-});
-
+document.getElementById('resetTest').addEventListener('click',()=>{fullLoad=false;displayHeavy=false;ledOn=true;bonusActive=false;setBonusGet(0);setPayout(0);setCredit(99);setBet(0);machine.className='machine';bonusMeter.hidden=true;fullLoadBtn.classList.remove('active');stopAll(false);modeEl.textContent='NORMAL';currentOutcome=['bar','seven','bell'];renderAll();displayText.innerHTML='F7<br><span>PERFORMANCE TEST</span>';setMessage('READY');});
+fullLoadBtn.addEventListener('click',()=>{fullLoad=!fullLoad;fullLoadBtn.classList.toggle('active',fullLoad);machine.classList.toggle('full-load',fullLoad);machine.classList.toggle('display-heavy',fullLoad||displayHeavy);modeEl.textContent=fullLoad?'FULL':'NORMAL';if(fullLoad){ledOn=true;machine.classList.remove('led-off');if(!isSpinning)spinAll(true);setMessage('MAXIMUM LOAD');}else{stopAll(false);machine.classList.toggle('display-heavy',displayHeavy);updateDisplayIdle();setMessage(bonusActive?'BONUS LOAD':'NORMAL LOAD');}});
 renderAll();setCredit(credit);setBonusGet(0);
 let frames=0,last=performance.now(),prev=last,frameSum=0;
 function tick(now){frames++;frameSum+=now-prev;prev=now;if(now-last>=1000){const elapsed=now-last;const fps=frames*1000/elapsed;fpsEl.textContent=fps.toFixed(1);frameMsEl.textContent=`${(frameSum/frames).toFixed(2)} ms`;frames=0;frameSum=0;last=now;}requestAnimationFrame(tick);}
