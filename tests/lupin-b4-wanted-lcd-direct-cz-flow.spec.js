@@ -56,14 +56,14 @@ test('Lupin B4 WANTED LCD verified direct destinations enter FUJIKO/DOROBO CZ on
       key:'WEAK_BLUE',mode:'WANTED_CHANCE',won:true,destination:zone
     });
     expect(branch.first.result.holdQueue[0]).toMatchObject({
-      type:`CHANCE_BLUE__${zone}`,
+      type:'CHANCE_BLUE',
       source:'VERIFIED_WANTED_LCD_CHANCE_AUTO',
       reservedEvent:zone
     });
 
     expect(branch.second.lever.role).toBe('REPLAY');
     expect(branch.second.result.consumedHold).toMatchObject({
-      type:`CHANCE_BLUE__${zone}`,
+      type:'CHANCE_BLUE',
       source:'VERIFIED_WANTED_LCD_CHANCE_AUTO',
       reservedEvent:zone
     });
@@ -75,7 +75,7 @@ test('Lupin B4 WANTED LCD verified direct destinations enter FUJIKO/DOROBO CZ on
       state:'ACTIVE',
       result:'UNRESOLVED',
       successModel:'UNIMPLEMENTED_PER_GAME_RATE_UNKNOWN',
-      transitionSource:`HOLD_CHANCE_BLUE__${zone}`
+      transitionSource:'HOLD_CHANCE_BLUE'
     });
     expect(branch.second.result.pendingReward).toBeNull();
     expect(branch.second.result.lcdChance.totalHits).toBe(1);
