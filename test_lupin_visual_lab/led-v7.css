@@ -1,0 +1,28 @@
+/* Side LED V7: align T25-style rails to the lamp columns and make the clear lens unmistakable. */
+.machine::after{
+  background:
+    /* lens edge + refraction, upper left */
+    linear-gradient(90deg,rgba(255,255,255,.72),rgba(255,255,255,.08) 10%,transparent 22%,transparent 78%,rgba(255,255,255,.10) 90%,rgba(255,255,255,.68)) 13px 109px/48px 109px no-repeat,
+    linear-gradient(112deg,rgba(255,255,255,.30) 0 7%,rgba(205,232,244,.10) 8% 38%,rgba(255,255,255,.34) 44%,rgba(255,255,255,.05) 51% 74%,rgba(218,240,249,.20) 82%,rgba(255,255,255,.38) 100%) 14px 110px/46px 107px no-repeat,
+    /* upper right */
+    linear-gradient(90deg,rgba(255,255,255,.68),rgba(255,255,255,.10) 10%,transparent 22%,transparent 78%,rgba(255,255,255,.08) 90%,rgba(255,255,255,.72)) 329px 109px/48px 109px no-repeat,
+    linear-gradient(68deg,rgba(255,255,255,.38) 0 7%,rgba(218,240,249,.20) 18%,rgba(255,255,255,.05) 26% 49%,rgba(255,255,255,.34) 56%,rgba(205,232,244,.10) 62% 92%,rgba(255,255,255,.30) 93% 100%) 330px 110px/46px 107px no-repeat,
+    /* lower left */
+    linear-gradient(90deg,rgba(255,255,255,.64),rgba(255,255,255,.07) 10%,transparent 22%,transparent 78%,rgba(255,255,255,.10) 90%,rgba(255,255,255,.62)) 11px 218px/51px 139px no-repeat,
+    linear-gradient(112deg,rgba(255,255,255,.25) 0 7%,rgba(177,221,242,.10) 8% 38%,rgba(255,255,255,.28) 44%,rgba(255,255,255,.04) 51% 74%,rgba(194,231,247,.18) 82%,rgba(255,255,255,.32) 100%) 12px 219px/49px 137px no-repeat,
+    /* lower right */
+    linear-gradient(90deg,rgba(255,255,255,.62),rgba(255,255,255,.10) 10%,transparent 22%,transparent 78%,rgba(255,255,255,.07) 90%,rgba(255,255,255,.64)) 328px 218px/51px 139px no-repeat,
+    linear-gradient(68deg,rgba(255,255,255,.32) 0 7%,rgba(194,231,247,.18) 18%,rgba(255,255,255,.04) 26% 49%,rgba(255,255,255,.28) 56%,rgba(177,221,242,.10) 62% 92%,rgba(255,255,255,.25) 93% 100%) 329px 219px/49px 137px no-repeat,
+    /* T25 segmented rails: pulled inward so each pair hugs the circle column */
+    repeating-linear-gradient(to bottom,#fff 0 4px,#fff200 5px 9px,#ff9d00 10px 13px,#3d2a00 14px 17px) 24px 119px/6px 90px no-repeat,
+    repeating-linear-gradient(to bottom,#fff 0 4px,#fff200 5px 9px,#ff9d00 10px 13px,#3d2a00 14px 17px) 46px 119px/6px 90px no-repeat,
+    repeating-linear-gradient(to bottom,#fff 0 4px,#fff200 5px 9px,#ff9d00 10px 13px,#3d2a00 14px 17px) 338px 119px/6px 90px no-repeat,
+    repeating-linear-gradient(to bottom,#fff 0 4px,#fff200 5px 9px,#ff9d00 10px 13px,#3d2a00 14px 17px) 360px 119px/6px 90px no-repeat,
+    repeating-linear-gradient(to bottom,#fff 0 4px,#8edbff 5px 9px,#2da8ef 10px 13px,#06304b 14px 17px) 23px 232px/6px 111px no-repeat,
+    repeating-linear-gradient(to bottom,#fff 0 4px,#8edbff 5px 9px,#2da8ef 10px 13px,#06304b 14px 17px) 47px 232px/6px 111px no-repeat,
+    repeating-linear-gradient(to bottom,#fff 0 4px,#8edbff 5px 9px,#2da8ef 10px 13px,#06304b 14px 17px) 337px 232px/6px 111px no-repeat,
+    repeating-linear-gradient(to bottom,#fff 0 4px,#8edbff 5px 9px,#2da8ef 10px 13px,#06304b 14px 17px) 361px 232px/6px 111px no-repeat!important;
+  filter:drop-shadow(0 0 4px rgba(235,250,255,.62)) drop-shadow(0 0 8px rgba(130,211,249,.18))!important;
+  opacity:1!important;
+}
+.machine.led-off::after{opacity:.14!important;filter:none!important}
