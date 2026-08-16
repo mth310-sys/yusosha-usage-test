@@ -4,7 +4,7 @@ test('Lupin B4 WANTED post-WC setting tables keep final-band availability bounda
   await page.goto('/test_lupin_b4/');
 
   const result = await page.evaluate(async () => {
-    const { drawWantedPostWcTarget } = await import('/test_lupin_b4/js/wanted-profile.js?v=step6ax-wanted-post-wc-setting-boundary1');
+    const { WANTED_POST_WC_ZONES, drawWantedPostWcTarget } = await import('/test_lupin_b4/js/wanted-profile.js?v=step6bc-wanted-post-wc-setting-boundary2');
 
     const drawWith = (setting, values) => {
       const seq=[...values];
@@ -14,10 +14,27 @@ test('Lupin B4 WANTED post-WC setting tables keep final-band availability bounda
       return {setting,draws,target};
     };
 
+    const finalBandWeights=Object.fromEntries(
+      [1,2,3,4,5,6].map(setting=>{
+        const row=WANTED_POST_WC_ZONES[setting].find(zone=>zone.min===449&&zone.max===480);
+        return [setting,row?.weight??null];
+      })
+    );
+
     return {
+      finalBandWeights,
       low:[1,2,3,4,5,6].map(setting=>drawWith(setting,[0.0,0.0])),
       high:[1,2,3,4,5,6].map(setting=>drawWith(setting,[0.999999,0.999999]))
     };
+  });
+
+  expect(result.finalBandWeights).toEqual({
+    1:0,
+    2:0,
+    3:0,
+    4:0.8,
+    5:0.8,
+    6:0.8
   });
 
   for(const row of result.low){
