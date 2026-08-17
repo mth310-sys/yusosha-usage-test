@@ -1,8 +1,9 @@
-/* Side LED V17 — LED-in-frame sliding reveal study.
+/* Side LED V18 — LED-in-frame sliding reveal study.
    NORMAL: amber/blue segmented LEDs are visibly built into the silver sliding frames.
    FULL/BONUS: each illuminated frame slides outward as one piece and reveals the
    round-lamp face behind it. No clear cover in this study.
    Round-lamp geometry stays at its original SVG position.
+   Left/right side-frame slide travel is matched at 30px.
    Visual-lab approximation only; the real cabinet mechanism remains unverified. */
 
 /* Round lamps sit behind the movable illuminated frames. */
@@ -43,7 +44,6 @@
   background-size:
     7px 88px,7px 88px,7px 109px,7px 109px,
     30px 105px,30px 105px,31px 135px,31px 135px!important;
-  /* Left unchanged. NORMAL right movable unit is another 2px inward. */
   background-position:
     33px 120px,331px 120px,33px 233px,331px 233px,
     22px 111px,320px 111px,21px 220px,320px 220px!important;
@@ -53,12 +53,12 @@
   transition:background-position .52s cubic-bezier(.18,.78,.22,1),filter .18s ease,opacity .18s ease!important;
 }
 
-/* FULL/BONUS keeps the existing sliding-frame endpoint; round lamps do not move. */
+/* FULL/BONUS: both side frames travel 30px outward from NORMAL. */
 .machine.full-load::after,
 .machine.bonus-mode::after{
   background-position:
-    3px 120px,367px 120px,3px 233px,367px 233px,
-    -8px 111px,356px 111px,-9px 220px,356px 220px!important;
+    3px 120px,361px 120px,3px 233px,361px 233px,
+    -8px 111px,350px 111px,-9px 220px,350px 220px!important;
 }
 
 .machine:not(.led-off)::after{
