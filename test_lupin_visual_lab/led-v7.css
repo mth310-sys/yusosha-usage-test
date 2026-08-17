@@ -1,3 +1,5 @@
+@import url("./lab-layout.css?v=2");
+
 /* Side LED V18 — LED-in-frame sliding reveal study.
    NORMAL: amber/blue segmented LEDs are visibly built into the silver sliding frames.
    FULL/BONUS: each illuminated frame slides outward as one piece and reveals the
