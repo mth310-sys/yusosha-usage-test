@@ -1,0 +1,36 @@
+/* Research UI Layout V1
+   Keep every diagnostic/control feature, but make the cabinet the first visual focus.
+   The page remains vertically scrollable: cabinet -> live metrics -> test controls -> perf log. */
+
+.lab-head{
+  margin-bottom:8px;
+}
+
+.machine-wrap{
+  margin:0;
+}
+
+.metrics{
+  margin:10px 0 6px;
+}
+
+.test-controls{
+  margin-top:0;
+}
+
+.perf-log{
+  margin-top:6px!important;
+}
+
+.note{
+  margin-top:8px;
+}
+
+@media(max-width:380px){
+  .lab-head{
+    margin-bottom:6px;
+  }
+  .metrics{
+    margin-top:8px;
+  }
+}
