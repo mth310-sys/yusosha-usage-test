@@ -73,3 +73,8 @@
 @media(prefers-reduced-motion:reduce){
   .machine::after,.shell-svg g[fill="url(#lpLamp)"] circle{transition:none!important;animation:none!important}
 }
+
+/* Control symmetry pass: START is absolute, so the three STOP tracks must all be equal. */
+.control-row{
+  grid-template-columns:repeat(3,1fr)!important;
+}
