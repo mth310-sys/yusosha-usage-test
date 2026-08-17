@@ -1,4 +1,4 @@
-/* Side LED V15 — LED-in-frame sliding reveal study.
+/* Side LED V16 — LED-in-frame sliding reveal study.
    NORMAL: amber/blue segmented LEDs are visibly built into the silver sliding frames.
    FULL/BONUS: each illuminated frame slides outward as one piece and reveals the
    round-lamp face behind it. No clear cover in this study.
@@ -45,8 +45,8 @@
     30px 105px,30px 105px,31px 135px,31px 135px!important;
   /* Left unchanged. NORMAL right movable unit is another 2px inward. */
   background-position:
-    33px 120px,335px 120px,33px 233px,335px 233px,
-    22px 111px,324px 111px,21px 220px,324px 220px!important;
+    33px 120px,333px 120px,33px 233px,333px 233px,
+    22px 111px,322px 111px,21px 220px,322px 220px!important;
   background-repeat:no-repeat!important;
   filter:drop-shadow(0 2px 2px rgba(0,0,0,.82)) drop-shadow(0 0 4px rgba(240,250,255,.38))!important;
   opacity:1!important;
