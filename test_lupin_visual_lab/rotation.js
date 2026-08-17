@@ -71,6 +71,12 @@
     rotor.classList.add('visible');
     readout.classList.add('visible');
     readout.textContent=`ROT ${Math.round(angle)}°`;
+
+    /* Side-prism study hook: 0°=linear face, 90°=round face.
+       Manual 90° stepping is exact; continuous motion exposes the nearest quadrant. */
+    const quadrant=(Math.round(angle/90)*90)%360;
+    machine.dataset.rotation=String(quadrant);
+    machine.classList.toggle('side-prism-round',quadrant===90||quadrant===270);
   }
 
   btn.addEventListener('click',()=>{
