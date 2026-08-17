@@ -1,27 +1,37 @@
-/* Control Deck V3 — two-stage operation-area study.
-   The available center deck is now used as two distinct rows:
-   upper row = START / MAX BET / information, lower row = three STOP buttons.
-   This is still a proportion/layout pass before detailed real-machine styling. */
+/* Control Deck V4 — three-stage operation-area study.
+   Row 1 = information display.
+   Row 2 = START + MAX BET.
+   Row 3 = three STOP buttons.
+   This remains a proportion/layout pass before detailed real-machine styling. */
 
-/* Open a little more room for the two-level operation deck. */
+/* Reserve enough vertical room for three distinct operation rows. */
 .lower-panel{
-  top:69%!important;
-  height:29%!important;
+  top:71%!important;
+  height:27%!important;
 }
 
-/* Upper operation row: information + MAX BET. */
+/* Row 1: BET / PAY / CREDIT information. MAX BET is moved visually to row 2. */
 .bet-row{
-  top:54.0%!important;
-  height:4.8%!important;
+  top:53.0%!important;
+  height:3.8%!important;
   z-index:27!important;
 }
 
-/* Lower operation row: three equal STOP buttons. */
+.bet-row #maxBet{
+  position:absolute!important;
+  top:29px!important;
+  left:42%!important;
+  width:16%!important;
+  height:29px!important;
+  z-index:29!important;
+}
+
+/* Row 3: three equal STOP buttons. */
 .control-row{
   left:21%!important;
-  top:60.0%!important;
+  top:63.0%!important;
   width:58%!important;
-  height:7.0%!important;
+  height:6.8%!important;
   grid-template-columns:repeat(3,1fr)!important;
   gap:8px!important;
   align-items:center!important;
@@ -32,10 +42,10 @@
   height:35px!important;
 }
 
-/* START belongs to the upper row, aligned beside MAX BET rather than STOP. */
+/* Row 2: START sits beside MAX BET. */
 .control-row .start{
-  left:-23%!important;
-  top:-31px!important;
-  width:21%!important;
+  left:-3%!important;
+  top:-39px!important;
+  width:22%!important;
   height:30px!important;
 }
