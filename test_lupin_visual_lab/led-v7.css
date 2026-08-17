@@ -1,48 +1,42 @@
-/* Side LED V8 — rotating prism hypothesis from real-machine video frames.
-   0deg: narrow linear luminous face. 90deg: three round lamp faces.
-   CSS-only prototype: ROTATE +90° (existing machine rotation state) exposes round face. */
-.machine::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:8;
-  pointer-events:none;
-  background:
-    /* clear lens / prism cover — upper L/R */
-    linear-gradient(90deg,rgba(255,255,255,.68),rgba(210,235,246,.12) 12%,transparent 30% 70%,rgba(255,255,255,.16) 88%,rgba(255,255,255,.65)) 13px 109px/48px 109px no-repeat,
-    linear-gradient(90deg,rgba(255,255,255,.65),rgba(255,255,255,.16) 12%,transparent 30% 70%,rgba(210,235,246,.12) 88%,rgba(255,255,255,.68)) 329px 109px/48px 109px no-repeat,
-    /* clear lens / prism cover — lower L/R */
-    linear-gradient(90deg,rgba(255,255,255,.62),rgba(190,226,243,.10) 12%,transparent 30% 70%,rgba(255,255,255,.14) 88%,rgba(255,255,255,.60)) 11px 218px/51px 139px no-repeat,
-    linear-gradient(90deg,rgba(255,255,255,.60),rgba(255,255,255,.14) 12%,transparent 30% 70%,rgba(190,226,243,.10) 88%,rgba(255,255,255,.62)) 328px 218px/51px 139px no-repeat,
-    /* normal face: continuous segmented vertical light bars */
-    repeating-linear-gradient(to bottom,#fff 0 4px,#fff4a0 5px 8px,#ffd23c 9px 12px,#8a5b08 13px 16px) 30px 119px/10px 90px no-repeat,
-    repeating-linear-gradient(to bottom,#fff 0 4px,#fff4a0 5px 8px,#ffd23c 9px 12px,#8a5b08 13px 16px) 350px 119px/10px 90px no-repeat,
-    repeating-linear-gradient(to bottom,#fff 0 4px,#c9f3ff 5px 8px,#4fc8f4 9px 12px,#0a587b 13px 16px) 29px 232px/11px 111px no-repeat,
-    repeating-linear-gradient(to bottom,#fff 0 4px,#c9f3ff 5px 8px,#4fc8f4 9px 12px,#0a587b 13px 16px) 350px 232px/11px 111px no-repeat;
-  filter:drop-shadow(0 0 4px rgba(235,250,255,.65)) drop-shadow(0 0 8px rgba(100,205,250,.20));
-  opacity:1;
-  transition:opacity .18s ease,filter .18s ease;
+/* Side LED V9 — rotating prism hypothesis, overriding legacy V6 injected styles. */
+/* Hide the legacy fixed round lamps on the linear face. */
+.machine:not(.side-prism-round) .shell-svg g[fill="url(#lpLamp)"] circle{
+  opacity:0!important;
+  filter:none!important;
+}
+.machine.side-prism-round .shell-svg g[fill="url(#lpLamp)"] circle{
+  opacity:1!important;
 }
 
-/* The round face lives on the adjacent face of the prism.
-   Existing +90deg cabinet test is used as a temporary mechanical-state switch. */
-.machine.rotation-90::after,
-.machine.rotated::after,
-.machine[data-rotation="90"]::after{
+.machine::after{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:24!important;
+  pointer-events:none!important;
   background:
-    linear-gradient(90deg,rgba(255,255,255,.72),rgba(220,241,249,.13) 12%,transparent 30% 70%,rgba(255,255,255,.18) 88%,rgba(255,255,255,.70)) 13px 109px/48px 109px no-repeat,
-    linear-gradient(90deg,rgba(255,255,255,.70),rgba(255,255,255,.18) 12%,transparent 30% 70%,rgba(220,241,249,.13) 88%,rgba(255,255,255,.72)) 329px 109px/48px 109px no-repeat,
-    radial-gradient(circle at 36px 136px,#fff 0 8px,#ffe990 9px 12px,rgba(255,190,30,.25) 13px 16px,transparent 17px),
-    radial-gradient(circle at 37px 169px,#fff 0 8px,#ffe990 9px 12px,rgba(255,190,30,.25) 13px 16px,transparent 17px),
-    radial-gradient(circle at 38px 201px,#fff 0 8px,#ffe990 9px 12px,rgba(255,190,30,.25) 13px 16px,transparent 17px),
-    radial-gradient(circle at 354px 136px,#fff 0 8px,#ffe990 9px 12px,rgba(255,190,30,.25) 13px 16px,transparent 17px),
-    radial-gradient(circle at 353px 169px,#fff 0 8px,#ffe990 9px 12px,rgba(255,190,30,.25) 13px 16px,transparent 17px),
-    radial-gradient(circle at 352px 201px,#fff 0 8px,#ffe990 9px 12px,rgba(255,190,30,.25) 13px 16px,transparent 17px),
-    radial-gradient(circle at 36px 247px,#fff 0 10px,#aeeaff 11px 14px,rgba(40,185,240,.25) 15px 18px,transparent 19px),
-    radial-gradient(circle at 37px 288px,#fff 0 10px,#aeeaff 11px 14px,rgba(40,185,240,.25) 15px 18px,transparent 19px),
-    radial-gradient(circle at 38px 329px,#fff 0 10px,#aeeaff 11px 14px,rgba(40,185,240,.25) 15px 18px,transparent 19px),
-    radial-gradient(circle at 354px 247px,#fff 0 10px,#aeeaff 11px 14px,rgba(40,185,240,.25) 15px 18px,transparent 19px),
-    radial-gradient(circle at 353px 288px,#fff 0 10px,#aeeaff 11px 14px,rgba(40,185,240,.25) 15px 18px,transparent 19px),
-    radial-gradient(circle at 352px 329px,#fff 0 10px,#aeeaff 11px 14px,rgba(40,185,240,.25) 15px 18px,transparent 19px);
+    /* visible clear prism covers */
+    linear-gradient(90deg,rgba(255,255,255,.78),rgba(205,231,242,.18) 12%,rgba(255,255,255,.04) 28%,transparent 42% 58%,rgba(255,255,255,.08) 72%,rgba(215,238,247,.20) 88%,rgba(255,255,255,.76)) 13px 109px/48px 109px no-repeat,
+    linear-gradient(90deg,rgba(255,255,255,.76),rgba(215,238,247,.20) 12%,rgba(255,255,255,.08) 28%,transparent 42% 58%,rgba(255,255,255,.04) 72%,rgba(205,231,242,.18) 88%,rgba(255,255,255,.78)) 329px 109px/48px 109px no-repeat,
+    linear-gradient(90deg,rgba(255,255,255,.72),rgba(185,220,238,.15) 12%,rgba(255,255,255,.04) 28%,transparent 42% 58%,rgba(255,255,255,.07) 72%,rgba(198,229,243,.18) 88%,rgba(255,255,255,.70)) 11px 218px/51px 139px no-repeat,
+    linear-gradient(90deg,rgba(255,255,255,.70),rgba(198,229,243,.18) 12%,rgba(255,255,255,.07) 28%,transparent 42% 58%,rgba(255,255,255,.04) 72%,rgba(185,220,238,.15) 88%,rgba(255,255,255,.72)) 328px 218px/51px 139px no-repeat,
+    /* 0° face: one narrow luminous face centered in each prism module */
+    repeating-linear-gradient(to bottom,#fff 0 4px,#fff4a0 5px 8px,#ffd23c 9px 12px,#8a5b08 13px 16px) 33px 119px/8px 90px no-repeat,
+    repeating-linear-gradient(to bottom,#fff 0 4px,#fff4a0 5px 8px,#ffd23c 9px 12px,#8a5b08 13px 16px) 349px 119px/8px 90px no-repeat,
+    repeating-linear-gradient(to bottom,#fff 0 4px,#c9f3ff 5px 8px,#4fc8f4 9px 12px,#0a587b 13px 16px) 33px 232px/8px 111px no-repeat,
+    repeating-linear-gradient(to bottom,#fff 0 4px,#c9f3ff 5px 8px,#4fc8f4 9px 12px,#0a587b 13px 16px) 349px 232px/8px 111px no-repeat!important;
+  filter:drop-shadow(0 0 4px rgba(235,250,255,.65)) drop-shadow(0 0 8px rgba(100,205,250,.20))!important;
+  opacity:1!important;
+  transition:opacity .18s ease,filter .18s ease!important;
 }
-.machine.led-off::after{opacity:.14;filter:none}
+
+/* 90°/270° face: line face disappears; the SVG round lamps become the exposed face. */
+.machine.side-prism-round::after{
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.82),rgba(220,241,249,.18) 12%,rgba(255,255,255,.05) 28%,transparent 42% 58%,rgba(255,255,255,.10) 72%,rgba(220,241,249,.22) 88%,rgba(255,255,255,.80)) 13px 109px/48px 109px no-repeat,
+    linear-gradient(90deg,rgba(255,255,255,.80),rgba(220,241,249,.22) 12%,rgba(255,255,255,.10) 28%,transparent 42% 58%,rgba(255,255,255,.05) 72%,rgba(220,241,249,.18) 88%,rgba(255,255,255,.82)) 329px 109px/48px 109px no-repeat,
+    linear-gradient(90deg,rgba(255,255,255,.76),rgba(195,229,244,.16) 12%,rgba(255,255,255,.05) 28%,transparent 42% 58%,rgba(255,255,255,.08) 72%,rgba(205,233,246,.20) 88%,rgba(255,255,255,.74)) 11px 218px/51px 139px no-repeat,
+    linear-gradient(90deg,rgba(255,255,255,.74),rgba(205,233,246,.20) 12%,rgba(255,255,255,.08) 28%,transparent 42% 58%,rgba(255,255,255,.05) 72%,rgba(195,229,244,.16) 88%,rgba(255,255,255,.76)) 328px 218px/51px 139px no-repeat!important;
+}
+.machine.led-off::after{opacity:.14!important;filter:none!important}
+.machine.led-off .shell-svg g[fill="url(#lpLamp)"] circle{opacity:.10!important;filter:none!important}
