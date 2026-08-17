@@ -1,12 +1,11 @@
 /* =========================================================
    F7 Rotation Proof
    iPhone Safariで回転適用そのものを切り分ける検証。
-   非対称役物 + 手動90度ステップ + MOTION2連続回転。
+   非対称役物 + MOTION2連続回転。
 ========================================================= */
 (function initRotationProof(){
   const machine=document.getElementById('machine');
-  const controls=document.querySelector('.test-controls');
-  if(!machine||!controls)return;
+  if(!machine)return;
 
   const style=document.createElement('style');
   style.textContent=`
@@ -38,8 +37,6 @@
       border-radius:50%;background:#101114;border:3px solid #ffd54a;color:#ffd54a;
       display:grid;place-items:center;font-size:9px;font-weight:900;z-index:3;
     }
-    .rotation-step-btn{border-color:#b56b20!important;color:#ffe1a8!important}
-    .rotation-step-btn.active{background:linear-gradient(#71340a,#241006)!important;color:white!important}
     .rotation-readout{position:absolute;z-index:71;left:50%;top:41.5%;transform:translateX(-50%);padding:3px 7px;border-radius:10px;background:#090909dd;border:1px solid #b56b20;color:#ffe19a;font-size:8px;font-weight:900;pointer-events:none;opacity:0}
     .rotation-readout.visible{opacity:1}
   `;
@@ -55,10 +52,6 @@
   readout.textContent='ROT 0°';
   machine.appendChild(readout);
 
-  const btn=document.createElement('button');
-  btn.id='rotationStep';btn.className='rotation-step-btn';btn.type='button';btn.textContent='ROTATE +90°';
-  controls.appendChild(btn);
-
   let angle=0;
   let auto=false;
   let raf=0;
@@ -73,19 +66,11 @@
     readout.textContent=`ROT ${Math.round(angle)}°`;
 
     /* Side-prism study hook: 0°=linear face, 90°=round face.
-       Manual 90° stepping is exact; continuous motion exposes the nearest quadrant. */
+       Continuous motion exposes the nearest quadrant. */
     const quadrant=(Math.round(angle/90)*90)%360;
     machine.dataset.rotation=String(quadrant);
     machine.classList.toggle('side-prism-round',quadrant===90||quadrant===270);
   }
-
-  btn.addEventListener('click',()=>{
-    auto=false;
-    if(raf){cancelAnimationFrame(raf);raf=0;}
-    applyAngle(angle+90);
-    btn.classList.add('active');
-    setTimeout(()=>btn.classList.remove('active'),180);
-  });
 
   function animate(now){
     if(!auto){raf=0;return;}
