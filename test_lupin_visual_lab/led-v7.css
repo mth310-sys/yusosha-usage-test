@@ -1,8 +1,8 @@
-/* Side LED V14 — LED-in-frame sliding reveal study.
+/* Side LED V15 — LED-in-frame sliding reveal study.
    NORMAL: amber/blue segmented LEDs are visibly built into the silver sliding frames.
    FULL/BONUS: each illuminated frame slides outward as one piece and reveals the
    round-lamp face behind it. No clear cover in this study.
-   Right-side geometry is shifted further inward for visual balance on phone view.
+   Round-lamp geometry stays at its original SVG position.
    Visual-lab approximation only; the real cabinet mechanism remains unverified. */
 
 /* Round lamps sit behind the movable illuminated frames. */
@@ -22,13 +22,9 @@
   transform:scale(.78)!important;
   transition:transform .42s cubic-bezier(.22,.75,.25,1) .10s,opacity .22s ease .12s!important;
 }
-/* Right lamp bank: move farther toward the display to balance the left side. */
-.machine .shell-svg g[fill="url(#lpLamp)"] circle:nth-child(n+7){
-  translate:-12px 0;
-}
 
 /* Movable units. The LED layers are painted above the silver body so the frame
-   itself visibly contains the light, matching the approved reference idea. */
+   itself visibly contains the light. */
 .machine::after{
   content:""!important;
   position:absolute!important;
@@ -36,12 +32,10 @@
   z-index:24!important;
   pointer-events:none!important;
   background-image:
-    /* LEDs — topmost, centered inside each silver frame */
     repeating-linear-gradient(to bottom,#fffbe5 0 3px,#ffd56b 4px 7px,#ff9f19 8px 11px,#704000 12px 15px),
     repeating-linear-gradient(to bottom,#fffbe5 0 3px,#ffd56b 4px 7px,#ff9f19 8px 11px,#704000 12px 15px),
     repeating-linear-gradient(to bottom,#effcff 0 3px,#8de3ff 4px 7px,#28aee9 8px 11px,#07577d 12px 15px),
     repeating-linear-gradient(to bottom,#effcff 0 3px,#8de3ff 4px 7px,#28aee9 8px 11px,#07577d 12px 15px),
-    /* silver sliding bodies */
     linear-gradient(90deg,#4b4e50 0 5%,#f8f9f6 12%,#a9aeb0 24%,#f4f5f1 38%,#555b5e 52%,#fafaf5 68%,#7d8385 82%,#eceeeb 94%,#44484a 100%),
     linear-gradient(90deg,#44484a 0 6%,#eceeeb 14%,#7d8385 27%,#fafaf5 43%,#555b5e 57%,#f4f5f1 72%,#a9aeb0 86%,#f8f9f6 95%,#4b4e50 100%),
     linear-gradient(90deg,#4b4e50 0 5%,#f8f9f6 12%,#a9aeb0 24%,#f4f5f1 38%,#555b5e 52%,#fafaf5 68%,#7d8385 82%,#eceeeb 94%,#44484a 100%),
@@ -49,17 +43,17 @@
   background-size:
     7px 88px,7px 88px,7px 109px,7px 109px,
     30px 105px,30px 105px,31px 135px,31px 135px!important;
-  /* Left unchanged. Right bank moved another 6px inward (12px total from original). */
+  /* Left unchanged. NORMAL right movable unit is another 2px inward. */
   background-position:
-    33px 120px,337px 120px,33px 233px,337px 233px,
-    22px 111px,326px 111px,21px 220px,326px 220px!important;
+    33px 120px,335px 120px,33px 233px,335px 233px,
+    22px 111px,324px 111px,21px 220px,324px 220px!important;
   background-repeat:no-repeat!important;
   filter:drop-shadow(0 2px 2px rgba(0,0,0,.82)) drop-shadow(0 0 4px rgba(240,250,255,.38))!important;
   opacity:1!important;
   transition:background-position .52s cubic-bezier(.18,.78,.22,1),filter .18s ease,opacity .18s ease!important;
 }
 
-/* FULL/BONUS: LED and body layers move the exact same distance, so they stay one unit. */
+/* FULL/BONUS keeps the existing sliding-frame endpoint; round lamps do not move. */
 .machine.full-load::after,
 .machine.bonus-mode::after{
   background-position:
