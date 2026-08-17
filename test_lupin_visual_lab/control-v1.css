@@ -1,0 +1,34 @@
+/* Control Deck V1 — operation-area proportion study.
+   First pass only: give the operation deck more vertical breathing room while
+   keeping the existing game controls and lower-panel content intact. */
+
+/* Open roughly 12px more space between the main display and lower panel. */
+.lower-panel{
+  top:65%!important;
+  height:33%!important;
+}
+
+/* Use the new room for the information strip and button deck. */
+.bet-row{
+  top:52.2%!important;
+  height:3.8%!important;
+}
+
+.control-row{
+  left:21%!important;
+  top:56.1%!important;
+  width:58%!important;
+  height:7.5%!important;
+  grid-template-columns:repeat(3,1fr)!important;
+  gap:9px!important;
+}
+
+.control-row button{
+  height:34px!important;
+}
+
+.control-row .start{
+  left:-24%!important;
+  width:22%!important;
+  height:30px!important;
+}
