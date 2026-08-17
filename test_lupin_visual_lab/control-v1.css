@@ -1,8 +1,8 @@
-/* Control Deck V5 — three-stage operation-area study.
+/* Control Deck V6 — three-stage operation-area study.
    Row 1 = information display.
-   Row 2 = START + MAX BET.
+   Row 2 = START + MAX BET operation shelf.
    Row 3 = silver three-STOP unit.
-   This pass begins the real-machine-inspired control styling. */
+   This pass keeps the existing controls but gives row 2 its own real-machine-like structure. */
 
 .lower-panel{
   top:71%!important;
@@ -16,14 +16,36 @@
   z-index:27!important;
 }
 
-/* Row 2: MAX BET. */
+/* Row 2: MAX BET is separated from the information strip. */
 .bet-row #maxBet{
   position:absolute!important;
-  top:29px!important;
-  left:42%!important;
-  width:16%!important;
-  height:29px!important;
-  z-index:31!important;
+  top:30px!important;
+  left:43%!important;
+  width:14%!important;
+  height:28px!important;
+  z-index:33!important;
+  border-radius:50%!important;
+  padding:0!important;
+  background:radial-gradient(circle at 40% 30%,#42474a 0 22%,#17191a 48%,#070808 78%,#000 100%)!important;
+  border:2px solid #85898b!important;
+  box-shadow:inset 0 2px 3px rgba(255,255,255,.28),0 2px 3px rgba(0,0,0,.72)!important;
+}
+
+/* Row 2 visual shelf: a shallow black/chrome operation surface. */
+.machine .bet-row::after{
+  content:"";
+  position:absolute;
+  left:-21%;
+  right:-21%;
+  top:23px;
+  height:39px;
+  z-index:28;
+  pointer-events:none;
+  background:linear-gradient(180deg,#25282a 0,#080909 35%,#020202 72%,#303335 100%);
+  border-top:2px solid #8f9395;
+  border-bottom:2px solid #191a1b;
+  clip-path:polygon(6% 0,94% 0,100% 35%,96% 100%,4% 100%,0 35%);
+  box-shadow:inset 0 2px 2px rgba(255,255,255,.16),0 2px 3px rgba(0,0,0,.7);
 }
 
 /* Row 3: compact silver three-button unit, centered like the real cabinet. */
@@ -61,12 +83,14 @@
     0 0 0 2px rgba(20,20,20,.8)!important;
 }
 
-/* Row 2: START sits beside MAX BET and remains independent of the silver tray. */
+/* START is the left control of row 2, aligned with MAX BET rather than the STOP tray. */
 .control-row .start{
   position:absolute!important;
-  left:-35%!important;
-  top:-38px!important;
-  width:27%!important;
-  height:30px!important;
-  z-index:32!important;
+  left:-34%!important;
+  top:-39px!important;
+  width:25%!important;
+  height:28px!important;
+  z-index:34!important;
+  border-radius:50%!important;
+  box-shadow:inset 0 -4px 6px rgba(0,0,0,.5),inset 0 2px 4px rgba(255,255,255,.42),0 2px 3px rgba(0,0,0,.72)!important;
 }
