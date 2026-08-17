@@ -1,8 +1,8 @@
-/* Side LED V13 — LED-in-frame sliding reveal study.
+/* Side LED V14 — LED-in-frame sliding reveal study.
    NORMAL: amber/blue segmented LEDs are visibly built into the silver sliding frames.
    FULL/BONUS: each illuminated frame slides outward as one piece and reveals the
    round-lamp face behind it. No clear cover in this study.
-   Right-side geometry is shifted inward slightly for visual balance.
+   Right-side geometry is shifted further inward for visual balance on phone view.
    Visual-lab approximation only; the real cabinet mechanism remains unverified. */
 
 /* Round lamps sit behind the movable illuminated frames. */
@@ -22,13 +22,13 @@
   transform:scale(.78)!important;
   transition:transform .42s cubic-bezier(.22,.75,.25,1) .10s,opacity .22s ease .12s!important;
 }
-/* The original SVG right lamp bank reads slightly too far outward on the phone view. */
+/* Right lamp bank: move farther toward the display to balance the left side. */
 .machine .shell-svg g[fill="url(#lpLamp)"] circle:nth-child(n+7){
-  translate:-6px 0;
+  translate:-12px 0;
 }
 
 /* Movable units. The LED layers are painted above the silver body so the frame
-   itself visibly contains the light, matching the circled reference idea. */
+   itself visibly contains the light, matching the approved reference idea. */
 .machine::after{
   content:""!important;
   position:absolute!important;
@@ -49,10 +49,10 @@
   background-size:
     7px 88px,7px 88px,7px 109px,7px 109px,
     30px 105px,30px 105px,31px 135px,31px 135px!important;
-  /* Left remains as approved. Right bank is 6px inward. */
+  /* Left unchanged. Right bank moved another 6px inward (12px total from original). */
   background-position:
-    33px 120px,343px 120px,33px 233px,343px 233px,
-    22px 111px,332px 111px,21px 220px,332px 220px!important;
+    33px 120px,337px 120px,33px 233px,337px 233px,
+    22px 111px,326px 111px,21px 220px,326px 220px!important;
   background-repeat:no-repeat!important;
   filter:drop-shadow(0 2px 2px rgba(0,0,0,.82)) drop-shadow(0 0 4px rgba(240,250,255,.38))!important;
   opacity:1!important;
@@ -63,8 +63,8 @@
 .machine.full-load::after,
 .machine.bonus-mode::after{
   background-position:
-    3px 120px,373px 120px,3px 233px,373px 233px,
-    -8px 111px,362px 111px,-9px 220px,362px 220px!important;
+    3px 120px,367px 120px,3px 233px,367px 233px,
+    -8px 111px,356px 111px,-9px 220px,356px 220px!important;
 }
 
 .machine:not(.led-off)::after{
