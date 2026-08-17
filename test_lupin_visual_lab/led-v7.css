@@ -1,31 +1,29 @@
-/* Side LED V11 — sliding face reveal study.
-   NORMAL: narrow segmented luminous face covers the lamp face.
-   FULL/BONUS: the narrow face slides outward and the 3-round-lamp face emerges from behind it.
-   This is a visual-lab approximation; the real cabinet mechanism remains unverified.
-   The clear lens remains visible in both states. */
+/* Side LED V12 — whole-frame sliding reveal study.
+   NORMAL: the segmented LED is mounted in a silver frame in front of the round lamps.
+   FULL/BONUS: the complete silver frame + segmented LED slides toward the cabinet edge,
+   exposing the round lamps behind it. No fixed clear cover in this slide study.
+   Visual-lab approximation only; the real cabinet mechanism remains unverified. */
 
-/* Round-lamp face sits behind the narrow face in NORMAL. */
+/* Round lamps are physically behind the movable frame. */
 .machine:not(.full-load):not(.bonus-mode) .shell-svg g[fill="url(#lpLamp)"] circle{
   opacity:0!important;
   transform-box:fill-box!important;
   transform-origin:center!important;
-  transform:scale(.48)!important;
+  transform:scale(.72)!important;
   filter:none!important;
-  transition:transform .42s cubic-bezier(.22,.75,.25,1),opacity .20s ease!important;
+  transition:transform .42s cubic-bezier(.22,.75,.25,1),opacity .18s ease!important;
 }
-
-/* FULL/BONUS: round lamps emerge after the sliding face starts moving. */
 .machine.full-load .shell-svg g[fill="url(#lpLamp)"] circle,
 .machine.bonus-mode .shell-svg g[fill="url(#lpLamp)"] circle{
   opacity:1!important;
   transform-box:fill-box!important;
   transform-origin:center!important;
-  transform:scale(.62)!important;
-  transition:transform .42s cubic-bezier(.22,.75,.25,1) .12s,opacity .24s ease .14s!important;
+  transform:scale(.78)!important;
+  transition:transform .42s cubic-bezier(.22,.75,.25,1) .10s,opacity .22s ease .12s!important;
 }
 
-/* Clear prism covers + four narrow segmented faces. Keep the same layer count in
-   both states so background-position can physically slide instead of hard-switching. */
+/* Four complete movable units: silver frame + segmented luminous strip.
+   Each frame is drawn as one background layer pair, so the frame and LED move together. */
 .machine::after{
   content:""!important;
   position:absolute!important;
@@ -33,27 +31,27 @@
   z-index:24!important;
   pointer-events:none!important;
   background-image:
-    linear-gradient(90deg,rgba(255,255,255,.78),rgba(205,231,242,.18) 12%,rgba(255,255,255,.04) 28%,transparent 42% 58%,rgba(255,255,255,.08) 72%,rgba(215,238,247,.20) 88%,rgba(255,255,255,.76)),
-    linear-gradient(90deg,rgba(255,255,255,.76),rgba(215,238,247,.20) 12%,rgba(255,255,255,.08) 28%,transparent 42% 58%,rgba(255,255,255,.04) 72%,rgba(205,231,242,.18) 88%,rgba(255,255,255,.78)),
-    linear-gradient(90deg,rgba(255,255,255,.72),rgba(185,220,238,.15) 12%,rgba(255,255,255,.04) 28%,transparent 42% 58%,rgba(255,255,255,.07) 72%,rgba(198,229,243,.18) 88%,rgba(255,255,255,.70)),
-    linear-gradient(90deg,rgba(255,255,255,.70),rgba(198,229,243,.18) 12%,rgba(255,255,255,.07) 28%,transparent 42% 58%,rgba(255,255,255,.04) 72%,rgba(185,220,238,.15) 88%,rgba(255,255,255,.72)),
+    linear-gradient(90deg,#555 0 5%,#f7f8f6 12%,#9da2a5 24%,#f2f3ef 38%,#555b5e 52%,#f8f8f3 68%,#777d80 82%,#e8e9e6 94%,#444 100%),
+    linear-gradient(90deg,#444 0 6%,#eceeeb 14%,#777d80 27%,#f8f8f3 43%,#555b5e 57%,#f2f3ef 72%,#9da2a5 86%,#f7f8f6 95%,#555 100%),
+    linear-gradient(90deg,#555 0 5%,#f7f8f6 12%,#9da2a5 24%,#f2f3ef 38%,#555b5e 52%,#f8f8f3 68%,#777d80 82%,#e8e9e6 94%,#444 100%),
+    linear-gradient(90deg,#444 0 6%,#eceeeb 14%,#777d80 27%,#f8f8f3 43%,#555b5e 57%,#f2f3ef 72%,#9da2a5 86%,#f7f8f6 95%,#555 100%),
     repeating-linear-gradient(to bottom,#fff 0 4px,#fff4a0 5px 8px,#ffd23c 9px 12px,#8a5b08 13px 16px),
     repeating-linear-gradient(to bottom,#fff 0 4px,#fff4a0 5px 8px,#ffd23c 9px 12px,#8a5b08 13px 16px),
     repeating-linear-gradient(to bottom,#fff 0 4px,#c9f3ff 5px 8px,#4fc8f4 9px 12px,#0a587b 13px 16px),
     repeating-linear-gradient(to bottom,#fff 0 4px,#c9f3ff 5px 8px,#4fc8f4 9px 12px,#0a587b 13px 16px)!important;
-  background-size:48px 109px,48px 109px,51px 139px,51px 139px,8px 90px,8px 90px,8px 111px,8px 111px!important;
-  background-position:13px 109px,329px 109px,11px 218px,328px 218px,33px 119px,349px 119px,33px 232px,349px 232px!important;
+  background-size:30px 105px,30px 105px,31px 135px,31px 135px,8px 90px,8px 90px,8px 111px,8px 111px!important;
+  background-position:22px 111px,338px 111px,21px 220px,338px 220px,33px 119px,349px 119px,33px 232px,349px 232px!important;
   background-repeat:no-repeat!important;
-  filter:drop-shadow(0 0 4px rgba(235,250,255,.65)) drop-shadow(0 0 8px rgba(100,205,250,.20))!important;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.8)) drop-shadow(0 0 3px rgba(240,250,255,.45))!important;
   opacity:1!important;
-  transition:background-position .48s cubic-bezier(.2,.78,.22,1),filter .18s ease,opacity .18s ease!important;
+  transition:background-position .52s cubic-bezier(.18,.78,.22,1),filter .18s ease,opacity .18s ease!important;
 }
 
-/* Slide the narrow faces toward the cabinet's outer edges.
-   The clear lens layers stay fixed, revealing the round lamps underneath. */
+/* FULL/BONUS: move the WHOLE units outward. Frame layers and LED layers travel by
+   exactly the same horizontal distance, leaving the round-lamp face exposed. */
 .machine.full-load::after,
 .machine.bonus-mode::after{
-  background-position:13px 109px,329px 109px,11px 218px,328px 218px,3px 119px,379px 119px,3px 232px,379px 232px!important;
+  background-position:-8px 111px,368px 111px,-9px 220px,368px 220px,3px 119px,379px 119px,3px 232px,379px 232px!important;
 }
 
 .machine.led-off::after{opacity:.14!important;filter:none!important}
