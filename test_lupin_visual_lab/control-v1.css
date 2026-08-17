@@ -1,34 +1,36 @@
-/* Control Deck V1 — operation-area proportion study.
-   First pass only: give the operation deck more vertical breathing room while
-   keeping the existing game controls and lower-panel content intact. */
+/* Control Deck V2 — operation-area proportion study.
+   Second pass: open the center operation deck further before building the
+   real-machine-inspired silver three-button unit. Existing controls remain intact. */
 
-/* Open roughly 12px more space between the main display and lower panel. */
+/* Give the operation deck roughly another 12px of vertical room. */
 .lower-panel{
-  top:65%!important;
-  height:33%!important;
+  top:67%!important;
+  height:31%!important;
 }
 
-/* Use the new room for the information strip and button deck. */
+/* Keep the information strip directly under the main display. */
 .bet-row{
   top:52.2%!important;
   height:3.8%!important;
 }
 
+/* Spread the three STOP controls through the enlarged operation area. */
 .control-row{
-  left:21%!important;
+  left:20%!important;
   top:56.1%!important;
-  width:58%!important;
-  height:7.5%!important;
+  width:60%!important;
+  height:9.4%!important;
   grid-template-columns:repeat(3,1fr)!important;
-  gap:9px!important;
+  gap:8px!important;
+  align-items:center!important;
 }
 
 .control-row button{
-  height:34px!important;
+  height:36px!important;
 }
 
 .control-row .start{
-  left:-24%!important;
-  width:22%!important;
+  left:-23%!important;
+  width:21%!important;
   height:30px!important;
 }
