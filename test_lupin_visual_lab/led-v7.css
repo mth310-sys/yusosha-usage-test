@@ -1,10 +1,11 @@
-/* Side LED V12 — whole-frame sliding reveal study.
-   NORMAL: the segmented LED is mounted in a silver frame in front of the round lamps.
-   FULL/BONUS: the complete silver frame + segmented LED slides toward the cabinet edge,
-   exposing the round lamps behind it. No fixed clear cover in this slide study.
+/* Side LED V13 — LED-in-frame sliding reveal study.
+   NORMAL: amber/blue segmented LEDs are visibly built into the silver sliding frames.
+   FULL/BONUS: each illuminated frame slides outward as one piece and reveals the
+   round-lamp face behind it. No clear cover in this study.
+   Right-side geometry is shifted inward slightly for visual balance.
    Visual-lab approximation only; the real cabinet mechanism remains unverified. */
 
-/* Round lamps are physically behind the movable frame. */
+/* Round lamps sit behind the movable illuminated frames. */
 .machine:not(.full-load):not(.bonus-mode) .shell-svg g[fill="url(#lpLamp)"] circle{
   opacity:0!important;
   transform-box:fill-box!important;
@@ -21,9 +22,13 @@
   transform:scale(.78)!important;
   transition:transform .42s cubic-bezier(.22,.75,.25,1) .10s,opacity .22s ease .12s!important;
 }
+/* The original SVG right lamp bank reads slightly too far outward on the phone view. */
+.machine .shell-svg g[fill="url(#lpLamp)"] circle:nth-child(n+7){
+  translate:-6px 0;
+}
 
-/* Four complete movable units: silver frame + segmented luminous strip.
-   Each frame is drawn as one background layer pair, so the frame and LED move together. */
+/* Movable units. The LED layers are painted above the silver body so the frame
+   itself visibly contains the light, matching the circled reference idea. */
 .machine::after{
   content:""!important;
   position:absolute!important;
@@ -31,32 +36,46 @@
   z-index:24!important;
   pointer-events:none!important;
   background-image:
-    linear-gradient(90deg,#555 0 5%,#f7f8f6 12%,#9da2a5 24%,#f2f3ef 38%,#555b5e 52%,#f8f8f3 68%,#777d80 82%,#e8e9e6 94%,#444 100%),
-    linear-gradient(90deg,#444 0 6%,#eceeeb 14%,#777d80 27%,#f8f8f3 43%,#555b5e 57%,#f2f3ef 72%,#9da2a5 86%,#f7f8f6 95%,#555 100%),
-    linear-gradient(90deg,#555 0 5%,#f7f8f6 12%,#9da2a5 24%,#f2f3ef 38%,#555b5e 52%,#f8f8f3 68%,#777d80 82%,#e8e9e6 94%,#444 100%),
-    linear-gradient(90deg,#444 0 6%,#eceeeb 14%,#777d80 27%,#f8f8f3 43%,#555b5e 57%,#f2f3ef 72%,#9da2a5 86%,#f7f8f6 95%,#555 100%),
-    repeating-linear-gradient(to bottom,#fff 0 4px,#fff4a0 5px 8px,#ffd23c 9px 12px,#8a5b08 13px 16px),
-    repeating-linear-gradient(to bottom,#fff 0 4px,#fff4a0 5px 8px,#ffd23c 9px 12px,#8a5b08 13px 16px),
-    repeating-linear-gradient(to bottom,#fff 0 4px,#c9f3ff 5px 8px,#4fc8f4 9px 12px,#0a587b 13px 16px),
-    repeating-linear-gradient(to bottom,#fff 0 4px,#c9f3ff 5px 8px,#4fc8f4 9px 12px,#0a587b 13px 16px)!important;
-  background-size:30px 105px,30px 105px,31px 135px,31px 135px,8px 90px,8px 90px,8px 111px,8px 111px!important;
-  background-position:22px 111px,338px 111px,21px 220px,338px 220px,33px 119px,349px 119px,33px 232px,349px 232px!important;
+    /* LEDs — topmost, centered inside each silver frame */
+    repeating-linear-gradient(to bottom,#fffbe5 0 3px,#ffd56b 4px 7px,#ff9f19 8px 11px,#704000 12px 15px),
+    repeating-linear-gradient(to bottom,#fffbe5 0 3px,#ffd56b 4px 7px,#ff9f19 8px 11px,#704000 12px 15px),
+    repeating-linear-gradient(to bottom,#effcff 0 3px,#8de3ff 4px 7px,#28aee9 8px 11px,#07577d 12px 15px),
+    repeating-linear-gradient(to bottom,#effcff 0 3px,#8de3ff 4px 7px,#28aee9 8px 11px,#07577d 12px 15px),
+    /* silver sliding bodies */
+    linear-gradient(90deg,#4b4e50 0 5%,#f8f9f6 12%,#a9aeb0 24%,#f4f5f1 38%,#555b5e 52%,#fafaf5 68%,#7d8385 82%,#eceeeb 94%,#44484a 100%),
+    linear-gradient(90deg,#44484a 0 6%,#eceeeb 14%,#7d8385 27%,#fafaf5 43%,#555b5e 57%,#f4f5f1 72%,#a9aeb0 86%,#f8f9f6 95%,#4b4e50 100%),
+    linear-gradient(90deg,#4b4e50 0 5%,#f8f9f6 12%,#a9aeb0 24%,#f4f5f1 38%,#555b5e 52%,#fafaf5 68%,#7d8385 82%,#eceeeb 94%,#44484a 100%),
+    linear-gradient(90deg,#44484a 0 6%,#eceeeb 14%,#7d8385 27%,#fafaf5 43%,#555b5e 57%,#f4f5f1 72%,#a9aeb0 86%,#f8f9f6 95%,#4b4e50 100%)!important;
+  background-size:
+    7px 88px,7px 88px,7px 109px,7px 109px,
+    30px 105px,30px 105px,31px 135px,31px 135px!important;
+  /* Left remains as approved. Right bank is 6px inward. */
+  background-position:
+    33px 120px,343px 120px,33px 233px,343px 233px,
+    22px 111px,332px 111px,21px 220px,332px 220px!important;
   background-repeat:no-repeat!important;
-  filter:drop-shadow(0 2px 2px rgba(0,0,0,.8)) drop-shadow(0 0 3px rgba(240,250,255,.45))!important;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.82)) drop-shadow(0 0 4px rgba(240,250,255,.38))!important;
   opacity:1!important;
   transition:background-position .52s cubic-bezier(.18,.78,.22,1),filter .18s ease,opacity .18s ease!important;
 }
 
-/* FULL/BONUS: move the WHOLE units outward. Frame layers and LED layers travel by
-   exactly the same horizontal distance, leaving the round-lamp face exposed. */
+/* FULL/BONUS: LED and body layers move the exact same distance, so they stay one unit. */
 .machine.full-load::after,
 .machine.bonus-mode::after{
-  background-position:-8px 111px,368px 111px,-9px 220px,368px 220px,3px 119px,379px 119px,3px 232px,379px 232px!important;
+  background-position:
+    3px 120px,373px 120px,3px 233px,373px 233px,
+    -8px 111px,362px 111px,-9px 220px,362px 220px!important;
 }
 
-.machine.led-off::after{opacity:.14!important;filter:none!important}
+.machine:not(.led-off)::after{
+  animation:frameLedBreathe 1.9s ease-in-out infinite alternate;
+}
+@keyframes frameLedBreathe{
+  to{filter:drop-shadow(0 2px 2px rgba(0,0,0,.82)) drop-shadow(0 0 6px rgba(138,219,255,.58)) brightness(1.07)}
+}
+.machine.led-off::after{opacity:.30!important;filter:none!important;animation:none!important}
 .machine.led-off .shell-svg g[fill="url(#lpLamp)"] circle{opacity:.10!important;filter:none!important}
 
 @media(prefers-reduced-motion:reduce){
-  .machine::after,.shell-svg g[fill="url(#lpLamp)"] circle{transition:none!important}
+  .machine::after,.shell-svg g[fill="url(#lpLamp)"] circle{transition:none!important;animation:none!important}
 }
