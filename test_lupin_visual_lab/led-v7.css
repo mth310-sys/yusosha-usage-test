@@ -1,58 +1,64 @@
-/* Side LED V10 — automatic prism-face switch during effect states.
-   NORMAL: narrow luminous face. FULL/BONUS: prism turns to expose the 3-round-lamp face.
+/* Side LED V11 — sliding face reveal study.
+   NORMAL: narrow segmented luminous face covers the lamp face.
+   FULL/BONUS: the narrow face slides outward and the 3-round-lamp face emerges from behind it.
+   This is a visual-lab approximation; the real cabinet mechanism remains unverified.
    The clear lens remains visible in both states. */
 
-/* NORMAL face: round lamps are turned away. */
+/* Round-lamp face sits behind the narrow face in NORMAL. */
 .machine:not(.full-load):not(.bonus-mode) .shell-svg g[fill="url(#lpLamp)"] circle{
   opacity:0!important;
   transform-box:fill-box!important;
   transform-origin:center!important;
-  transform:scaleX(.08) scaleY(.62)!important;
+  transform:scale(.48)!important;
   filter:none!important;
-  transition:transform .28s ease,opacity .16s ease!important;
+  transition:transform .42s cubic-bezier(.22,.75,.25,1),opacity .20s ease!important;
 }
 
-/* Effect face: round lamps rotate into view automatically. */
+/* FULL/BONUS: round lamps emerge after the sliding face starts moving. */
 .machine.full-load .shell-svg g[fill="url(#lpLamp)"] circle,
 .machine.bonus-mode .shell-svg g[fill="url(#lpLamp)"] circle{
   opacity:1!important;
   transform-box:fill-box!important;
   transform-origin:center!important;
   transform:scale(.62)!important;
-  transition:transform .28s ease .08s,opacity .16s ease .08s!important;
+  transition:transform .42s cubic-bezier(.22,.75,.25,1) .12s,opacity .24s ease .14s!important;
 }
 
+/* Clear prism covers + four narrow segmented faces. Keep the same layer count in
+   both states so background-position can physically slide instead of hard-switching. */
 .machine::after{
   content:""!important;
   position:absolute!important;
   inset:0!important;
   z-index:24!important;
   pointer-events:none!important;
-  background:
-    /* clear prism covers */
-    linear-gradient(90deg,rgba(255,255,255,.78),rgba(205,231,242,.18) 12%,rgba(255,255,255,.04) 28%,transparent 42% 58%,rgba(255,255,255,.08) 72%,rgba(215,238,247,.20) 88%,rgba(255,255,255,.76)) 13px 109px/48px 109px no-repeat,
-    linear-gradient(90deg,rgba(255,255,255,.76),rgba(215,238,247,.20) 12%,rgba(255,255,255,.08) 28%,transparent 42% 58%,rgba(255,255,255,.04) 72%,rgba(205,231,242,.18) 88%,rgba(255,255,255,.78)) 329px 109px/48px 109px no-repeat,
-    linear-gradient(90deg,rgba(255,255,255,.72),rgba(185,220,238,.15) 12%,rgba(255,255,255,.04) 28%,transparent 42% 58%,rgba(255,255,255,.07) 72%,rgba(198,229,243,.18) 88%,rgba(255,255,255,.70)) 11px 218px/51px 139px no-repeat,
-    linear-gradient(90deg,rgba(255,255,255,.70),rgba(198,229,243,.18) 12%,rgba(255,255,255,.07) 28%,transparent 42% 58%,rgba(255,255,255,.04) 72%,rgba(185,220,238,.15) 88%,rgba(255,255,255,.72)) 328px 218px/51px 139px no-repeat,
-    /* NORMAL face: one narrow luminous face centered in each module */
-    repeating-linear-gradient(to bottom,#fff 0 4px,#fff4a0 5px 8px,#ffd23c 9px 12px,#8a5b08 13px 16px) 33px 119px/8px 90px no-repeat,
-    repeating-linear-gradient(to bottom,#fff 0 4px,#fff4a0 5px 8px,#ffd23c 9px 12px,#8a5b08 13px 16px) 349px 119px/8px 90px no-repeat,
-    repeating-linear-gradient(to bottom,#fff 0 4px,#c9f3ff 5px 8px,#4fc8f4 9px 12px,#0a587b 13px 16px) 33px 232px/8px 111px no-repeat,
-    repeating-linear-gradient(to bottom,#fff 0 4px,#c9f3ff 5px 8px,#4fc8f4 9px 12px,#0a587b 13px 16px) 349px 232px/8px 111px no-repeat!important;
+  background-image:
+    linear-gradient(90deg,rgba(255,255,255,.78),rgba(205,231,242,.18) 12%,rgba(255,255,255,.04) 28%,transparent 42% 58%,rgba(255,255,255,.08) 72%,rgba(215,238,247,.20) 88%,rgba(255,255,255,.76)),
+    linear-gradient(90deg,rgba(255,255,255,.76),rgba(215,238,247,.20) 12%,rgba(255,255,255,.08) 28%,transparent 42% 58%,rgba(255,255,255,.04) 72%,rgba(205,231,242,.18) 88%,rgba(255,255,255,.78)),
+    linear-gradient(90deg,rgba(255,255,255,.72),rgba(185,220,238,.15) 12%,rgba(255,255,255,.04) 28%,transparent 42% 58%,rgba(255,255,255,.07) 72%,rgba(198,229,243,.18) 88%,rgba(255,255,255,.70)),
+    linear-gradient(90deg,rgba(255,255,255,.70),rgba(198,229,243,.18) 12%,rgba(255,255,255,.07) 28%,transparent 42% 58%,rgba(255,255,255,.04) 72%,rgba(185,220,238,.15) 88%,rgba(255,255,255,.72)),
+    repeating-linear-gradient(to bottom,#fff 0 4px,#fff4a0 5px 8px,#ffd23c 9px 12px,#8a5b08 13px 16px),
+    repeating-linear-gradient(to bottom,#fff 0 4px,#fff4a0 5px 8px,#ffd23c 9px 12px,#8a5b08 13px 16px),
+    repeating-linear-gradient(to bottom,#fff 0 4px,#c9f3ff 5px 8px,#4fc8f4 9px 12px,#0a587b 13px 16px),
+    repeating-linear-gradient(to bottom,#fff 0 4px,#c9f3ff 5px 8px,#4fc8f4 9px 12px,#0a587b 13px 16px)!important;
+  background-size:48px 109px,48px 109px,51px 139px,51px 139px,8px 90px,8px 90px,8px 111px,8px 111px!important;
+  background-position:13px 109px,329px 109px,11px 218px,328px 218px,33px 119px,349px 119px,33px 232px,349px 232px!important;
+  background-repeat:no-repeat!important;
   filter:drop-shadow(0 0 4px rgba(235,250,255,.65)) drop-shadow(0 0 8px rgba(100,205,250,.20))!important;
   opacity:1!important;
-  transition:opacity .18s ease,filter .18s ease!important;
+  transition:background-position .48s cubic-bezier(.2,.78,.22,1),filter .18s ease,opacity .18s ease!important;
 }
 
-/* Effect face: line face vanishes; clear prism cover remains. */
+/* Slide the narrow faces toward the cabinet's outer edges.
+   The clear lens layers stay fixed, revealing the round lamps underneath. */
 .machine.full-load::after,
 .machine.bonus-mode::after{
-  background:
-    linear-gradient(90deg,rgba(255,255,255,.82),rgba(220,241,249,.18) 12%,rgba(255,255,255,.05) 28%,transparent 42% 58%,rgba(255,255,255,.10) 72%,rgba(220,241,249,.22) 88%,rgba(255,255,255,.80)) 13px 109px/48px 109px no-repeat,
-    linear-gradient(90deg,rgba(255,255,255,.80),rgba(220,241,249,.22) 12%,rgba(255,255,255,.10) 28%,transparent 42% 58%,rgba(255,255,255,.05) 72%,rgba(220,241,249,.18) 88%,rgba(255,255,255,.82)) 329px 109px/48px 109px no-repeat,
-    linear-gradient(90deg,rgba(255,255,255,.76),rgba(195,229,244,.16) 12%,rgba(255,255,255,.05) 28%,transparent 42% 58%,rgba(255,255,255,.08) 72%,rgba(205,233,246,.20) 88%,rgba(255,255,255,.74)) 11px 218px/51px 139px no-repeat,
-    linear-gradient(90deg,rgba(255,255,255,.74),rgba(205,233,246,.20) 12%,rgba(255,255,255,.08) 28%,transparent 42% 58%,rgba(255,255,255,.05) 72%,rgba(195,229,244,.16) 88%,rgba(255,255,255,.76)) 328px 218px/51px 139px no-repeat!important;
+  background-position:13px 109px,329px 109px,11px 218px,328px 218px,3px 119px,379px 119px,3px 232px,379px 232px!important;
 }
 
 .machine.led-off::after{opacity:.14!important;filter:none!important}
 .machine.led-off .shell-svg g[fill="url(#lpLamp)"] circle{opacity:.10!important;filter:none!important}
+
+@media(prefers-reduced-motion:reduce){
+  .machine::after,.shell-svg g[fill="url(#lpLamp)"] circle{transition:none!important}
+}
