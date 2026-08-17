@@ -1,51 +1,72 @@
-/* Control Deck V4 — three-stage operation-area study.
+/* Control Deck V5 — three-stage operation-area study.
    Row 1 = information display.
    Row 2 = START + MAX BET.
-   Row 3 = three STOP buttons.
-   This remains a proportion/layout pass before detailed real-machine styling. */
+   Row 3 = silver three-STOP unit.
+   This pass begins the real-machine-inspired control styling. */
 
-/* Reserve enough vertical room for three distinct operation rows. */
 .lower-panel{
   top:71%!important;
   height:27%!important;
 }
 
-/* Row 1: BET / PAY / CREDIT information. MAX BET is moved visually to row 2. */
+/* Row 1: BET / PAY / CREDIT information. */
 .bet-row{
   top:53.0%!important;
   height:3.8%!important;
   z-index:27!important;
 }
 
+/* Row 2: MAX BET. */
 .bet-row #maxBet{
   position:absolute!important;
   top:29px!important;
   left:42%!important;
   width:16%!important;
   height:29px!important;
-  z-index:29!important;
+  z-index:31!important;
 }
 
-/* Row 3: three equal STOP buttons. */
+/* Row 3: compact silver three-button unit, centered like the real cabinet. */
 .control-row{
-  left:21%!important;
+  left:27%!important;
   top:63.0%!important;
-  width:58%!important;
-  height:6.8%!important;
+  width:46%!important;
+  height:7.2%!important;
   grid-template-columns:repeat(3,1fr)!important;
   gap:8px!important;
   align-items:center!important;
-  z-index:28!important;
+  padding:5px 10px!important;
+  z-index:30!important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.9),rgba(167,171,174,.96) 28%,rgba(73,77,80,.98) 58%,rgba(214,216,216,.95) 100%)!important;
+  border:2px solid #2c2e30!important;
+  border-radius:5px 5px 11px 11px!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.9),
+    inset 0 -3px 5px rgba(0,0,0,.55),
+    0 2px 3px rgba(0,0,0,.72)!important;
 }
 
-.control-row button{
-  height:35px!important;
+/* The three STOPs are smaller, near-circular lamps set into the silver unit. */
+.control-row .stop{
+  width:100%!important;
+  height:auto!important;
+  aspect-ratio:1/1!important;
+  justify-self:center!important;
+  border-radius:50%!important;
+  outline:2px solid #5c6062!important;
+  box-shadow:
+    inset 0 -5px 8px rgba(0,0,0,.55),
+    inset 0 2px 5px rgba(255,255,255,.55),
+    0 0 0 2px rgba(20,20,20,.8)!important;
 }
 
-/* Row 2: START sits beside MAX BET. */
+/* Row 2: START sits beside MAX BET and remains independent of the silver tray. */
 .control-row .start{
-  left:-3%!important;
-  top:-39px!important;
-  width:22%!important;
+  position:absolute!important;
+  left:-35%!important;
+  top:-38px!important;
+  width:27%!important;
   height:30px!important;
+  z-index:32!important;
 }
