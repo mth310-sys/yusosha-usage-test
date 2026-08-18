@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050608">
+<title>LUPIN BODY TEST</title>
+<link rel="stylesheet" href="./style.css?v=1">
+</head>
+<body>
+<main class="body-lab">
+  <header class="body-head"><small>YUSOSHA LUPIN BODY DEVELOPMENT</small><strong>筐体本体 開発機</strong><span>CORE未接続 / 外装・リール・操作部を先に完成させる</span></header>
+  <section class="machine-stage f9-frame">
+    <div class="f9-cabinet" id="cabinet">
+      <div class="f9-black-body"></div>
+      <div class="f9-frame-layer"><div class="f9-inner-spine"></div></div>
+      <div class="f9-parts-layer">
+        <section class="f9-top-unit">
+          <div class="f9-top-speaker left"></div><div class="f9-top-speaker right"></div>
+          <div class="f9-gold-crown"></div>
+          <div class="f9-gold-mesh left"></div><div class="f9-gold-mesh center"></div>
+          <div class="f9-dot-circle"><div class="f9-dot-grid" id="dotGrid"></div><div class="f9-ring" id="ring"></div></div>
+          <div class="f9-reel-box" id="reelBox" aria-label="上部3リール">
+            <div class="f9-reel" data-reel="0"><span>7</span></div>
+            <div class="f9-reel" data-reel="1"><span>★</span></div>
+            <div class="f9-reel" data-reel="2"><span>7</span></div>
+          </div>
+        </section>
+        <section class="f9-main-display"><div class="f9-screen"><div class="f9-rays"></div><strong>LUPIN</strong><small>BODY DEVELOPMENT</small></div></section>
+        <section class="f9-deck">
+          <div class="f9-deck-lip"></div>
+          <div class="f9-left-controls">
+            <button type="button" class="f9-maxbet" id="maxBet" aria-label="MAX BET"></button>
+            <button type="button" class="f9-start-lever" id="start" aria-label="START"><i class="f9-lever-stem"></i><i class="f9-lever-knob"></i></button>
+          </div>
+          <div class="f9-stops">
+            <button type="button" class="f9-stop" data-stop="0" aria-label="STOP LEFT"></button>
+            <button type="button" class="f9-stop" data-stop="1" aria-label="STOP CENTER"></button>
+            <button type="button" class="f9-stop" data-stop="2" aria-label="STOP RIGHT"></button>
+          </div>
+        </section>
+        <section class="f9-lower"><div class="f9-lower-led left"></div><div class="f9-lower-frame"><div class="f9-lower-art"><div class="f9-art-glow"></div></div></div><div class="f9-lower-led right"></div></section>
+      </div>
+      <div class="f9-shell-layer">
+        <div class="f9-shoulder left"><i></i><b></b></div><div class="f9-shoulder right"><i></i><b></b></div>
+        <div class="f9-mid-shell left"><i></i><b></b></div><div class="f9-mid-shell right"><i></i><b></b></div>
+        <div class="f9-waist left"></div><div class="f9-waist right"></div>
+        <div class="f9-lower-shell left"><i></i></div><div class="f9-lower-shell right"><i></i></div>
+        <div id="sideUnits"></div>
+      </div>
+      <button type="button" id="sideToggle" class="body-side-toggle">SIDE OPEN</button>
+    </div>
+  </section>
+  <section class="body-controls">
+    <button id="ledToggle" type="button">LED ON/OFF</button>
+    <button id="lowerToggle" type="button">LOWER NORMAL/RAINBOW</button>
+    <button id="reelTest" type="button">REEL TEST</button>
+  </section>
+  <p class="body-note">この段階ではCoreロジックへ接続しない。筐体・リール機構・操作部・LEDを自由に作り込み、完成後にB4 Coreへ統合する。</p>
+</main>
+<script src="./main.js?v=1"></script>
+</body>
+</html>
