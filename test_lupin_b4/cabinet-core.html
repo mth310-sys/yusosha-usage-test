@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>LUPIN B4 Cabinet Core Test</title>
+<style>
+html,body{margin:0;background:#050505;color:#fff}#core{display:block;width:100%;min-height:100vh;border:0;background:#050505}
+</style>
+</head>
+<body>
+<iframe id="core" src="./index.html" title="LUPIN B4 cabinet integrated core"></iframe>
+<script>
+(function(){
+  const frame=document.getElementById('core');
+  frame.addEventListener('load',()=>{
+    const doc=frame.contentDocument;
+    if(!doc)return;
+    if(!doc.querySelector('link[data-b4-cabinet-port]')){
+      const link=doc.createElement('link');
+      link.rel='stylesheet';link.href='./css/f9-cabinet-port.css?v=1';link.dataset.b4CabinetPort='1';
+      doc.head.appendChild(link);
+    }
+    if(!doc.querySelector('script[data-b4-cabinet-port]')){
+      const script=doc.createElement('script');
+      script.src='./js/f9-cabinet-port.js?v=1';script.dataset.b4CabinetPort='1';
+      doc.body.appendChild(script);
+    }
+    const resize=()=>{try{frame.style.height=Math.max(innerHeight,doc.documentElement.scrollHeight,doc.body.scrollHeight)+'px'}catch(e){}};
+    resize();
+    new ResizeObserver(resize).observe(doc.body);
+    setTimeout(resize,250);
+    setTimeout(resize,1000);
+  });
+})();
+</script>
+</body>
+</html>
