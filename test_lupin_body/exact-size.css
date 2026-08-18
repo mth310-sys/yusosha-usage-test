@@ -1,0 +1,9 @@
+/* Exact 390x600 cabinet development viewport.
+   This is NOT a responsive preview: keep the cabinet at its design pixels. */
+html,body{min-width:390px;overflow-x:auto}
+.body-lab{width:390px;max-width:none;margin:0 auto;padding:10px 0 24px}
+.body-head{padding:0 8px}
+.machine-stage{width:390px;height:600px;max-width:none;margin:0;overflow:hidden}
+.f9-cabinet{left:0;top:0;width:390px;height:600px;transform:none}
+.body-controls,.body-note{width:390px;max-width:none;padding-left:8px;padding-right:8px}
+@media(max-width:390px){.machine-stage{transform:none}.body-lab{padding-left:0;padding-right:0}.body-head,.body-controls,.body-note{padding-left:8px;padding-right:8px}}
