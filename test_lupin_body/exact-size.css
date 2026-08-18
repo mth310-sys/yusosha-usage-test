@@ -1,8 +1,8 @@
-/* 390x600 logical cabinet canvas, fitted to the phone viewport without horizontal scrolling.
-   Internal coordinates remain 390x600; the browser viewport handles fitting. */
-html,body{margin:0;width:390px;max-width:390px;overflow-x:hidden}
+/* Standalone body uses the original F9 design size directly.
+   Design Lab preview scaling is not carried over here. */
+html,body{margin:0;width:100%;overflow-x:hidden}
 .body-lab{width:390px;max-width:390px;margin:0 auto;padding:10px 0 24px}
 .body-head{width:390px;padding:0 8px}
-.machine-stage{position:relative;width:390px;height:600px;max-width:390px;margin:0 auto;overflow:hidden}
-.f9-cabinet{left:0;top:0;width:390px;height:600px;transform:none}
+.machine-stage{position:relative;width:390px;height:600px;min-width:390px;max-width:390px;margin:0 auto;overflow:hidden;transform:none!important}
+.f9-cabinet{left:0;top:0;width:390px;height:600px;min-width:390px;max-width:390px;transform:none!important}
 .body-controls,.body-note{width:390px;max-width:390px;padding-left:8px;padding-right:8px}
