@@ -1,6 +1,14 @@
 /* Cabinet-only baseline.
-   Keep the F9 design coordinates intact and expose only the actual 0-528 body range. */
+   Keep the F9 design coordinates intact.
+   Step 1 of vertical expansion: move only the lower section to the bottom of the 390x844 target area. */
 html,body{margin:0;overflow-x:hidden;background:#050608}
 .body-lab{width:100%;max-width:390px;margin:0 auto;padding:0}
 .machine-stage{position:relative;width:100%;height:auto;max-width:none;margin:0 auto;overflow:hidden;background:#020304}
-.f9-cabinet{left:0;top:0;width:390px;height:600px;transform-origin:top left;transform:scale(var(--body-scale,1))}
+.f9-cabinet{left:0;top:0;width:390px;height:844px;transform-origin:top left;transform:scale(var(--body-scale,1))}
+
+/* Original lower body ends at y=528. Move the complete lower block down by 316px
+   so its bottom reaches the 844px target. Do not stretch anything yet. */
+.f9-lower{transform:translateY(316px)}
+.f9-lower-shell{transform:translateY(316px)}
+.f9-lower-shell.right{transform:scaleX(-1) translateY(316px)}
+.body-side-toggle{transform:translateY(316px)}
