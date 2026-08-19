@@ -15,11 +15,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
 .f9-lower-led{top:5px;bottom:5px}
 .body-side-toggle{transform:translateY(var(--lower-shift,0px))}
 
-/* Control section expansion baseline.
-   Expand downward only; keep all current top positions unchanged.
-   Deck: 54px -> 81px (+50%). Side waist frames: 72px -> 108px (+50%). */
-.f9-deck{height:81px}
-.f9-waist{height:108px}
+/* Control section expansion.
+   Keep the current top positions fixed and extend only downward.
+   Previous: deck 81px / waist 108px.
+   Additional +30% from the current size: deck 105px / waist 140px. */
+.f9-deck{height:105px}
+.f9-waist{height:140px}
 
 /* Control placement step.
    Move the three STOP buttons and the round START control downward by 50% of
