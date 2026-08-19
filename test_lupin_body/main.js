@@ -5,15 +5,14 @@
   const ring=document.getElementById('ring');
   const sideUnits=document.getElementById('sideUnits');
   const sideToggle=document.getElementById('sideToggle');
-  const lower=document.querySelector('.f9-lower');
   let sideOpen=false;
-  let reelStep=0;
 
+  const BODY_HEIGHT=528;
   const fitCabinet=()=>{
     const available=stage.clientWidth;
     const scale=Math.min(1,available/390);
     cabinet.style.setProperty('--body-scale',String(scale));
-    stage.style.height=`${600*scale}px`;
+    stage.style.height=`${BODY_HEIGHT*scale}px`;
   };
   fitCabinet();
   requestAnimationFrame(fitCabinet);
@@ -53,13 +52,5 @@
     sideOpen=!sideOpen;
     document.querySelectorAll('.f9-side-mech').forEach(el=>el.classList.toggle('open',sideOpen));
     sideToggle.textContent=sideOpen?'SIDE CLOSE':'SIDE OPEN';
-  });
-  document.getElementById('ledToggle').addEventListener('click',()=>cabinet.classList.toggle('leds-off'));
-  document.getElementById('lowerToggle').addEventListener('click',()=>lower.classList.toggle('rainbow'));
-
-  const reelSets=[['7','★','7'],['BAR','7','BAR'],['★','★','★'],['7','7','7']];
-  document.getElementById('reelTest').addEventListener('click',()=>{
-    reelStep=(reelStep+1)%reelSets.length;
-    document.querySelectorAll('.f9-reel span').forEach((span,i)=>span.textContent=reelSets[reelStep][i]);
   });
 })();
