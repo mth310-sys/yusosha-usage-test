@@ -1,5 +1,6 @@
 (()=>{
   const cabinet=document.getElementById('cabinet');
+  const stage=document.querySelector('.machine-stage');
   const dotGrid=document.getElementById('dotGrid');
   const ring=document.getElementById('ring');
   const sideUnits=document.getElementById('sideUnits');
@@ -7,6 +8,16 @@
   const lower=document.querySelector('.f9-lower');
   let sideOpen=false;
   let reelStep=0;
+
+  const fitCabinet=()=>{
+    const available=stage.clientWidth;
+    const scale=Math.min(1,available/390);
+    cabinet.style.setProperty('--body-scale',String(scale));
+    stage.style.height=`${600*scale}px`;
+  };
+  fitCabinet();
+  requestAnimationFrame(fitCabinet);
+  window.addEventListener('resize',fitCabinet,{passive:true});
 
   const n=15,c=(n-1)/2;
   for(let y=0;y<n;y++) for(let x=0;x<n;x++){
