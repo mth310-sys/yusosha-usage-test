@@ -17,7 +17,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
 
 /* Control section expansion baseline.
    Expand downward only; keep all current top positions unchanged.
-   Deck: 54px -> 81px (+50%). Side waist frames: 72px -> 108px (+50%).
-   Button placement is intentionally untouched for the next adjustment step. */
+   Deck: 54px -> 81px (+50%). Side waist frames: 72px -> 108px (+50%). */
 .f9-deck{height:81px}
 .f9-waist{height:108px}
+
+/* Control placement step.
+   Move the three STOP buttons and the round START control downward by 50% of
+   their own current height. Keep MAX BET untouched for separate adjustment. */
+.f9-stops{transform:translate(-50%,50%)}
+.f9-start-lever{transform:translateY(50%)}
