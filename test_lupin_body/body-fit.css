@@ -6,11 +6,11 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
 .machine-stage{position:relative;width:100%;height:100dvh;max-width:none;margin:0 auto;overflow:hidden;background:#020304}
 .f9-cabinet{left:0;top:0;width:390px;height:var(--body-height,528px);transform-origin:top left;transform:scale(var(--body-scale,1))}
 
-/* Only the complete lower block moves. JS calculates --lower-shift from the
-   CURRENT visible viewport height, so the lower body lands on the screen bottom. */
-.f9-lower{transform:translateY(calc(var(--lower-shift,0px) - 30px));height:177px}
+/* Lower section: 80px total upward extension from the original baseline.
+   Keep its bottom aligned to the current visible viewport. */
+.f9-lower{transform:translateY(calc(var(--lower-shift,0px) - 80px));height:227px}
 .f9-lower-frame{top:4px;bottom:4px}
-.f9-lower-shell{transform:translateY(calc(var(--lower-shift,0px) - 30px));height:180px}
-.f9-lower-shell.right{transform:scaleX(-1) translateY(calc(var(--lower-shift,0px) - 30px))}
+.f9-lower-shell{transform:translateY(calc(var(--lower-shift,0px) - 80px));height:230px}
+.f9-lower-shell.right{transform:scaleX(-1) translateY(calc(var(--lower-shift,0px) - 80px))}
 .f9-lower-led{top:5px;bottom:5px}
 .body-side-toggle{transform:translateY(var(--lower-shift,0px))}
