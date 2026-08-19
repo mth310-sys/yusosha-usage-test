@@ -7,7 +7,7 @@
   const sideToggle=document.getElementById('sideToggle');
   let sideOpen=false;
 
-  const BODY_HEIGHT=528;
+  const BODY_HEIGHT=844;
   const fitCabinet=()=>{
     const available=stage.clientWidth;
     const scale=Math.min(1,available/390);
