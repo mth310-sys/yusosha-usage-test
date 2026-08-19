@@ -7,16 +7,23 @@
   const sideToggle=document.getElementById('sideToggle');
   let sideOpen=false;
 
-  const BODY_HEIGHT=844;
+  const BASE_BODY_HEIGHT=528;
   const fitCabinet=()=>{
     const available=stage.clientWidth;
     const scale=Math.min(1,available/390);
+    const viewportHeight=window.visualViewport?.height||window.innerHeight;
+    const targetDesignHeight=viewportHeight/scale;
+    const lowerShift=Math.max(0,targetDesignHeight-BASE_BODY_HEIGHT);
+
     cabinet.style.setProperty('--body-scale',String(scale));
-    stage.style.height=`${BODY_HEIGHT*scale}px`;
+    cabinet.style.setProperty('--body-height',`${targetDesignHeight}px`);
+    cabinet.style.setProperty('--lower-shift',`${lowerShift}px`);
+    stage.style.height=`${viewportHeight}px`;
   };
   fitCabinet();
   requestAnimationFrame(fitCabinet);
   window.addEventListener('resize',fitCabinet,{passive:true});
+  window.visualViewport?.addEventListener('resize',fitCabinet,{passive:true});
 
   const n=15,c=(n-1)/2;
   for(let y=0;y<n;y++) for(let x=0;x<n;x++){
