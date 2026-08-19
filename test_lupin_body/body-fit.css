@@ -27,3 +27,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
    Add another 30%, for 80% total. Keep MAX BET untouched. */
 .f9-stops{transform:translate(-50%,80%)}
 .f9-start-lever{transform:translateY(80%)}
+
+/* START size adjustment: enlarge only the visible round knob by 20%.
+   Keep the control anchor/position unchanged. */
+.f9-lever-knob{width:30px;height:30px;left:4.5px;top:-0.5px}
