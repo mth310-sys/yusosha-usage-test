@@ -23,7 +23,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
 .f9-waist{height:140px}
 
 /* Control placement step.
-   Move the three STOP buttons and the round START control downward by 50% of
-   their own current height. Keep MAX BET untouched for separate adjustment. */
-.f9-stops{transform:translate(-50%,50%)}
-.f9-start-lever{transform:translateY(50%)}
+   Previous downward shift was 50% of each control's own height.
+   Add another 30%, for 80% total. Keep MAX BET untouched. */
+.f9-stops{transform:translate(-50%,80%)}
+.f9-start-lever{transform:translateY(80%)}
