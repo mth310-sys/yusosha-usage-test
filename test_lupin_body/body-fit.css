@@ -13,25 +13,27 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
 .f9-lower-shell{transform:translateY(calc(var(--lower-shift,0px) - 80px));height:230px}
 .f9-lower-shell.right{transform:scaleX(-1) translateY(calc(var(--lower-shift,0px) - 80px))}
 .f9-lower-led{top:5px;bottom:5px}
-.body-side-toggle{transform:translateY(var(--lower-shift,0px))}
-
-/* Main display + middle side frames.
-   Keep upper edges fixed and extend downward only.
-   Current display 204px -> +20% = 245px.
-   Current middle shell 193px -> +20% = 232px. */
-.f9-main-display{height:245px}
-.f9-mid-shell{height:232px}
-.f9-mid-shell.left{clip-path:polygon(0 5%,88% 0,100% 13%,96% 88%,76% 100%,0 95%)}
-.f9-mid-shell.right{clip-path:polygon(0 5%,88% 0,100% 13%,96% 88%,76% 100%,0 95%)}
-
-/* Middle left/right LED mechanisms: extend downward by 50%.
-   Keep the mechanism top and opening behavior unchanged. */
-.f9-side-mech.middle{height:194px}
 
 /* Control band alignment.
-   Place the bottom edge of the deck and both waist frames exactly at the
-   upper edge of the lower section. This prevents the previous overlap. */
+   The deck top is 324 + (lowerShift - 130) = 194 + lowerShift.
+   Use that same line as the exact lower edge for the display, middle frames
+   and middle LED mechanisms so the open center gap is removed. */
 .f9-deck{height:105px;transform:translateY(calc(var(--lower-shift,0px) - 130px))}
+.f9-main-display{height:calc(23px + var(--lower-shift,0px))}
+.f9-mid-shell{height:calc(26px + var(--lower-shift,0px))}
+.f9-mid-shell.left{clip-path:polygon(0 5%,88% 0,100% 10%,100% 90%,76% 100%,0 95%)}
+.f9-mid-shell.right{clip-path:polygon(0 5%,88% 0,100% 10%,100% 90%,76% 100%,0 95%)}
+.f9-side-mech.middle{height:calc(13px + var(--lower-shift,0px))}
+
+/* Keep the LED mechanism test control visible on the operation band. */
+.body-side-toggle{
+  right:8px;
+  bottom:auto;
+  top:calc(202px + var(--lower-shift,0px));
+  transform:none;
+  z-index:20;
+  pointer-events:auto;
+}
 
 /* Side frames start at the same upper line as the control deck.
    Their lower edge stays unchanged, so only the excess upper portion is removed. */
