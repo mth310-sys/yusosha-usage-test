@@ -50,6 +50,9 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
 /* Upper circular LED position adjustment. */
 .f9-dot-circle{transform:translate(10px,10px)}
 
+/* Upper reel position adjustment. */
+.f9-reel-box{transform:translateY(10px)}
+
 /* Give the whole upper assembly enough clipping room down to roughly the
    current main-display upper edge. This is intentionally generous so the
    moved circular LED/ring cannot be clipped at its lower edge. */
