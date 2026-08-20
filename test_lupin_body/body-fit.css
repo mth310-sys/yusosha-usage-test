@@ -41,6 +41,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
   transform:translateY(calc(var(--lower-shift,0px) - 181px));
 }
 
+/* Upper outer side frames: extend their lower edge to the current top edge
+   of the main-display side frames. Keep the existing top edge fixed. */
+.f9-shoulder{
+  height:calc(133px + var(--lower-shift,0px));
+}
+
 /* Keep the LED mechanism test control visible on the operation band. */
 .body-side-toggle{
   right:8px;
