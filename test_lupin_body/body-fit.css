@@ -15,24 +15,20 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
 .f9-lower-led{top:5px;bottom:5px}
 .body-side-toggle{transform:translateY(var(--lower-shift,0px))}
 
-/* Control section expansion.
-   Keep the current sizes and move the whole control band together with the
-   extended upper edge of the lower panel. Internal buttons move with deck. */
-.f9-deck{height:105px;transform:translateY(calc(var(--lower-shift,0px) - 80px))}
+/* Control band alignment.
+   Place the bottom edge of the deck and both waist frames exactly at the
+   upper edge of the lower section. This prevents the previous overlap. */
+.f9-deck{height:105px;transform:translateY(calc(var(--lower-shift,0px) - 130px))}
 .f9-waist{height:140px}
-.f9-waist.left{transform:translateY(calc(var(--lower-shift,0px) - 80px))}
-.f9-waist.right{transform:scaleX(-1) translateY(calc(var(--lower-shift,0px) - 80px))}
+.f9-waist.left{transform:translateY(calc(var(--lower-shift,0px) - 151px))}
+.f9-waist.right{transform:scaleX(-1) translateY(calc(var(--lower-shift,0px) - 151px))}
 
-/* Control placement step.
-   Previous downward shift was 50% of each control's own height.
-   Add another 30%, for 80% total. */
+/* Control placement inside the deck. */
 .f9-stops{transform:translate(-50%,80%)}
 .f9-start-lever{transform:translateY(80%)}
 
-/* START size adjustment: enlarge only the visible round knob by 20%.
-   Keep the control anchor/position unchanged. */
+/* START size adjustment: enlarge only the visible round knob by 20%. */
 .f9-lever-knob{width:30px;height:30px;left:4.5px;top:-0.5px}
 
-/* MAX BET size adjustment: extend downward by 30% only.
-   Keep its top edge and width unchanged. */
+/* MAX BET size adjustment: extend downward by 30% only. */
 .f9-maxbet{height:18px}
