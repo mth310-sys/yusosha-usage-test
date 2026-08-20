@@ -15,6 +15,14 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
 .f9-lower-led{top:5px;bottom:5px}
 .body-side-toggle{transform:translateY(var(--lower-shift,0px))}
 
+/* Main display + middle side frames.
+   Keep their current upper edges fixed and extend downward into the open center area.
+   The control band remains untouched. */
+.f9-main-display{height:204px}
+.f9-mid-shell{height:193px}
+.f9-mid-shell.left{clip-path:polygon(0 5%,88% 0,100% 13%,96% 88%,76% 100%,0 95%)}
+.f9-mid-shell.right{clip-path:polygon(0 5%,88% 0,100% 13%,96% 88%,76% 100%,0 95%)}
+
 /* Control band alignment.
    Place the bottom edge of the deck and both waist frames exactly at the
    upper edge of the lower section. This prevents the previous overlap. */
