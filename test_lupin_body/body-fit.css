@@ -50,6 +50,10 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
 /* Upper circular LED position adjustment. */
 .f9-dot-circle{transform:translate(10px,10px)}
 
+/* The circular LED was moved 10px downward. Increase only the top-unit
+   clipping area so the lower edge/ring remains fully visible. */
+.f9-top-unit{height:182px}
+
 /* Keep the LED mechanism test control visible on the operation band. */
 .body-side-toggle{
   right:8px;
