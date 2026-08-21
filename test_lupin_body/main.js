@@ -7,17 +7,24 @@
   const sideToggle=document.getElementById('sideToggle');
   let sideOpen=false;
 
-  const BASE_BODY_HEIGHT=528;
+  /*
+   * Fixed cabinet design geometry.
+   * Safari and Home Screen may report different viewport heights, but that
+   * must never change distances between cabinet parts. Only the whole cabinet
+   * scale is allowed to change.
+   */
+  const DESIGN_WIDTH=390;
+  const DESIGN_HEIGHT=844;
+  const FIXED_LOWER_SHIFT=DESIGN_HEIGHT-528;
+
   const fitCabinet=()=>{
-    const available=stage.clientWidth;
-    const scale=Math.min(1,available/390);
+    const viewportWidth=stage.clientWidth||window.innerWidth;
     const viewportHeight=window.visualViewport?.height||window.innerHeight;
-    const targetDesignHeight=viewportHeight/scale;
-    const lowerShift=Math.max(0,targetDesignHeight-BASE_BODY_HEIGHT);
+    const scale=Math.min(1,viewportWidth/DESIGN_WIDTH,viewportHeight/DESIGN_HEIGHT);
 
     cabinet.style.setProperty('--body-scale',String(scale));
-    cabinet.style.setProperty('--body-height',`${targetDesignHeight}px`);
-    cabinet.style.setProperty('--lower-shift',`${lowerShift}px`);
+    cabinet.style.setProperty('--body-height',`${DESIGN_HEIGHT}px`);
+    cabinet.style.setProperty('--lower-shift',`${FIXED_LOWER_SHIFT}px`);
     stage.style.height=`${viewportHeight}px`;
   };
   fitCabinet();
