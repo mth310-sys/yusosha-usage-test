@@ -27,10 +27,10 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
 .f9-reel-box{transform:translateY(15px);z-index:8;box-shadow:0 4px 9px #000,0 0 0 2px #17120a,0 0 0 3px #8d5a18}
 .f9-top-unit{height:230px}
 
-/* Radial-line-only study.
+/* Radial-line + LED-point study.
    Gold ornament surfaces remain removed.
-   Rays originate from the approved circular LED center, but are clipped to the
-   usable upper display area so they never draw over the top frame/crown. */
+   Rays originate from the approved circular LED center. Small warm LED points
+   sit behind the rays, and the complete effect is clipped below the top frame. */
 .f9-gold-mesh{display:none}
 .f9-dot-ornament{
   position:absolute;
@@ -49,7 +49,9 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
       #f4c75b 12.7deg 13.5deg,
       #9b5c13 13.5deg 14.2deg,
       transparent 14.2deg 24deg
-    );
+    ),
+    radial-gradient(circle,#fff0a6 0 1.1px,#ffc44a 1.3px 2.1px,#ff8f1f80 2.3px 3.2px,transparent 3.5px) 4px 3px/24px 24px,
+    radial-gradient(circle,#ffd46d 0 .9px,#ff9c28 1.2px 1.8px,transparent 2.7px) 16px 14px/30px 30px;
   -webkit-mask:radial-gradient(circle at 102.5px 78.5px,transparent 0 68px,#000 70px 210px,transparent 212px);
   mask:radial-gradient(circle at 102.5px 78.5px,transparent 0 68px,#000 70px 210px,transparent 212px);
   filter:drop-shadow(0 0 2px #e7a128) drop-shadow(0 0 4px #8f570e80);
