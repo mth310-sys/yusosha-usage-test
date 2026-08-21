@@ -51,54 +51,55 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
 .f9-dot-circle{transform:translate(30px,15px)}
 
 /* Circular LED outer ornament.
-   Keep the approved LED circle untouched and expose the complete real-machine
-   inspired outer assembly as one readable unit:
-   inner luminous gap -> radial ribs + diamond mesh -> second outer ring. */
+   The real cabinet reads as a much larger circular assembly hidden behind
+   the surrounding upper fascia, not as a complete second ring. Keep the LED
+   itself fixed; expose only selected arcs plus the luminous rib/mesh field. */
 .f9-dot-ornament{
   position:absolute;
-  left:69px;
-  top:42px;
-  width:151px;
-  height:151px;
+  left:43px;
+  top:19px;
+  width:205px;
+  height:205px;
   border-radius:50%;
   z-index:2;
   pointer-events:none;
   background:
-    repeating-linear-gradient(45deg,transparent 0 6px,#f0b64299 6px 7px,transparent 7px 12px),
-    repeating-linear-gradient(-45deg,transparent 0 6px,#6f3e0db8 6px 7px,transparent 7px 12px),
-    repeating-conic-gradient(from 0deg,#3d2206 0deg 2deg,#e8a92f 2deg 4deg,#75430b 4deg 6deg,transparent 6deg 13deg),
-    radial-gradient(circle,transparent 0 39%,#ffd56cdd 40% 43%,#8a500d 44% 48%,#e6a52e 49% 57%,#4a2907 58% 62%,#f0bd4c 63% 66%,#422406 67% 69%,transparent 70%);
-  -webkit-mask:radial-gradient(circle,transparent 0 39%,#000 40% 70%,transparent 71%);
-  mask:radial-gradient(circle,transparent 0 39%,#000 40% 70%,transparent 71%);
-  box-shadow:
-    0 0 8px #ffc44daa,
-    0 0 15px #ff9f2490,
-    inset 0 0 11px #ffe69dcc;
+    repeating-linear-gradient(45deg,transparent 0 8px,#f0b642a6 8px 10px,transparent 10px 16px),
+    repeating-linear-gradient(-45deg,transparent 0 8px,#75400dbd 8px 10px,transparent 10px 16px),
+    repeating-conic-gradient(from -8deg,#4a2707 0deg 2deg,#f1b63b 2deg 4deg,#6f3b09 4deg 6deg,transparent 6deg 14deg),
+    radial-gradient(circle,transparent 0 44%,#ffd970e8 45% 48%,#9a570d 49% 53%,#e9a62c 54% 64%,#5a3008 65% 69%,#f2c15a 70% 73%,#432306 74% 76%,transparent 77%);
+  -webkit-mask:
+    radial-gradient(circle,transparent 0 44%,#000 45% 76%,transparent 77%),
+    conic-gradient(from -18deg,#000 0deg 112deg,transparent 112deg 151deg,#000 151deg 287deg,transparent 287deg 322deg,#000 322deg 360deg);
+  -webkit-mask-composite:source-in;
+  mask:
+    radial-gradient(circle,transparent 0 44%,#000 45% 76%,transparent 77%) intersect,
+    conic-gradient(from -18deg,#000 0deg 112deg,transparent 112deg 151deg,#000 151deg 287deg,transparent 287deg 322deg,#000 322deg 360deg);
+  box-shadow:0 0 10px #ffc44db8,0 0 18px #ff9f2488,inset 0 0 13px #ffe69dd9;
   filter:drop-shadow(0 2px 2px #000c);
 }
 .f9-dot-ornament::before{
   content:"";
   position:absolute;
-  inset:3px;
+  inset:4px;
   border-radius:50%;
   border:3px solid #c98a24;
-  box-shadow:0 0 5px #ffd36c,inset 0 0 4px #3c2105;
+  box-shadow:0 0 6px #ffd36c,inset 0 0 5px #3c2105;
 }
 .f9-dot-ornament::after{
   content:"";
   position:absolute;
-  inset:19px;
+  inset:35px;
   border-radius:50%;
   border:2px solid #ffd875;
-  box-shadow:0 0 8px #ffb42f,0 0 13px #ff8d1866,inset 0 0 5px #5c3108;
+  box-shadow:0 0 9px #ffb42f,0 0 14px #ff8d1870,inset 0 0 5px #5c3108;
 }
 
 /* Upper reels: current approved position. */
 .f9-reel-box{transform:translateY(15px)}
 
 /* Give the whole upper assembly enough clipping room down to roughly the
-   current main-display upper edge. This is intentionally generous so the
-   moved circular LED/ring cannot be clipped at its lower edge. */
+   current main-display upper edge. */
 .f9-top-unit{height:230px}
 
 /* Keep the LED mechanism test control visible on the operation band. */
