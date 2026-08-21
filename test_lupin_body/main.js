@@ -8,10 +8,10 @@
   let sideOpen=false;
 
   /*
-   * Fixed cabinet design geometry.
-   * Safari and Home Screen may report different viewport heights, but that
-   * must never change distances between cabinet parts. Only the whole cabinet
-   * scale is allowed to change.
+   * Cabinet geometry is fixed in the 390px design coordinate system.
+   * iOS Safari / Home Screen viewport-height differences must NOT resize the
+   * cabinet or change internal spacing. Scale from width only; viewport height
+   * controls clipping/visible area only.
    */
   const DESIGN_WIDTH=390;
   const DESIGN_HEIGHT=844;
@@ -20,7 +20,7 @@
   const fitCabinet=()=>{
     const viewportWidth=stage.clientWidth||window.innerWidth;
     const viewportHeight=window.visualViewport?.height||window.innerHeight;
-    const scale=Math.min(1,viewportWidth/DESIGN_WIDTH,viewportHeight/DESIGN_HEIGHT);
+    const scale=Math.min(1,viewportWidth/DESIGN_WIDTH);
 
     cabinet.style.setProperty('--body-scale',String(scale));
     cabinet.style.setProperty('--body-height',`${DESIGN_HEIGHT}px`);
