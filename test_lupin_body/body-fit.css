@@ -47,10 +47,10 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
   height:calc(133px + var(--lower-shift,0px));
 }
 
-/* Upper circular LED: previous +10/+10, then +10 right and +5 down. */
-.f9-dot-circle{transform:translate(20px,15px)}
+/* Upper circular LED: move another 10px right, keep vertical position. */
+.f9-dot-circle{transform:translate(30px,15px)}
 
-/* Upper reels: previous +10 down, then +5 down. */
+/* Upper reels: current approved position. */
 .f9-reel-box{transform:translateY(15px)}
 
 /* Give the whole upper assembly enough clipping room down to roughly the
