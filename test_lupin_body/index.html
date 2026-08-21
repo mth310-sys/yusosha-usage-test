@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#050608">
 <title>LUPIN BODY TEST</title>
 <link rel="stylesheet" href="./style.css?v=2">
-<link rel="stylesheet" href="./body-fit.css?v=2">
+<link rel="stylesheet" href="./body-fit.css?v=3">
 </head>
 <body>
 <main class="body-lab">
@@ -19,49 +19,22 @@
           <div class="f9-top-speaker left"></div><div class="f9-top-speaker right"></div>
           <div class="f9-gold-crown"></div>
           <div class="f9-gold-mesh left"></div><div class="f9-gold-mesh center"></div>
-          <div class="f9-dot-ornament" aria-hidden="true">
-            <i class="f9-ornament-panel p-left-upper"></i>
-            <i class="f9-ornament-panel p-left-mid"></i>
-            <i class="f9-ornament-panel p-left-lower"></i>
-            <i class="f9-ornament-panel p-top"></i>
-            <i class="f9-ornament-panel p-right-upper"></i>
-            <i class="f9-ornament-panel p-right-lower"></i>
-            <i class="f9-ornament-panel p-bottom"></i>
-            <i class="f9-ornament-ring"></i>
+          <div class="f9-dot-ornament pattern-1" id="dotOrnament" aria-hidden="true">
+            <i class="f9-ornament-panel p-left-upper"></i><i class="f9-ornament-panel p-left-mid"></i><i class="f9-ornament-panel p-left-lower"></i><i class="f9-ornament-panel p-top"></i><i class="f9-ornament-panel p-right-upper"></i><i class="f9-ornament-panel p-right-lower"></i><i class="f9-ornament-panel p-bottom"></i><i class="f9-ornament-ring"></i>
           </div>
           <div class="f9-dot-circle"><div class="f9-dot-grid" id="dotGrid"></div><div class="f9-ring" id="ring"></div></div>
-          <div class="f9-reel-box" id="reelBox" aria-label="上部3リール">
-            <div class="f9-reel" data-reel="0"><span>7</span></div>
-            <div class="f9-reel" data-reel="1"><span>★</span></div>
-            <div class="f9-reel" data-reel="2"><span>7</span></div>
-          </div>
+          <div class="f9-reel-box" id="reelBox" aria-label="上部3リール"><div class="f9-reel" data-reel="0"><span>7</span></div><div class="f9-reel" data-reel="1"><span>★</span></div><div class="f9-reel" data-reel="2"><span>7</span></div></div>
+          <div class="upper-led-pattern-controls" id="upperLedPatternControls" aria-label="上部LED発光パターン"><button type="button" data-pattern="1">1</button><button type="button" data-pattern="2">2</button><button type="button" data-pattern="3">3</button><button type="button" data-pattern="4">4</button><button type="button" data-pattern="5">5</button><button type="button" data-pattern="6">6</button><button type="button" data-pattern="7">7</button><button type="button" data-pattern="8">8</button><button type="button" data-pattern="9">9</button><button type="button" data-pattern="10">10</button></div>
         </section>
         <section class="f9-main-display"><div class="f9-screen"><div class="f9-rays"></div><strong>LUPIN</strong><small>BODY DEVELOPMENT</small></div></section>
-        <section class="f9-deck">
-          <div class="f9-deck-lip"></div>
-          <div class="f9-left-controls">
-            <button type="button" class="f9-maxbet" id="maxBet" aria-label="MAX BET"></button>
-            <button type="button" class="f9-start-lever" id="start" aria-label="START"><i class="f9-lever-stem"></i><i class="f9-lever-knob"></i></button>
-          </div>
-          <div class="f9-stops">
-            <button type="button" class="f9-stop" data-stop="0" aria-label="STOP LEFT"></button>
-            <button type="button" class="f9-stop" data-stop="1" aria-label="STOP CENTER"></button>
-            <button type="button" class="f9-stop" data-stop="2" aria-label="STOP RIGHT"></button>
-          </div>
-        </section>
+        <section class="f9-deck"><div class="f9-deck-lip"></div><div class="f9-left-controls"><button type="button" class="f9-maxbet" id="maxBet" aria-label="MAX BET"></button><button type="button" class="f9-start-lever" id="start" aria-label="START"><i class="f9-lever-stem"></i><i class="f9-lever-knob"></i></button></div><div class="f9-stops"><button type="button" class="f9-stop" data-stop="0" aria-label="STOP LEFT"></button><button type="button" class="f9-stop" data-stop="1" aria-label="STOP CENTER"></button><button type="button" class="f9-stop" data-stop="2" aria-label="STOP RIGHT"></button></div></section>
         <section class="f9-lower"><div class="f9-lower-led left"></div><div class="f9-lower-frame"><div class="f9-lower-art"><div class="f9-art-glow"></div></div></div><div class="f9-lower-led right"></div></section>
       </div>
-      <div class="f9-shell-layer">
-        <div class="f9-shoulder left"><i></i><b></b></div><div class="f9-shoulder right"><i></i><b></b></div>
-        <div class="f9-mid-shell left"><i></i><b></b></div><div class="f9-mid-shell right"><i></i><b></b></div>
-        <div class="f9-waist left"></div><div class="f9-waist right"></div>
-        <div class="f9-lower-shell left"><i></i></div><div class="f9-lower-shell right"><i></i></div>
-        <div id="sideUnits"></div>
-      </div>
+      <div class="f9-shell-layer"><div class="f9-shoulder left"><i></i><b></b></div><div class="f9-shoulder right"><i></i><b></b></div><div class="f9-mid-shell left"><i></i><b></b></div><div class="f9-mid-shell right"><i></i><b></b></div><div class="f9-waist left"></div><div class="f9-waist right"></div><div class="f9-lower-shell left"><i></i></div><div class="f9-lower-shell right"><i></i></div><div id="sideUnits"></div></div>
       <button type="button" id="sideToggle" class="body-side-toggle">SIDE OPEN</button>
     </div>
   </section>
 </main>
-<script src="./main.js?v=3"></script>
+<script src="./main.js?v=4"></script>
 </body>
 </html>
