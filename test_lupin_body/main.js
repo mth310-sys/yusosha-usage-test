@@ -7,24 +7,17 @@
   const sideToggle=document.getElementById('sideToggle');
   let sideOpen=false;
 
-  /*
-   * Cabinet geometry is fixed in the 390px design coordinate system.
-   * iOS Safari / Home Screen viewport-height differences must NOT resize the
-   * cabinet or change internal spacing. Scale from width only; viewport height
-   * controls clipping/visible area only.
-   */
-  const DESIGN_WIDTH=390;
-  const DESIGN_HEIGHT=844;
-  const FIXED_LOWER_SHIFT=DESIGN_HEIGHT-528;
-
+  const BASE_BODY_HEIGHT=528;
   const fitCabinet=()=>{
-    const viewportWidth=stage.clientWidth||window.innerWidth;
+    const available=stage.clientWidth;
+    const scale=Math.min(1,available/390);
     const viewportHeight=window.visualViewport?.height||window.innerHeight;
-    const scale=Math.min(1,viewportWidth/DESIGN_WIDTH);
+    const targetDesignHeight=viewportHeight/scale;
+    const lowerShift=Math.max(0,targetDesignHeight-BASE_BODY_HEIGHT);
 
     cabinet.style.setProperty('--body-scale',String(scale));
-    cabinet.style.setProperty('--body-height',`${DESIGN_HEIGHT}px`);
-    cabinet.style.setProperty('--lower-shift',`${FIXED_LOWER_SHIFT}px`);
+    cabinet.style.setProperty('--body-height',`${targetDesignHeight}px`);
+    cabinet.style.setProperty('--lower-shift',`${lowerShift}px`);
     stage.style.height=`${viewportHeight}px`;
   };
   fitCabinet();
