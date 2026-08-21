@@ -27,45 +27,53 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}
 .f9-reel-box{transform:translateY(15px);z-index:8;box-shadow:0 4px 9px #000,0 0 0 2px #17120a,0 0 0 3px #8d5a18}
 .f9-top-unit{height:230px}
 
-/* Upper ornament study v3: the ornament is a field of separate pieces.
-   The large circle is deliberately subdued; it should read only as structure behind the pieces. */
+/* Upper ornament study v4.
+   The circle/reels are embedded in an irregular ornament field, not placed over a gold plate. */
 .f9-dot-ornament{position:absolute;left:42px;top:24px;width:302px;height:174px;z-index:2;pointer-events:none;background:none;overflow:visible;clip-path:none}
 .f9-ornament-panel{position:absolute;display:block;overflow:hidden;
   background:
-    repeating-linear-gradient(45deg,transparent 0 6px,#f4cc6868 6px 8px,transparent 8px 13px),
-    repeating-linear-gradient(-45deg,transparent 0 7px,#3b1c056e 7px 9px,transparent 9px 15px),
-    linear-gradient(145deg,#311503,#8d4a0b 17%,#d99822 38%,#f1c052 49%,#7a3d09 67%,#b76610 83%,#291103);
-  border:1px solid #69400f;
-  box-shadow:inset 0 0 5px #160a02,0 0 2px #e89c2850}
-.f9-ornament-panel::before{content:"";position:absolute;inset:3px;
-  background:repeating-linear-gradient(90deg,transparent 0 11px,#2b130552 11px 13px,transparent 13px 21px);opacity:.7}
+    repeating-linear-gradient(46deg,transparent 0 5px,#f3c75c6e 5px 7px,transparent 7px 12px),
+    repeating-linear-gradient(-47deg,transparent 0 6px,#3417057a 6px 8px,transparent 8px 14px),
+    linear-gradient(145deg,#2b1102,#754008 17%,#c37a17 34%,#efbd4c 47%,#6b3407 64%,#b35e0e 82%,#251003);
+  border:1px solid #633709;
+  box-shadow:inset 0 0 5px #130801,0 0 2px #d88b1e55}
+.f9-ornament-panel::before{content:"";position:absolute;inset:2px;
+  background:repeating-linear-gradient(91deg,transparent 0 9px,#2811035c 9px 11px,transparent 11px 18px);opacity:.72}
 .f9-ornament-panel::after{content:"";position:absolute;inset:1px;
-  background:radial-gradient(circle,#ffd56d 0 1.25px,#ff9c25 1.4px 2px,transparent 2.4px) 2px 2px/15px 15px,
-             linear-gradient(118deg,transparent 0 41%,#ffe49a4a 42% 45%,transparent 46% 100%);
-  mix-blend-mode:screen;opacity:.82}
+  background:radial-gradient(circle,#ffe07b 0 1.1px,#ff9c25 1.25px 1.9px,transparent 2.3px) 1px 1px/14px 14px,
+             linear-gradient(118deg,transparent 0 41%,#ffe7a052 42% 44%,transparent 45% 100%);
+  mix-blend-mode:screen;opacity:.86}
 
-/* Fan-like fragments: narrower, irregular and separated by dark seams. */
-.f9-ornament-panel.p-left-upper{left:-1px;top:31px;width:90px;height:27px;clip-path:polygon(0 20%,100% 0,82% 100%,6% 79%);transform:rotate(-11deg);transform-origin:100% 90%}
-.f9-ornament-panel.p-left-mid{left:-4px;top:72px;width:80px;height:24px;clip-path:polygon(0 10%,100% 0,91% 100%,3% 86%);transform:rotate(-2deg);transform-origin:100% 50%}
-.f9-ornament-panel.p-left-lower{left:2px;top:113px;width:92px;height:28px;clip-path:polygon(0 0,91% 9%,100% 100%,9% 76%);transform:rotate(10deg);transform-origin:100% 10%}
-.f9-ornament-panel.p-top{left:101px;top:4px;width:108px;height:23px;clip-path:polygon(0 82%,25% 0,100% 0,80% 100%);transform:rotate(-2deg)}
-.f9-ornament-panel.p-right-upper{left:197px;top:28px;width:99px;height:26px;clip-path:polygon(0 0,100% 14%,91% 100%,19% 73%);transform:rotate(6deg)}
-.f9-ornament-panel.p-right-lower{left:198px;top:122px;width:98px;height:25px;clip-path:polygon(15% 0,100% 9%,100% 82%,0 100%);transform:rotate(-6deg)}
-.f9-ornament-panel.p-bottom{left:102px;top:148px;width:121px;height:21px;clip-path:polygon(0 0,100% 8%,79% 100%,19% 84%);transform:rotate(1deg)}
+/* Smaller separated shards. Their edges aim toward the circular unit but never form one continuous fan. */
+.f9-ornament-panel.p-left-upper{left:-2px;top:35px;width:82px;height:22px;clip-path:polygon(0 28%,100% 0,79% 100%,8% 76%);transform:rotate(-12deg);transform-origin:100% 90%}
+.f9-ornament-panel.p-left-mid{left:-5px;top:75px;width:72px;height:20px;clip-path:polygon(0 14%,100% 0,88% 100%,4% 83%);transform:rotate(-3deg);transform-origin:100% 50%}
+.f9-ornament-panel.p-left-lower{left:1px;top:115px;width:83px;height:23px;clip-path:polygon(0 0,90% 10%,100% 100%,11% 72%);transform:rotate(11deg);transform-origin:100% 8%}
+.f9-ornament-panel.p-top{left:108px;top:6px;width:93px;height:19px;clip-path:polygon(0 85%,28% 0,100% 0,77% 100%);transform:rotate(-2deg)}
+.f9-ornament-panel.p-right-upper{left:205px;top:31px;width:91px;height:21px;clip-path:polygon(0 0,100% 17%,89% 100%,22% 69%);transform:rotate(7deg)}
+.f9-ornament-panel.p-right-lower{left:205px;top:124px;width:90px;height:21px;clip-path:polygon(18% 0,100% 11%,100% 78%,0 100%);transform:rotate(-7deg)}
+.f9-ornament-panel.p-bottom{left:108px;top:150px;width:106px;height:17px;clip-path:polygon(0 0,100% 10%,76% 100%,21% 81%);transform:rotate(1deg)}
 
-/* Structural circle: thin, darker and mostly hidden. */
-.f9-ornament-ring{position:absolute;left:23px;top:-7px;width:191px;height:191px;border-radius:50%;border:3px solid #6d410d;box-shadow:0 0 0 1px #bd8425,inset 0 0 0 1px #271203,0 0 4px #d88b1d45;z-index:1;opacity:.72}
-.f9-ornament-ring::before{content:"";position:absolute;inset:-5px;border-radius:50%;
-  background:repeating-conic-gradient(from -4deg,transparent 0 12deg,#bd7c1b 12deg 13.5deg,transparent 13.5deg 23deg);
-  -webkit-mask:radial-gradient(circle,transparent 0 81%,#000 82% 85%,transparent 86%);
-  mask:radial-gradient(circle,transparent 0 81%,#000 82% 85%,transparent 86%);opacity:.72}
-.f9-ornament-ring::after{content:"";position:absolute;inset:5px;border-radius:50%;border:1px dotted #e4aa39;opacity:.58}
+/* Only fragments of the large circle remain. Remove the continuous border entirely. */
+.f9-ornament-ring{position:absolute;left:24px;top:-5px;width:188px;height:188px;border-radius:50%;border:0;box-shadow:none;z-index:1;opacity:.62;
+  background:repeating-conic-gradient(from -9deg,
+    #b67518 0 1.2deg,transparent 1.2deg 13deg,
+    #e0a535 13deg 14.2deg,transparent 14.2deg 29deg);
+  -webkit-mask:radial-gradient(circle,transparent 0 82%,#000 83% 85%,transparent 86%);
+  mask:radial-gradient(circle,transparent 0 82%,#000 83% 85%,transparent 86%)}
+.f9-ornament-ring::before{content:"";position:absolute;inset:4px;border-radius:50%;
+  background:conic-gradient(from 4deg,#d69b2d 0 31deg,transparent 31deg 73deg,#70400b 73deg 113deg,transparent 113deg 166deg,#c7831c 166deg 208deg,transparent 208deg 274deg,#8b500d 274deg 310deg,transparent 310deg 360deg);
+  -webkit-mask:radial-gradient(circle,transparent 0 84%,#000 85% 87%,transparent 88%);
+  mask:radial-gradient(circle,transparent 0 84%,#000 85% 87%,transparent 88%);opacity:.65}
+.f9-ornament-ring::after{content:"";position:absolute;inset:8px;border-radius:50%;border:0;
+  background:repeating-conic-gradient(from 2deg,#ffca4f 0 .7deg,transparent .7deg 18deg);
+  -webkit-mask:radial-gradient(circle,transparent 0 87%,#000 88% 89%,transparent 90%);
+  mask:radial-gradient(circle,transparent 0 87%,#000 88% 89%,transparent 90%);opacity:.58}
 
-/* Reel cradle stays dark; gold pieces frame it rather than becoming one sheet. */
-.f9-dot-ornament::before{content:"";position:absolute;left:180px;top:39px;width:119px;height:108px;
-  background:linear-gradient(#7e470d,#211205 14%,#060606 27% 81%,#321a05 92%,#89500f);
-  clip-path:polygon(8% 0,100% 6%,95% 100%,0 94%);
-  box-shadow:inset 0 0 0 2px #241304,0 0 5px #000;z-index:0}
+/* Reel cradle remains a dark cavity; ornament fragments terminate around it. */
+.f9-dot-ornament::before{content:"";position:absolute;left:181px;top:41px;width:117px;height:104px;
+  background:linear-gradient(#70400c,#1c0f04 13%,#050505 26% 82%,#2a1504 92%,#75430d);
+  clip-path:polygon(9% 0,100% 7%,95% 100%,0 93%);
+  box-shadow:inset 0 0 0 2px #211103,0 0 5px #000;z-index:0}
 
 /* Keep the LED mechanism test control visible on the operation band. */
 .body-side-toggle{right:8px;bottom:auto;top:calc(202px + var(--lower-shift,0px));transform:none;z-index:20;pointer-events:auto}
