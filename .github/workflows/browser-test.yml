@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  lupin-b4:
+  browser-test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -23,15 +23,12 @@ jobs:
             echo "CHECK $f"
             node --input-type=module --check < "$f"
           done
+      - name: Check Lupin ZERO module syntax
+        run: |
+          set -e
+          for f in test_lupin_zero/src/*.js; do
+            echo "CHECK $f"
+            node --input-type=module --check < "$f"
+          done
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
-      - name: Upload Playwright diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-diagnostics
-          path: |
-            test-results/
-            playwright-report/
-          if-no-files-found: ignore
-          retention-days: 7
