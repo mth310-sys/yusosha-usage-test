@@ -47,6 +47,13 @@ export const VERIFIED_SPEC = Object.freeze({
       center: '五エ門',
       right: 'ルパン'
     }),
+    targetPrompt: Object.freeze({
+      label: 'メインリールを狙え',
+      target: 'SPECIAL_SYMBOL',
+      successConsequence: 'LONG_FREEZE_AND_LEGEND_GATE',
+      exactSpecialSymbolArtwork: null,
+      exactStopPattern: null
+    }),
     fullStrips: null,
     stripLength: null,
     symbolOrder: null,
@@ -67,6 +74,9 @@ export const VERIFIED_SPEC = Object.freeze({
     liquidReelChanceEyeRates: 'MULTI_SOURCE_MATCH',
     liquidReelAlignedEffects: 'MULTI_SOURCE_MATCH',
     physicalMainReelCharacterSymbols: 'PUBLISHED_ANALYSIS_AND_MACHINE_VISUALS',
+    mainReelTargetPrompt: 'PUBLISHED_MACHINE_GUIDE',
+    mainReelSpecialSymbolArtwork: 'UNRESOLVED',
+    mainReelSpecialSymbolStopPattern: 'UNRESOLVED',
     mbStopPattern: 'MULTI_SOURCE_MATCH',
     fullPhysicalReelStrips: 'UNRESOLVED',
     physicalReelStripLength: 'UNRESOLVED',
@@ -77,6 +87,8 @@ export const VERIFIED_SPEC = Object.freeze({
     fullPhysicalReelStrips: 'DO_NOT_INVENT',
     physicalReelStripLength: 'DO_NOT_INVENT',
     physicalReelSymbolOrder: 'DO_NOT_INVENT',
+    mainReelSpecialSymbolArtwork: 'DO_NOT_INVENT',
+    mainReelSpecialSymbolStopPattern: 'DO_NOT_INVENT',
     rareRolePhysicalStopPatterns: 'DO_NOT_INVENT',
     unlistedProbabilities: 'DO_NOT_INTERPOLATE'
   })
