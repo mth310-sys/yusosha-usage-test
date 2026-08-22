@@ -9,13 +9,13 @@
 </head>
 <body>
   <main class="app-shell">
-    <section class="machine" aria-label="LUPIN ZERO research cabinet">
+    <section class="machine" aria-label="LUPIN ZERO cabinet">
       <header class="crown">
         <div class="brand">YUSOSHA // LUPIN ZERO</div>
-        <button id="phaseBadge" class="phase-badge" type="button" aria-label="Toggle mechanism research state">RESEARCH CORE</button>
+        <div id="phaseBadge" class="phase-badge">SYSTEM</div>
       </header>
 
-      <div id="prismMechanism" class="prism-mechanism" data-state="closed" aria-label="Observed prism mechanism closed prototype">
+      <div id="prismMechanism" class="prism-mechanism" data-state="closed" aria-label="Prism mechanism">
         <div class="prism-round-led" aria-hidden="true"><span></span></div>
         <div class="prism-body" aria-hidden="true">
           <span class="prism-face prism-face-a"></span>
@@ -25,15 +25,8 @@
       </div>
 
       <section class="lcd-shell">
-        <div id="game" class="game-host" aria-label="Phaser render surface"></div>
+        <div id="game" class="game-host" aria-label="Main LCD"></div>
         <div class="lcd-glass" aria-hidden="true"></div>
-      </section>
-
-      <section class="research-cues" aria-label="Liquid reel and chance-zone research controls">
-        <button type="button" data-chance-eye="WEAK">青</button>
-        <button type="button" data-chance-eye="MIDDLE">赤</button>
-        <button type="button" data-chance-eye="STRONG">金</button>
-        <button id="czOddBtn" class="cz-odd" type="button" disabled>奇数揃い</button>
       </section>
 
       <section class="meter-row" aria-live="polite">
@@ -55,7 +48,7 @@
       </section>
 
       <footer class="lower-panel">
-        <div class="panel-title">消されたルパン — SYSTEM REBUILD LAB</div>
+        <div class="panel-title">消されたルパン</div>
         <div id="message" class="message">BETしてSTART</div>
       </footer>
     </section>
