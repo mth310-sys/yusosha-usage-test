@@ -1,28 +1,20 @@
-export const MachineState = Object.freeze({
-  IDLE: 'IDLE',
-  READY: 'READY',
-  SPINNING: 'SPINNING',
-  STOPPING: 'STOPPING'
-});
+import { createMachineState, reduceMachine, KernelPhase } from './machine-kernel.js';
+
+export const MachineState = KernelPhase;
 
 export class MachineCore extends EventTarget {
   constructor({ credit = 50, maxBet = 3 } = {}) {
     super();
-    this.credit = credit;
-    this.maxBet = maxBet;
-    this.bet = 0;
-    this.state = MachineState.IDLE;
-    this.stopped = [true, true, true];
-    this.spinId = 0;
+    this.kernelState = createMachineState({ credit, maxBet });
   }
 
   snapshot() {
     return Object.freeze({
-      credit: this.credit,
-      bet: this.bet,
-      state: this.state,
-      stopped: [...this.stopped],
-      spinId: this.spinId
+      credit: this.kernelState.credit,
+      bet: this.kernelState.bet,
+      state: this.kernelState.phase,
+      stopped: [...this.kernelState.stopped],
+      spinId: this.kernelState.spinId
     });
   }
 
@@ -30,53 +22,44 @@ export class MachineCore extends EventTarget {
     this.dispatchEvent(new CustomEvent(type, { detail: { ...detail, snapshot: this.snapshot() } }));
   }
 
-  betOne() {
-    if (this.state === MachineState.SPINNING || this.state === MachineState.STOPPING) return false;
-    if (this.bet >= this.maxBet || this.credit <= 0) return false;
-    this.credit -= 1;
-    this.bet += 1;
-    this.state = MachineState.READY;
-    this.emit('change', { reason: 'bet-one' });
+  apply(command) {
+    const reduced = reduceMachine(this.kernelState, command);
+    if (!reduced.accepted) return false;
+    this.kernelState = reduced.state;
+
+    for (const event of reduced.events) {
+      if (event.type === 'CHANGE') this.emit('change', { reason: event.reason });
+      if (event.type === 'SPIN_START') this.emit('spin-start', { spinId: event.spinId });
+      if (event.type === 'REEL_STOP') {
+        this.emit('reel-stop', {
+          reelIndex: event.reelIndex,
+          spinId: event.spinId,
+          complete: event.complete
+        });
+      }
+      if (event.type === 'SPIN_END') {
+        this.emit('spin-end', {
+          reelIndex: event.reelIndex,
+          spinId: event.spinId
+        });
+      }
+    }
     return true;
+  }
+
+  betOne() {
+    return this.apply({ type: 'BET_ONE' });
   }
 
   maxBetNow() {
-    if (this.state === MachineState.SPINNING || this.state === MachineState.STOPPING) return false;
-    let changed = false;
-    while (this.bet < this.maxBet && this.credit > 0) {
-      this.credit -= 1;
-      this.bet += 1;
-      changed = true;
-    }
-    if (changed) {
-      this.state = MachineState.READY;
-      this.emit('change', { reason: 'max-bet' });
-    }
-    return changed;
+    return this.apply({ type: 'MAX_BET' });
   }
 
   start() {
-    if (this.state !== MachineState.READY || this.bet <= 0) return false;
-    this.spinId += 1;
-    this.state = MachineState.SPINNING;
-    this.stopped = [false, false, false];
-    this.emit('spin-start', { spinId: this.spinId });
-    return true;
+    return this.apply({ type: 'START' });
   }
 
   stop(reelIndex) {
-    if (![MachineState.SPINNING, MachineState.STOPPING].includes(this.state)) return false;
-    if (!Number.isInteger(reelIndex) || reelIndex < 0 || reelIndex > 2 || this.stopped[reelIndex]) return false;
-
-    this.stopped[reelIndex] = true;
-    const complete = this.stopped.every(Boolean);
-    this.state = complete ? MachineState.IDLE : MachineState.STOPPING;
-    this.emit('reel-stop', { reelIndex, spinId: this.spinId, complete });
-
-    if (complete) {
-      this.bet = 0;
-      this.emit('spin-end', { reelIndex, spinId: this.spinId });
-    }
-    return true;
+    return this.apply({ type: 'STOP_REEL', reelIndex });
   }
 }
