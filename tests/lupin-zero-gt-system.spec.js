@@ -51,10 +51,25 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   });
   expect(result.spec.lupinRush.perPatternAwardDistribution).toBeNull();
 
+  expect(result.spec.treasureHunt.exactOccurrenceTrigger).toBeNull();
+  expect(result.spec.treasureHunt.successProbability).toBeNull();
+  expect(result.spec.treasureHunt.guaranteedSuccessPresentations).toEqual({
+    FLAME_LUPIN_HOLD: { minTreasurePoints: 200000 },
+    FUJIKO_HOLD: { minTreasurePoints: 300000 },
+    TAMA_CHAN_HOLD: { minTreasurePoints: 1000000 }
+  });
+  expect(result.spec.treasureHunt.treasureRushRelationship.status).toBe('CONFLICT');
+  expect(result.spec.treasureHunt.treasureRushRelationship.publishedClaims).toEqual([
+    'SUCCESS_ENTERS_TREASURE_RUSH',
+    'SUCCESS_GIVES_TREASURE_RUSH_CHANCE'
+  ]);
+  expect(result.spec.treasureHunt.treasureRushRelationship.directEntryOnSuccess).toBeNull();
+  expect(result.spec.treasureHunt.treasureRushRelationship.entryProbabilityAfterSuccess).toBeNull();
+
+  expect(result.spec.treasureRush.triggerRelation).toBe('TREASURE_HUNT_SUCCESS_RELATED');
   expect(result.spec.treasureRush.games).toEqual({ min: 4, max: 9 });
   expect(result.spec.treasureRush.averageTreasurePoints).toBe(499000);
   expect(result.spec.treasureRush.perGameAwardTable).toBeNull();
-  expect(result.spec.treasureRush.treasureHuntSuccessProbability).toBeNull();
 
   expect(result.spec.extraBonus.triggerPoints).toBe(1000000);
   expect(result.spec.extraBonus.gamesRule).toBe('15_PLUS_REMAINING_ART_GAMES');
@@ -70,9 +85,14 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.spec.evidence.lupinRushPatternExpectationOrder).toBe('MULTI_SOURCE_MATCH');
   expect(result.spec.evidence.lupinRushPatternSelectionRates).toBe('PUBLISHED_ANALYSIS');
   expect(result.spec.evidence.lupinRushPerPatternAwardDistribution).toBe('UNRESOLVED');
+  expect(result.spec.evidence.treasureHuntGuaranteedSuccessPresentations).toBe('PUBLISHED_ANALYSIS');
+  expect(result.spec.evidence.treasureHuntOccurrenceTrigger).toBe('UNRESOLVED');
   expect(result.spec.evidence.treasureHuntSuccessProbability).toBe('UNRESOLVED');
+  expect(result.spec.evidence.treasureHuntToTreasureRushRoute).toBe('CONFLICT');
   expect(result.spec.policy.inferTreasurePointAwardAmounts).toBe(false);
+  expect(result.spec.policy.inferTreasureHuntOccurrenceTrigger).toBe(false);
   expect(result.spec.policy.inferTreasureHuntSuccessProbability).toBe(false);
+  expect(result.spec.policy.inferTreasureRushEntryOnHuntSuccess).toBe(false);
   expect(result.spec.policy.inferStageTransitionRates).toBe(false);
   expect(result.spec.policy.inferRushPatternSelectionRates).toBe(false);
   expect(result.spec.policy.inferRushPerPatternAwardsFromOverallAverage).toBe(false);
