@@ -52,6 +52,7 @@ export class MachineCore extends EventTarget {
       if (event.type === 'WANTED_WINDOW_CONFIGURED') this.emit('wanted-window-configured', { window: event.window, triggerGame: event.triggerGame, context: event.context });
       if (event.type === 'NORMAL_PROGRESSION_ADVANCED') this.emit('normal-progression-advanced', { games: event.games });
       if (event.type === 'RAIUN_POINTS_SET') this.emit('raiun-points-set', { points: event.points, evidenceStatus: event.evidenceStatus });
+      if (event.type === 'RAIUN_POINTS_ADDED') this.emit('raiun-points-added', { from: event.from, points: event.points, to: event.to, evidenceStatus: event.evidenceStatus });
       if (event.type === 'RAIUN_HIGH_ENTER') this.emit('raiun-high-enter', { games: event.games, points: event.points });
       if (event.type === 'MODE_ENTER') this.emit('mode-enter', { mode: event.mode, games: event.games, evidenceStatus: event.evidenceStatus, sourceWindow: event.sourceWindow ?? null });
       if (event.type === 'MODE_EXIT') this.emit('mode-exit', { from: event.from, to: event.to });
@@ -84,6 +85,7 @@ export class MachineCore extends EventTarget {
 
   advanceNormalProgression() { return this.apply({ type: 'ADVANCE_NORMAL_PROGRESSION' }); }
   setRaiunPoints(points, evidenceStatus = 'UNRESOLVED') { return this.apply({ type: 'SET_RAIUN_POINTS', points, evidenceStatus }); }
+  addRaiunPoints(points, evidenceStatus = 'UNRESOLVED') { return this.apply({ type: 'ADD_RAIUN_POINTS', points, evidenceStatus }); }
   exitWantedChance() { return this.apply({ type: 'EXIT_WANTED_CHANCE' }); }
   enterMode(mode, games, evidenceStatus = 'UNRESOLVED') { return this.apply({ type: 'ENTER_MODE', mode, games, evidenceStatus }); }
   advanceModeGame() { return this.apply({ type: 'ADVANCE_MODE_GAME' }); }
