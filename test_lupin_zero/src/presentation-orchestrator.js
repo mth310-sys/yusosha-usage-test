@@ -3,7 +3,10 @@ import { MachineSurfaceState } from './machine-surface-state.js';
 
 export const PRESENTATION_CUES = Object.freeze({
   RESEARCH_REVEAL: 'RESEARCH_REVEAL',
-  RESEARCH_RESET: 'RESEARCH_RESET'
+  RESEARCH_RESET: 'RESEARCH_RESET',
+  CHANCE_EYE_BLUE: 'CHANCE_EYE_BLUE',
+  CHANCE_EYE_RED: 'CHANCE_EYE_RED',
+  CHANCE_EYE_GOLD: 'CHANCE_EYE_GOLD'
 });
 
 export class PresentationOrchestrator {
@@ -35,7 +38,7 @@ export class PresentationOrchestrator {
     return surface;
   }
 
-  runCue(cue) {
+  runCue(cue, detail = {}) {
     if (cue === PRESENTATION_CUES.RESEARCH_REVEAL) {
       return Object.freeze([
         this.applyEvent(machineEvent(MACHINE_EVENTS.LED_CUE, { side: 'LEFT', cue: 'REVEAL' })),
@@ -50,6 +53,11 @@ export class PresentationOrchestrator {
         this.applyEvent(machineEvent(MACHINE_EVENTS.LED_CUE, { side: 'RIGHT', cue: 'IDLE' })),
         this.applyEvent(machineEvent(MACHINE_EVENTS.MECHANISM_CUE, { cue: 'CLOSED' })),
         this.applyEvent(machineEvent(MACHINE_EVENTS.LCD_CUE, { cue: 'RESEARCH_RESET' }))
+      ]);
+    }
+    if ([PRESENTATION_CUES.CHANCE_EYE_BLUE, PRESENTATION_CUES.CHANCE_EYE_RED, PRESENTATION_CUES.CHANCE_EYE_GOLD].includes(cue)) {
+      return Object.freeze([
+        this.applyEvent(machineEvent(MACHINE_EVENTS.LCD_CUE, { cue, ...detail }))
       ]);
     }
     throw new Error(`Unknown presentation cue: ${cue}`);
@@ -67,5 +75,8 @@ export class PresentationOrchestrator {
 export const PRESENTATION_ORCHESTRATOR_POLICY = Object.freeze({
   researchCueIsVerifiedAutomaticBehavior: false,
   automaticTriggerImplemented: false,
-  note: 'Research cue coordinates verified/observed surfaces without claiming the real-machine automatic trigger relationship.'
+  chanceEyeLcdSemanticsImplemented: true,
+  chanceEyePhysicalLedReactionImplemented: false,
+  chanceEyeMechanismReactionImplemented: false,
+  note: 'Research cue coordinates observed surfaces. Chance-eye cues drive only verified liquid/LCD semantics until physical reactions are evidenced.'
 });
