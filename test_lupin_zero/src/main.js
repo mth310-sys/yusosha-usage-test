@@ -5,17 +5,20 @@ import { PrismMechanismController } from './mechanism-controller.js';
 import { PresentationOrchestrator } from './presentation-orchestrator.js';
 import { getChanceEyePresentation } from './chance-eye-presentation-map.js';
 import { resolveChanceEyeOutcome, CHANCE_EYE_CONTEXT, CHANCE_EYE_DESTINATION } from './chance-eye-outcome-resolver.js';
+import { resolveChanceEyeOccurrence } from './chance-eye-occurrence-resolver.js';
 import { resolveChanceZoneDuration } from './chance-zone-duration-resolver.js';
 import { SeededRandomSource } from './random-source.js';
 
-const RESEARCH_SETTING = 1;
+const MACHINE_SETTING = 1;
 const core = new MachineCore({ credit: 50, maxBet: 3 });
 const researchReels = new ResearchReelEngine();
+const chanceEyeOccurrenceRandom = new SeededRandomSource(0x20160800);
 const chanceEyeRandom = new SeededRandomSource(0x20160801);
 const chanceZoneRandom = new SeededRandomSource(0x20160802);
 const machineRoot = document.querySelector('.machine');
 const lcdShell = document.querySelector('.lcd-shell');
 const mechanism = new PrismMechanismController(document.querySelector('#prismMechanism'));
+let pendingChanceEyeOccurrence = null;
 
 const ui = {
   credit: document.querySelector('#creditValue'),
@@ -80,7 +83,7 @@ function render(snapshot = core.snapshot()) {
 
 function enterChanceZone(destination) {
   if (![CHANCE_EYE_DESTINATION.FUJIKO_ZONE, CHANCE_EYE_DESTINATION.ODOROBO_ZONE].includes(destination)) return null;
-  const duration = resolveChanceZoneDuration(chanceZoneRandom, RESEARCH_SETTING, destination);
+  const duration = resolveChanceZoneDuration(chanceZoneRandom, MACHINE_SETTING, destination);
   const entered = core.enterMode(destination, duration.games, duration.evidenceStatus);
   return entered ? duration : null;
 }
@@ -91,44 +94,62 @@ function playChanceEye(kind, mode = CHANCE_EYE_CONTEXT.NORMAL) {
   const outcome = resolveChanceEyeOutcome(chanceEyeRandom, key, mode);
   const chanceZone = outcome.hit ? enterChanceZone(outcome.destination) : null;
   presentation.runCue(spec.presentationCue, { ...spec, outcome, chanceZone });
-  ui.message.textContent = chanceZone
-    ? `${spec.label} HIT → ${outcome.destination} ${chanceZone.games}G`
-    : outcome.hit
-      ? `${spec.label} HIT → ${outcome.destination}`
-      : `${spec.label} MISS`;
+
+  if (chanceZone) {
+    ui.message.textContent = outcome.destination === CHANCE_EYE_DESTINATION.FUJIKO_ZONE
+      ? '不二子ゾーン'
+      : '大泥棒ゾーン';
+  } else {
+    ui.message.textContent = spec.label;
+  }
   render();
   return Object.freeze({ spec, outcome, chanceZone });
 }
 
+function resolvePendingChanceEye() {
+  const pending = pendingChanceEyeOccurrence;
+  pendingChanceEyeOccurrence = null;
+  if (!pending?.occurred) return null;
+  if (core.snapshot().mode !== 'NORMAL') return null;
+  return playChanceEye(pending.kind, CHANCE_EYE_CONTEXT.NORMAL);
+}
+
 core.addEventListener('change', (event) => {
   render(event.detail.snapshot);
-  ui.message.textContent = event.detail.snapshot.bet === 3 ? 'MAX BET — START可能' : 'BET受付中';
+  ui.message.textContent = event.detail.snapshot.bet === 3 ? 'MAX BET — START' : 'BET受付';
 });
 
 core.addEventListener('mode-enter', (event) => {
   render(event.detail.snapshot);
-  ui.message.textContent = `${event.detail.mode} 突入 — ${event.detail.games}G`;
+  ui.message.textContent = event.detail.mode === CHANCE_EYE_DESTINATION.FUJIKO_ZONE
+    ? '不二子ゾーン'
+    : event.detail.mode === CHANCE_EYE_DESTINATION.ODOROBO_ZONE
+      ? '大泥棒ゾーン'
+      : event.detail.mode;
 });
 
 core.addEventListener('mode-game-advanced', (event) => {
   render(event.detail.snapshot);
-  ui.message.textContent = `${event.detail.mode} — 残り${event.detail.remaining}G`;
 });
 
 core.addEventListener('mode-window-exhausted', (event) => {
   render(event.detail.snapshot);
-  ui.message.textContent = `${event.detail.mode} 規定G消化`;
+  ui.message.textContent = `${event.detail.mode} 終了`;
 });
 
 core.addEventListener('chance-zone-success', (event) => {
   render(event.detail.snapshot);
-  ui.message.textContent = `${event.detail.mode} 成功 — BONUS / ART 判定待ち`;
+  ui.message.textContent = 'チャンスゾーン成功';
 });
 
 core.addEventListener('spin-start', (event) => {
+  const snapshot = event.detail.snapshot;
+  pendingChanceEyeOccurrence = snapshot.mode === 'NORMAL'
+    ? resolveChanceEyeOccurrence(chanceEyeOccurrenceRandom, CHANCE_EYE_CONTEXT.NORMAL)
+    : null;
   researchReels.start(event.detail.spinId);
-  render(event.detail.snapshot);
-  ui.message.textContent = 'SPIN — STOPボタンで停止';
+  render(snapshot);
+  ui.message.textContent = 'SPIN';
   scene().startSpin();
 });
 
@@ -139,12 +160,15 @@ core.addEventListener('reel-stop', (event) => {
 });
 
 core.addEventListener('spin-end', (event) => {
+  const completedMode = event.detail.snapshot.mode;
   if (event.detail.snapshot.modeGamesRemaining > 0) core.advanceModeGame();
-  render();
   scene().endSpin();
-  if (core.snapshot().mode === 'NORMAL') {
-    ui.message.textContent = '1ゲーム完了';
+
+  if (completedMode === 'NORMAL') {
+    const chanceEye = resolvePendingChanceEye();
+    if (!chanceEye) ui.message.textContent = '1ゲーム完了';
   }
+  render();
 });
 
 ui.betBtn.addEventListener('click', () => core.betOne());
@@ -163,7 +187,8 @@ window.__LUPIN_ZERO__ = {
   presentation,
   playChanceEye,
   resolveChanceZoneOddAlignment: () => core.resolveChanceZoneOddAlignment(),
+  chanceEyeOccurrenceRandom,
   chanceEyeRandom,
   chanceZoneRandom,
-  researchSetting: RESEARCH_SETTING
+  machineSetting: MACHINE_SETTING
 };
