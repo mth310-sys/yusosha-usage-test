@@ -59,6 +59,37 @@ export const VERIFIED_SPEC = Object.freeze({
       expectedSets: Object.freeze({ min: 5.1, max: 6.0 })
     })
   }),
+  chanceZones: Object.freeze({
+    entryLotteryTrigger: 'CHANCE_EYE',
+    odoroboZone: Object.freeze({
+      category: 'SELF_CLEAR_CZ',
+      games: Object.freeze([10, 20]),
+      expectedRatePercent: Object.freeze({ min: 39.6, max: 43.2 }),
+      successCondition: 'ODD_SYMBOL_ALIGNED',
+      successDestination: 'LUPIN_BONUS_OR_GOLDEN_TIME',
+      canUpgradeTo: 'FUJIKO_ZONE'
+    }),
+    fujikoZone: Object.freeze({
+      category: 'SELF_CLEAR_CZ',
+      games: Object.freeze([10, 20]),
+      expectedRatePercent: Object.freeze({ min: 58.8, max: 63.2 }),
+      successCondition: 'ODD_SYMBOL_ALIGNED',
+      successDestination: 'LUPIN_BONUS_OR_GOLDEN_TIME'
+    }),
+    rizeZone: Object.freeze({
+      category: 'PRECURSOR_ZONE',
+      progressionRule: 'STEP_UP_INCREASES_EXPECTATION',
+      successDestination: 'LUPIN_BONUS_OR_GOLDEN_TIME',
+      games: null,
+      automaticEntryProbability: null
+    }),
+    sevenZone: Object.freeze({
+      category: 'CONFIRMED_ART_PRECURSOR',
+      confirmedDestination: 'GOLDEN_TIME',
+      games: null,
+      automaticEntryProbability: null
+    })
+  }),
   liquidReel: Object.freeze({
     chanceEyes: Object.freeze({
       weak: Object.freeze({ label: '青チャンス目', visualRule: 'BLUE_SAME_COLOR', normalDenominator: 53.6, wantedChanceDenominator: 13.9 }),
@@ -107,6 +138,12 @@ export const VERIFIED_SPEC = Object.freeze({
     raiunModeProfile: 'MULTI_SOURCE_MATCH',
     lupinBonusProfile: 'MULTI_SOURCE_MATCH',
     goldenTimeProfile: 'MULTI_SOURCE_MATCH',
+    chanceZoneTypes: 'MULTI_SOURCE_MATCH',
+    chanceZoneEntryTrigger: 'PUBLISHED_ANALYSIS',
+    odoroboZoneProfile: 'MULTI_SOURCE_MATCH',
+    fujikoZoneProfile: 'MULTI_SOURCE_MATCH',
+    rizeZoneProfile: 'MULTI_SOURCE_MATCH',
+    sevenZoneProfile: 'MULTI_SOURCE_MATCH',
     liquidReelChanceEyeRules: 'MULTI_SOURCE_MATCH',
     liquidReelChanceEyeRates: 'MULTI_SOURCE_MATCH',
     liquidReelAlignedEffects: 'MULTI_SOURCE_MATCH',
@@ -127,7 +164,8 @@ export const VERIFIED_SPEC = Object.freeze({
     mainReelSpecialSymbolArtwork: 'DO_NOT_INVENT',
     mainReelSpecialSymbolStopPattern: 'DO_NOT_INVENT',
     rareRolePhysicalStopPatterns: 'DO_NOT_INVENT',
-    unlistedProbabilities: 'DO_NOT_INTERPOLATE'
+    unlistedProbabilities: 'DO_NOT_INTERPOLATE',
+    unresolvedChanceZoneEntryRates: 'DO_NOT_INVENT'
   })
 });
 
