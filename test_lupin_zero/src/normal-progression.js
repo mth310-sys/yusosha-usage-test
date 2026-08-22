@@ -72,8 +72,10 @@ export const RAIUN_COUNTER_SPEC = Object.freeze({
   averageGamesToTarget: 190,
   exactInitialPointDistributionKnown: false,
   exactIncrementDistributionKnown: false,
-  automaticPointGenerationImplemented: false,
-  evidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS
+  automaticPointGenerationImplemented: true,
+  productionInferenceModule: './raiun-counter-resolver.js',
+  evidenceStatus: ReuseEvidenceStatus.INFERRED_HIGH_CONFIDENCE,
+  replaceable: true
 });
 
 export const NORMAL_PROGRESSION_POLICY = Object.freeze({
@@ -83,5 +85,8 @@ export const NORMAL_PROGRESSION_POLICY = Object.freeze({
   wantedProductionFallbackEvidenceStatus: ReuseEvidenceStatus.INFERRED_HIGH_CONFIDENCE,
   raiunTarget100PointsImplemented: true,
   raiunHighSevenGamesImplemented: true,
-  raiunUnknownPointDistributionInvented: false
+  raiunUnknownPointDistributionInvented: false,
+  raiunProductionInferenceImplemented: true,
+  raiunProductionInferenceEvidenceStatus: ReuseEvidenceStatus.INFERRED_HIGH_CONFIDENCE,
+  raiunProductionInferenceReplaceable: true
 });
