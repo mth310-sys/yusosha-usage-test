@@ -8,6 +8,7 @@ import { resolveChanceEyeOutcome, CHANCE_EYE_CONTEXT, CHANCE_EYE_DESTINATION } f
 import { resolveChanceEyeOccurrence } from './chance-eye-occurrence-resolver.js';
 import { resolveChanceZoneDuration } from './chance-zone-duration-resolver.js';
 import { PhysicalRoleSession } from './physical-role-session.js';
+import { getNormalRoleSettlement } from './normal-role-settlement.js';
 import { SeededRandomSource } from './random-source.js';
 
 const MACHINE_SETTING = 1;
@@ -73,7 +74,11 @@ function render(snapshot = core.snapshot()) {
     : snapshot.modeResult
       ? `${snapshot.mode} SUCCESS`
       : `${snapshot.mode} ${snapshot.modeGamesRemaining ?? '?'}G`;
-  ui.phaseBadge.textContent = snapshot.mode === 'NORMAL' ? 'SYSTEM' : snapshot.mode;
+  ui.phaseBadge.textContent = snapshot.mbFollowupGamesRemaining > 0
+    ? `MB ${snapshot.mbFollowupGamesRemaining}G`
+    : snapshot.mode === 'NORMAL'
+      ? 'SYSTEM'
+      : snapshot.mode;
 
   const busy = [MachineState.SPINNING, MachineState.STOPPING].includes(snapshot.state);
   const pendingModeResult = Boolean(snapshot.modeResult);
@@ -118,9 +123,24 @@ function resolvePendingChanceEye() {
   return playChanceEye(pending.kind, CHANCE_EYE_CONTEXT.NORMAL);
 }
 
+function settlePendingPhysicalRole() {
+  const production = pendingPhysicalRole?.production ?? null;
+  if (!production) return null;
+  const settlement = getNormalRoleSettlement(production, 3);
+  core.settleNormalRole(settlement);
+  return settlement;
+}
+
 core.addEventListener('change', (event) => {
   render(event.detail.snapshot);
   ui.message.textContent = event.detail.snapshot.bet === 3 ? 'MAX BET — START' : 'BET受付';
+});
+
+core.addEventListener('normal-role-settled', (event) => {
+  render(event.detail.snapshot);
+  if (event.detail.role === 'REPLAY') ui.message.textContent = 'REPLAY';
+  else if (event.detail.role === 'MB') ui.message.textContent = 'MB';
+  else if (event.detail.creditDelta > 0) ui.message.textContent = `${event.detail.creditDelta} PAY`;
 });
 
 core.addEventListener('mode-enter', (event) => {
@@ -172,9 +192,11 @@ core.addEventListener('spin-end', (event) => {
   if (event.detail.snapshot.modeGamesRemaining > 0) core.advanceModeGame();
   scene().endSpin();
 
+  let settlement = null;
   if (completedMode === 'NORMAL') {
+    settlement = settlePendingPhysicalRole();
     const chanceEye = resolvePendingChanceEye();
-    if (!chanceEye) ui.message.textContent = '1ゲーム完了';
+    if (!chanceEye && !settlement?.accepted) ui.message.textContent = '1ゲーム完了';
   }
   pendingPhysicalRole = null;
   render();
