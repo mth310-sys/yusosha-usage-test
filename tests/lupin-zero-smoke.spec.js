@@ -91,9 +91,12 @@ test('VerifiedSpec keeps published base role denominators exact and reel strips 
       mb: spec.getNormalRoleDenominator('MB', 3),
       nineCoin: [1,2,3,4,5,6].map((setting) => spec.getNormalRoleDenominator('NINE_COIN', setting)),
       tenCoin: [1,2,3,4,5,6].map((setting) => spec.getNormalRoleDenominator('TEN_COIN', setting)),
+      premium: [1,2,3,4,5,6].map((setting) => spec.getNormalRoleDenominator('PREMIUM', setting)),
+      legend: [1,2,3,4,5,6].map((setting) => spec.getNormalRoleDenominator('LEGEND', setting)),
       invalid: spec.getNormalRoleDenominator('UNKNOWN', 1),
       evidence: spec.VERIFIED_SPEC.evidence,
       policy: spec.VERIFIED_SPEC.policy,
+      play: spec.VERIFIED_SPEC.play,
       mbSpec: spec.VERIFIED_SPEC.mb
     };
   });
@@ -103,9 +106,19 @@ test('VerifiedSpec keeps published base role denominators exact and reel strips 
   expect(result.mb).toBe(27.31);
   expect(result.nineCoin).toEqual([25.28,25.46,25.62,25.78,25.94,26.11]);
   expect(result.tenCoin).toEqual([26.27,25.18,24.28,23.45,22.67,21.94]);
+  expect(result.premium).toEqual([65536,65536,65536,65536,32768,21845.33]);
+  expect(result.legend).toEqual([65536,65536,65536,65536,32768,32768]);
   expect(result.invalid).toBeNull();
+  expect(result.play).toEqual({
+    normalFreeStopAllowed: true,
+    normalPushOrderPenalty: false,
+    rareRoleFamilies: ['青チャンス目', '赤チャンス目', '金チャンス目'],
+    gamesPer50Coins: { min: 46.1, max: 48.7 }
+  });
   expect(result.evidence.fullPhysicalReelStrips).toBe('UNRESOLVED');
+  expect(result.evidence.rareRolePhysicalStopPatterns).toBe('UNRESOLVED');
   expect(result.policy.fullPhysicalReelStrips).toBe('DO_NOT_INVENT');
+  expect(result.policy.rareRolePhysicalStopPatterns).toBe('DO_NOT_INVENT');
   expect(result.policy.unlistedProbabilities).toBe('DO_NOT_INTERPOLATE');
   expect(result.mbSpec).toEqual({
     stopLine: 'MIDDLE',
