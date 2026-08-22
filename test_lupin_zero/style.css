@@ -14,7 +14,17 @@ button{font:inherit;color:#fff;-webkit-tap-highlight-color:transparent;touch-act
 .machine::before,.machine::after{content:"";position:absolute;top:70px;bottom:70px;width:8px;border-radius:99px;background:linear-gradient(#4b0b0f,#ffb222,#65070d);box-shadow:0 0 16px #ff3b23;opacity:.7}
 .machine::before{left:3px}.machine::after{right:3px}
 .crown{height:56px;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;border:1px solid #6f5322;border-radius:16px 16px 8px 8px;background:linear-gradient(#24150d,#080808);box-shadow:inset 0 0 16px #000}
-.brand{font-size:13px;font-weight:900;letter-spacing:.08em;color:#f0d277;text-shadow:0 0 8px #8d5d10}.phase-badge{font-size:9px;padding:5px 7px;border:1px solid #815f21;border-radius:99px;color:#cab06f}
+.brand{font-size:13px;font-weight:900;letter-spacing:.08em;color:#f0d277;text-shadow:0 0 8px #8d5d10}.phase-badge{font-size:9px;padding:5px 7px;border:1px solid #815f21;border-radius:99px;color:#cab06f;background:#16100a}
+.prism-mechanism{position:absolute;z-index:8;right:7px;top:104px;width:42px;height:164px;perspective:240px;pointer-events:none}
+.prism-round-led{position:absolute;left:2px;top:48px;width:36px;height:68px;border-radius:50%;background:radial-gradient(circle at 46% 42%,#fff 0 7%,#ffe879 15%,#ffad27 38%,#a31316 67%,#210000 100%);border:2px solid #5a4020;box-shadow:0 0 5px rgba(255,213,71,.2),inset 0 0 12px #270000;opacity:.08;transform:scale(.78);transition:opacity 180ms ease,transform 220ms ease,box-shadow 180ms ease}
+.prism-round-led span{position:absolute;inset:22% 18%;border-radius:50%;border:2px solid rgba(255,246,189,.55);box-shadow:inset 0 0 7px #fff2a1}
+.prism-body{position:absolute;inset:0;transform-style:preserve-3d;transform-origin:50% 50%;transition:transform 360ms cubic-bezier(.2,.76,.2,1)}
+.prism-face{position:absolute;left:4px;top:0;width:34px;height:164px;clip-path:polygon(50% 0,100% 14%,100% 86%,50% 100%,0 86%,0 14%);border:1px solid rgba(232,198,105,.6);background:linear-gradient(90deg,#120707,#6d1518 42%,#c48b32 50%,#431011 61%,#080404);box-shadow:inset 0 0 15px #000,0 0 4px rgba(235,177,54,.28);backface-visibility:hidden}
+.prism-face-a{transform:rotateY(0deg) translateZ(10px)}
+.prism-face-b{transform:rotateY(120deg) translateZ(10px)}
+.prism-face-c{transform:rotateY(240deg) translateZ(10px)}
+.prism-mechanism[data-state="reveal"] .prism-body{transform:rotateY(-82deg) translateX(7px)}
+.prism-mechanism[data-state="reveal"] .prism-round-led{opacity:1;transform:scale(1);box-shadow:0 0 8px #ffd949,0 0 18px rgba(255,63,26,.8),inset 0 0 14px #fff4a2}
 .lcd-shell{position:relative;margin:9px auto 7px;width:calc(100% - 26px);height:270px;border:5px solid #161616;border-radius:15px;background:#000;overflow:hidden;box-shadow:0 0 0 2px #695021,inset 0 0 25px #000}
 .game-host{width:100%;height:100%}.game-host canvas{display:block;width:100%!important;height:100%!important}
 .lcd-glass{pointer-events:none;position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.13),transparent 28%,transparent 70%,rgba(255,255,255,.05));mix-blend-mode:screen}
