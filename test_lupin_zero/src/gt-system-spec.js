@@ -76,11 +76,19 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     visibleStageMayLagInternalStage: true
   }),
   lupinRush: Object.freeze({
-    timing: 'SET_START',
+    timing: 'SET_START_AND_SOME_CONTINUATIONS',
     games: 4,
     patterns: Object.freeze(['WALTHER', 'SILHOUETTE', 'REVOLVER_VISION', 'ATTACK_VISION']),
+    expectationOrder: Object.freeze(['WALTHER', 'SILHOUETTE', 'REVOLVER_VISION', 'ATTACK_VISION']),
     averageTreasurePoints: 342000,
-    patternSelectionRates: null
+    patternSelectionRates: Object.freeze({
+      WALTHER: 63.0,
+      SILHOUETTE: 31.0,
+      REVOLVER_VISION: 5.0,
+      ATTACK_VISION: 1.0
+    }),
+    attackVisionPublishedEffect: '1000000_TREASURE_EXPECTED_OR_CONFIRMED_BY_PRESENTATION_GUIDE',
+    perPatternAwardDistribution: null
   }),
   treasureRush: Object.freeze({
     trigger: 'TREASURE_HUNT_SUCCESS',
@@ -120,8 +128,10 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     stageScenarioSelection: 'MULTI_SOURCE_MATCH',
     stageScenarioInitialStages: 'MULTI_SOURCE_MATCH',
     stageScenarioUpgradeRates: 'MULTI_SOURCE_MATCH',
-    lupinRushProfile: 'PUBLISHED_ANALYSIS',
-    lupinRushPatternSelectionRates: 'UNRESOLVED',
+    lupinRushProfile: 'MULTI_SOURCE_MATCH',
+    lupinRushPatternExpectationOrder: 'MULTI_SOURCE_MATCH',
+    lupinRushPatternSelectionRates: 'PUBLISHED_ANALYSIS',
+    lupinRushPerPatternAwardDistribution: 'UNRESOLVED',
     treasureRushProfile: 'MULTI_SOURCE_MATCH',
     treasureRushPerGameAwardTable: 'UNRESOLVED',
     treasureHuntSuccessProbability: 'UNRESOLVED',
@@ -136,6 +146,7 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     inferTreasureHuntSuccessProbability: false,
     inferStageTransitionRates: false,
     inferRushPatternSelectionRates: false,
+    inferRushPerPatternAwardsFromOverallAverage: false,
     interpolateUnlistedContinuationPoints: false
   })
 });
