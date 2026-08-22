@@ -7,6 +7,7 @@ import { getChanceEyePresentation } from './chance-eye-presentation-map.js';
 import { resolveChanceEyeOutcome, CHANCE_EYE_CONTEXT, CHANCE_EYE_DESTINATION } from './chance-eye-outcome-resolver.js';
 import { resolveChanceEyeOccurrence } from './chance-eye-occurrence-resolver.js';
 import { resolveChanceZoneDuration } from './chance-zone-duration-resolver.js';
+import { PhysicalRoleSession } from './physical-role-session.js';
 import { SeededRandomSource } from './random-source.js';
 
 const MACHINE_SETTING = 1;
@@ -15,10 +16,13 @@ const researchReels = new ResearchReelEngine();
 const chanceEyeOccurrenceRandom = new SeededRandomSource(0x20160800);
 const chanceEyeRandom = new SeededRandomSource(0x20160801);
 const chanceZoneRandom = new SeededRandomSource(0x20160802);
+const physicalRoleRandom = new SeededRandomSource(0x20160803);
+const physicalRoleSession = new PhysicalRoleSession({ randomSource: physicalRoleRandom, setting: MACHINE_SETTING });
 const machineRoot = document.querySelector('.machine');
 const lcdShell = document.querySelector('.lcd-shell');
 const mechanism = new PrismMechanismController(document.querySelector('#prismMechanism'));
 let pendingChanceEyeOccurrence = null;
+let pendingPhysicalRole = null;
 
 const ui = {
   credit: document.querySelector('#creditValue'),
@@ -147,6 +151,9 @@ core.addEventListener('spin-start', (event) => {
   pendingChanceEyeOccurrence = snapshot.mode === 'NORMAL'
     ? resolveChanceEyeOccurrence(chanceEyeOccurrenceRandom, CHANCE_EYE_CONTEXT.NORMAL)
     : null;
+  pendingPhysicalRole = snapshot.mode === 'NORMAL'
+    ? physicalRoleSession.start(event.detail.spinId)
+    : null;
   researchReels.start(event.detail.spinId);
   render(snapshot);
   ui.message.textContent = 'SPIN';
@@ -154,8 +161,9 @@ core.addEventListener('spin-start', (event) => {
 });
 
 core.addEventListener('reel-stop', (event) => {
-  const stop = researchReels.stop(event.detail.reelIndex);
-  scene().setReelRunning(event.detail.reelIndex, false, stop?.symbol ?? null);
+  const fallbackStop = researchReels.stop(event.detail.reelIndex);
+  const physicalSymbol = pendingPhysicalRole?.stopPlan?.middleLineSymbols?.[event.detail.reelIndex] ?? null;
+  scene().setReelRunning(event.detail.reelIndex, false, physicalSymbol ?? fallbackStop?.symbol ?? null);
   render(event.detail.snapshot);
 });
 
@@ -168,6 +176,7 @@ core.addEventListener('spin-end', (event) => {
     const chanceEye = resolvePendingChanceEye();
     if (!chanceEye) ui.message.textContent = '1ゲーム完了';
   }
+  pendingPhysicalRole = null;
   render();
 });
 
@@ -190,5 +199,7 @@ window.__LUPIN_ZERO__ = {
   chanceEyeOccurrenceRandom,
   chanceEyeRandom,
   chanceZoneRandom,
+  physicalRoleRandom,
+  physicalRoleSession,
   machineSetting: MACHINE_SETTING
 };
