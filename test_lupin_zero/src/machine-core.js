@@ -29,7 +29,9 @@ export class MachineCore extends EventTarget {
       wantedTriggerGame: this.kernelState.wantedTriggerGame,
       wantedTriggerEvidenceStatus: this.kernelState.wantedTriggerEvidenceStatus,
       raiunPoints: this.kernelState.raiunPoints,
-      raiunHighGamesRemaining: this.kernelState.raiunHighGamesRemaining
+      raiunHighGamesRemaining: this.kernelState.raiunHighGamesRemaining,
+      raiunHighRank: this.kernelState.raiunHighRank,
+      raiunHighLastResult: this.kernelState.raiunHighLastResult ? { ...this.kernelState.raiunHighLastResult } : null
     });
   }
 
@@ -53,7 +55,11 @@ export class MachineCore extends EventTarget {
       if (event.type === 'NORMAL_PROGRESSION_ADVANCED') this.emit('normal-progression-advanced', { games: event.games });
       if (event.type === 'RAIUN_POINTS_SET') this.emit('raiun-points-set', { points: event.points, evidenceStatus: event.evidenceStatus });
       if (event.type === 'RAIUN_POINTS_ADDED') this.emit('raiun-points-added', { from: event.from, points: event.points, to: event.to, evidenceStatus: event.evidenceStatus });
-      if (event.type === 'RAIUN_HIGH_ENTER') this.emit('raiun-high-enter', { games: event.games, points: event.points });
+      if (event.type === 'RAIUN_COUNTER_RESET') this.emit('raiun-counter-reset', { points: event.points, rank: event.rank, evidenceStatus: event.evidenceStatus });
+      if (event.type === 'RAIUN_HIGH_RANK_SET') this.emit('raiun-high-rank-set', { rank: event.rank, evidenceStatus: event.evidenceStatus });
+      if (event.type === 'RAIUN_HIGH_ENTER') this.emit('raiun-high-enter', { games: event.games, points: event.points, rank: event.rank });
+      if (event.type === 'RAIUN_HIGH_GAME_RESOLVED') this.emit('raiun-high-game-resolved', { rank: event.rank, hit: event.hit, remaining: event.remaining, resolution: event.resolution });
+      if (event.type === 'RAIUN_HIGH_EXHAUSTED') this.emit('raiun-high-exhausted', { rank: event.rank, redUpgradeStatus: event.redUpgradeStatus });
       if (event.type === 'MODE_ENTER') this.emit('mode-enter', { mode: event.mode, games: event.games, evidenceStatus: event.evidenceStatus, sourceWindow: event.sourceWindow ?? null });
       if (event.type === 'MODE_EXIT') this.emit('mode-exit', { from: event.from, to: event.to });
       if (event.type === 'MODE_GAME_ADVANCED') this.emit('mode-game-advanced', { mode: event.mode, remaining: event.remaining });
@@ -86,6 +92,9 @@ export class MachineCore extends EventTarget {
   advanceNormalProgression() { return this.apply({ type: 'ADVANCE_NORMAL_PROGRESSION' }); }
   setRaiunPoints(points, evidenceStatus = 'UNRESOLVED') { return this.apply({ type: 'SET_RAIUN_POINTS', points, evidenceStatus }); }
   addRaiunPoints(points, evidenceStatus = 'UNRESOLVED') { return this.apply({ type: 'ADD_RAIUN_POINTS', points, evidenceStatus }); }
+  resolveRaiunHighGame(resolution) { return this.apply({ type: 'RESOLVE_RAIUN_HIGH_GAME', resolution }); }
+  resetRaiunCounter(points, evidenceStatus = 'UNRESOLVED') { return this.apply({ type: 'RESET_RAIUN_COUNTER', points, evidenceStatus }); }
+  setRaiunHighRank(rank, evidenceStatus = 'UNRESOLVED') { return this.apply({ type: 'SET_RAIUN_HIGH_RANK', rank, evidenceStatus }); }
   exitWantedChance() { return this.apply({ type: 'EXIT_WANTED_CHANCE' }); }
   enterMode(mode, games, evidenceStatus = 'UNRESOLVED') { return this.apply({ type: 'ENTER_MODE', mode, games, evidenceStatus }); }
   advanceModeGame() { return this.apply({ type: 'ADVANCE_MODE_GAME' }); }
