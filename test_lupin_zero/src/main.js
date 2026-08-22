@@ -4,9 +4,12 @@ import { ResearchReelEngine } from './research-reel-engine.js';
 import { PrismMechanismController } from './mechanism-controller.js';
 import { PresentationOrchestrator, PRESENTATION_CUES } from './presentation-orchestrator.js';
 import { getChanceEyePresentation } from './chance-eye-presentation-map.js';
+import { resolveChanceEyeOutcome, CHANCE_EYE_CONTEXT } from './chance-eye-outcome-resolver.js';
+import { SeededRandomSource } from './random-source.js';
 
 const core = new MachineCore({ credit: 50, maxBet: 3 });
 const researchReels = new ResearchReelEngine();
+const chanceEyeRandom = new SeededRandomSource(0x20160801);
 const machineRoot = document.querySelector('.machine');
 const lcdShell = document.querySelector('.lcd-shell');
 const mechanism = new PrismMechanismController(document.querySelector('#prismMechanism'));
@@ -77,11 +80,15 @@ function renderResearchPresentation() {
     : '研究用連動キュー解除 — 自動発動条件は未接続';
 }
 
-function playChanceEye(kind, mode = 'normal') {
+function playChanceEye(kind, mode = CHANCE_EYE_CONTEXT.NORMAL) {
   const spec = getChanceEyePresentation(kind, mode);
-  presentation.runCue(spec.presentationCue, spec);
-  ui.message.textContent = `${spec.label} — ${spec.visualRule} / 1/${spec.denominator}`;
-  return spec;
+  const key = kind.toLowerCase() === 'weak' ? 'weak' : kind.toLowerCase() === 'middle' ? 'middle' : 'strong';
+  const outcome = resolveChanceEyeOutcome(chanceEyeRandom, key, mode);
+  presentation.runCue(spec.presentationCue, { ...spec, outcome });
+  ui.message.textContent = outcome.hit
+    ? `${spec.label} HIT ${spec.totalHitPercent ?? outcome.totalHitPercent}% → ${outcome.destination}`
+    : `${spec.label} MISS / hit ${outcome.totalHitPercent}%`;
+  return Object.freeze({ spec, outcome });
 }
 
 core.addEventListener('change', (event) => {
@@ -127,4 +134,4 @@ ui.phaseBadge.addEventListener('click', () => {
 
 render();
 renderResearchPresentation();
-window.__LUPIN_ZERO__ = { core, game, researchReels, mechanism, presentation, playChanceEye };
+window.__LUPIN_ZERO__ = { core, game, researchReels, mechanism, presentation, playChanceEye, chanceEyeRandom };
