@@ -10,6 +10,8 @@ import { resolveChanceZoneDuration } from './chance-zone-duration-resolver.js';
 import { PhysicalRoleSession } from './physical-role-session.js';
 import { getNormalRoleSettlement } from './normal-role-settlement.js';
 import { getMbFollowupGameSettlement } from './mb-followup.js';
+import { selectWantedWindow, WANTED_RESET_CONTEXT } from './normal-progression.js';
+import { GameMode } from './game-flow-spec.js';
 import { SeededRandomSource } from './random-source.js';
 
 const MACHINE_SETTING = 1;
@@ -19,6 +21,7 @@ const chanceEyeOccurrenceRandom = new SeededRandomSource(0x20160800);
 const chanceEyeRandom = new SeededRandomSource(0x20160801);
 const chanceZoneRandom = new SeededRandomSource(0x20160802);
 const physicalRoleRandom = new SeededRandomSource(0x20160803);
+const wantedWindowRandom = new SeededRandomSource(0x20160804);
 const physicalRoleSession = new PhysicalRoleSession({ randomSource: physicalRoleRandom, setting: MACHINE_SETTING });
 const machineRoot = document.querySelector('.machine');
 const lcdShell = document.querySelector('.lcd-shell');
@@ -72,14 +75,14 @@ function render(snapshot = core.snapshot()) {
   ui.bet.textContent = snapshot.bet;
   ui.state.textContent = snapshot.mbFollowupGamesRemaining > 0
     ? `MB ${snapshot.mbFollowupGamesRemaining}G`
-    : snapshot.mode === 'NORMAL'
+    : snapshot.mode === GameMode.NORMAL
       ? snapshot.state
       : snapshot.modeResult
         ? `${snapshot.mode} SUCCESS`
         : `${snapshot.mode} ${snapshot.modeGamesRemaining ?? '?'}G`;
   ui.phaseBadge.textContent = snapshot.mbFollowupGamesRemaining > 0
     ? `MB ${snapshot.mbFollowupGamesRemaining}G`
-    : snapshot.mode === 'NORMAL'
+    : snapshot.mode === GameMode.NORMAL
       ? 'SYSTEM'
       : snapshot.mode;
 
@@ -93,6 +96,11 @@ function render(snapshot = core.snapshot()) {
   });
 }
 
+function configureNextWanted(context) {
+  const selection = selectWantedWindow(wantedWindowRandom, MACHINE_SETTING, context);
+  return core.configureWantedWindow(selection) ? selection : null;
+}
+
 function enterChanceZone(destination) {
   if (![CHANCE_EYE_DESTINATION.FUJIKO_ZONE, CHANCE_EYE_DESTINATION.ODOROBO_ZONE].includes(destination)) return null;
   const duration = resolveChanceZoneDuration(chanceZoneRandom, MACHINE_SETTING, destination);
@@ -100,10 +108,10 @@ function enterChanceZone(destination) {
   return entered ? duration : null;
 }
 
-function playChanceEye(kind, mode = CHANCE_EYE_CONTEXT.NORMAL) {
-  const spec = getChanceEyePresentation(kind, mode);
+function playChanceEye(kind, context = CHANCE_EYE_CONTEXT.NORMAL) {
+  const spec = getChanceEyePresentation(kind, context);
   const key = kind.toLowerCase() === 'weak' ? 'weak' : kind.toLowerCase() === 'middle' ? 'middle' : 'strong';
-  const outcome = resolveChanceEyeOutcome(chanceEyeRandom, key, mode);
+  const outcome = resolveChanceEyeOutcome(chanceEyeRandom, key, context);
   const chanceZone = outcome.hit ? enterChanceZone(outcome.destination) : null;
   presentation.runCue(spec.presentationCue, { ...spec, outcome, chanceZone });
 
@@ -118,12 +126,14 @@ function playChanceEye(kind, mode = CHANCE_EYE_CONTEXT.NORMAL) {
   return Object.freeze({ spec, outcome, chanceZone });
 }
 
-function resolvePendingChanceEye() {
+function resolvePendingChanceEye(completedMode) {
   const pending = pendingChanceEyeOccurrence;
   pendingChanceEyeOccurrence = null;
   if (!pending?.occurred) return null;
-  if (core.snapshot().mode !== 'NORMAL') return null;
-  return playChanceEye(pending.kind, CHANCE_EYE_CONTEXT.NORMAL);
+  const context = completedMode === GameMode.WANTED_CHANCE
+    ? CHANCE_EYE_CONTEXT.WANTED_CHANCE
+    : CHANCE_EYE_CONTEXT.NORMAL;
+  return playChanceEye(pending.kind, context);
 }
 
 function settlePendingPhysicalRole() {
@@ -153,11 +163,10 @@ core.addEventListener('mb-followup-game-settled', (event) => {
 
 core.addEventListener('mode-enter', (event) => {
   render(event.detail.snapshot);
-  ui.message.textContent = event.detail.mode === CHANCE_EYE_DESTINATION.FUJIKO_ZONE
-    ? '不二子ゾーン'
-    : event.detail.mode === CHANCE_EYE_DESTINATION.ODOROBO_ZONE
-      ? '大泥棒ゾーン'
-      : event.detail.mode;
+  if (event.detail.mode === GameMode.WANTED_CHANCE) ui.message.textContent = 'WANTED CHANCE';
+  else if (event.detail.mode === CHANCE_EYE_DESTINATION.FUJIKO_ZONE) ui.message.textContent = '不二子ゾーン';
+  else if (event.detail.mode === CHANCE_EYE_DESTINATION.ODOROBO_ZONE) ui.message.textContent = '大泥棒ゾーン';
+  else ui.message.textContent = event.detail.mode;
 });
 
 core.addEventListener('mode-game-advanced', (event) => {
@@ -165,8 +174,14 @@ core.addEventListener('mode-game-advanced', (event) => {
 });
 
 core.addEventListener('mode-window-exhausted', (event) => {
-  render(event.detail.snapshot);
-  ui.message.textContent = `${event.detail.mode} 終了`;
+  if (event.detail.mode === GameMode.WANTED_CHANCE) {
+    core.exitWantedChance();
+    configureNextWanted(WANTED_RESET_CONTEXT.AFTER_WANTED);
+    ui.message.textContent = 'WANTED CHANCE END';
+  } else {
+    ui.message.textContent = `${event.detail.mode} 終了`;
+  }
+  render();
 });
 
 core.addEventListener('chance-zone-success', (event) => {
@@ -174,18 +189,28 @@ core.addEventListener('chance-zone-success', (event) => {
   ui.message.textContent = 'チャンスゾーン成功';
 });
 
+core.addEventListener('raiun-high-enter', (event) => {
+  render(event.detail.snapshot);
+  ui.message.textContent = `雷雲高確 ${event.detail.games}G`;
+});
+
 core.addEventListener('spin-start', (event) => {
   const snapshot = event.detail.snapshot;
   const mbFollowupActive = snapshot.mbFollowupGamesRemaining > 0;
-  pendingChanceEyeOccurrence = snapshot.mode === 'NORMAL' && !mbFollowupActive
-    ? resolveChanceEyeOccurrence(chanceEyeOccurrenceRandom, CHANCE_EYE_CONTEXT.NORMAL)
+  const normalLikeMode = [GameMode.NORMAL, GameMode.WANTED_CHANCE].includes(snapshot.mode);
+  const chanceEyeContext = snapshot.mode === GameMode.WANTED_CHANCE
+    ? CHANCE_EYE_CONTEXT.WANTED_CHANCE
+    : CHANCE_EYE_CONTEXT.NORMAL;
+
+  pendingChanceEyeOccurrence = normalLikeMode && !mbFollowupActive
+    ? resolveChanceEyeOccurrence(chanceEyeOccurrenceRandom, chanceEyeContext)
     : null;
-  pendingPhysicalRole = snapshot.mode === 'NORMAL' && !mbFollowupActive
+  pendingPhysicalRole = normalLikeMode && !mbFollowupActive
     ? physicalRoleSession.start(event.detail.spinId)
     : null;
   researchReels.start(event.detail.spinId);
   render(snapshot);
-  ui.message.textContent = mbFollowupActive ? 'MB' : 'SPIN';
+  ui.message.textContent = mbFollowupActive ? 'MB' : snapshot.mode === GameMode.WANTED_CHANCE ? 'WANTED CHANCE' : 'SPIN';
   scene().startSpin();
 });
 
@@ -199,16 +224,26 @@ core.addEventListener('reel-stop', (event) => {
 core.addEventListener('spin-end', (event) => {
   const completedMode = event.detail.snapshot.mode;
   const completedMbFollowup = event.detail.snapshot.mbFollowupGamesRemaining > 0;
-  if (event.detail.snapshot.modeGamesRemaining > 0) core.advanceModeGame();
   scene().endSpin();
 
   if (completedMbFollowup) {
     core.settleMbFollowupGame(getMbFollowupGameSettlement());
-  } else if (completedMode === 'NORMAL') {
+  } else if ([GameMode.NORMAL, GameMode.WANTED_CHANCE].includes(completedMode)) {
     const settlement = settlePendingPhysicalRole();
-    const chanceEye = resolvePendingChanceEye();
+    const chanceEye = resolvePendingChanceEye(completedMode);
+    const modeAfterChanceEye = core.snapshot().mode;
+
+    if (completedMode === GameMode.NORMAL && modeAfterChanceEye === GameMode.NORMAL) {
+      core.advanceNormalProgression();
+    } else if (completedMode === GameMode.WANTED_CHANCE && modeAfterChanceEye === GameMode.WANTED_CHANCE) {
+      core.advanceModeGame();
+    }
+
     if (!chanceEye && !settlement?.accepted) ui.message.textContent = '1ゲーム完了';
+  } else if (event.detail.snapshot.modeGamesRemaining > 0) {
+    core.advanceModeGame();
   }
+
   pendingPhysicalRole = null;
   pendingChanceEyeOccurrence = null;
   render();
@@ -221,6 +256,7 @@ ui.stopBtns.forEach((button) => {
   button.addEventListener('click', () => core.stop(Number(button.dataset.reel)));
 });
 
+configureNextWanted(WANTED_RESET_CONTEXT.AFTER_BONUS_ART_OR_RESET);
 render();
 window.__LUPIN_ZERO__ = {
   core,
@@ -230,10 +266,12 @@ window.__LUPIN_ZERO__ = {
   presentation,
   playChanceEye,
   resolveChanceZoneOddAlignment: () => core.resolveChanceZoneOddAlignment(),
+  setRaiunPoints: (points, evidenceStatus) => core.setRaiunPoints(points, evidenceStatus),
   chanceEyeOccurrenceRandom,
   chanceEyeRandom,
   chanceZoneRandom,
   physicalRoleRandom,
+  wantedWindowRandom,
   physicalRoleSession,
   machineSetting: MACHINE_SETTING
 };
