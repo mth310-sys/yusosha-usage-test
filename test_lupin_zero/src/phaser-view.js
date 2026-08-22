@@ -94,8 +94,9 @@ export class LupinView extends Phaser.Scene {
     this.chanceEyePanel.setVisible(true);
     this.chanceEyeText.setText(view.label).setColor(view.textColor).setVisible(true);
     const denominator = Number.isFinite(detail.denominator) ? `1/${detail.denominator}` : 'rate unresolved';
-    this.chanceEyeMeta.setText(`${detail.visualRule ?? 'SEMANTIC VIEW'} // ${denominator}`).setVisible(true);
-    this.status.setText(`${view.label} // PUBLISHED LIQUID-REEL SEMANTICS`);
+    const outcome = detail.outcome?.destination ?? 'OUTCOME NOT DRAWN';
+    this.chanceEyeMeta.setText(`${detail.visualRule ?? 'SEMANTIC VIEW'} // ${denominator}\n${outcome}`).setVisible(true);
+    this.status.setText(`${view.label} // ${outcome}`);
     this.cameras.main.flash(120, (view.color >> 16) & 255, (view.color >> 8) & 255, view.color & 255, false);
     return true;
   }
