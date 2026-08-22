@@ -90,12 +90,29 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     attackVisionPublishedEffect: '1000000_TREASURE_EXPECTED_OR_CONFIRMED_BY_PRESENTATION_GUIDE',
     perPatternAwardDistribution: null
   }),
+  treasureHunt: Object.freeze({
+    exactOccurrenceTrigger: null,
+    successProbability: null,
+    guaranteedSuccessPresentations: Object.freeze({
+      FLAME_LUPIN_HOLD: Object.freeze({ minTreasurePoints: 200000 }),
+      FUJIKO_HOLD: Object.freeze({ minTreasurePoints: 300000 }),
+      TAMA_CHAN_HOLD: Object.freeze({ minTreasurePoints: 1000000 })
+    }),
+    treasureRushRelationship: Object.freeze({
+      status: 'CONFLICT',
+      publishedClaims: Object.freeze([
+        'SUCCESS_ENTERS_TREASURE_RUSH',
+        'SUCCESS_GIVES_TREASURE_RUSH_CHANCE'
+      ]),
+      directEntryOnSuccess: null,
+      entryProbabilityAfterSuccess: null
+    })
+  }),
   treasureRush: Object.freeze({
-    trigger: 'TREASURE_HUNT_SUCCESS',
+    triggerRelation: 'TREASURE_HUNT_SUCCESS_RELATED',
     games: Object.freeze({ min: 4, max: 9 }),
     averageTreasurePoints: 499000,
-    perGameAwardTable: null,
-    treasureHuntSuccessProbability: null
+    perGameAwardTable: null
   }),
   extraBonus: Object.freeze({
     triggerPoints: 1000000,
@@ -132,9 +149,12 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     lupinRushPatternExpectationOrder: 'MULTI_SOURCE_MATCH',
     lupinRushPatternSelectionRates: 'PUBLISHED_ANALYSIS',
     lupinRushPerPatternAwardDistribution: 'UNRESOLVED',
+    treasureHuntGuaranteedSuccessPresentations: 'PUBLISHED_ANALYSIS',
+    treasureHuntOccurrenceTrigger: 'UNRESOLVED',
+    treasureHuntSuccessProbability: 'UNRESOLVED',
+    treasureHuntToTreasureRushRoute: 'CONFLICT',
     treasureRushProfile: 'MULTI_SOURCE_MATCH',
     treasureRushPerGameAwardTable: 'UNRESOLVED',
-    treasureHuntSuccessProbability: 'UNRESOLVED',
     extraBonusCoreRoute: 'MULTI_SOURCE_MATCH',
     extraBonusExactRates: 'PUBLISHED_ANALYSIS',
     goldRushCoreRoute: 'MULTI_SOURCE_MATCH',
@@ -143,7 +163,9 @@ export const GT_SYSTEM_SPEC = Object.freeze({
   }),
   policy: Object.freeze({
     inferTreasurePointAwardAmounts: false,
+    inferTreasureHuntOccurrenceTrigger: false,
     inferTreasureHuntSuccessProbability: false,
+    inferTreasureRushEntryOnHuntSuccess: false,
     inferStageTransitionRates: false,
     inferRushPatternSelectionRates: false,
     inferRushPerPatternAwardsFromOverallAverage: false,
