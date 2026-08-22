@@ -40,7 +40,17 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
 
   expect(result.spec.lupinRush.games).toBe(4);
   expect(result.spec.lupinRush.averageTreasurePoints).toBe(342000);
-  expect(result.spec.lupinRush.patternSelectionRates).toBeNull();
+  expect(result.spec.lupinRush.expectationOrder).toEqual([
+    'WALTHER','SILHOUETTE','REVOLVER_VISION','ATTACK_VISION'
+  ]);
+  expect(result.spec.lupinRush.patternSelectionRates).toEqual({
+    WALTHER: 63,
+    SILHOUETTE: 31,
+    REVOLVER_VISION: 5,
+    ATTACK_VISION: 1
+  });
+  expect(result.spec.lupinRush.perPatternAwardDistribution).toBeNull();
+
   expect(result.spec.treasureRush.games).toEqual({ min: 4, max: 9 });
   expect(result.spec.treasureRush.averageTreasurePoints).toBe(499000);
   expect(result.spec.treasureRush.perGameAwardTable).toBeNull();
@@ -57,11 +67,15 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
 
   expect(result.spec.continuationBattle.trigger).toBe('SET_GAMES_EXHAUSTED_WITHOUT_STOCK');
   expect(result.spec.evidence.exactTreasureAwardTable).toBe('UNRESOLVED');
+  expect(result.spec.evidence.lupinRushPatternExpectationOrder).toBe('MULTI_SOURCE_MATCH');
+  expect(result.spec.evidence.lupinRushPatternSelectionRates).toBe('PUBLISHED_ANALYSIS');
+  expect(result.spec.evidence.lupinRushPerPatternAwardDistribution).toBe('UNRESOLVED');
   expect(result.spec.evidence.treasureHuntSuccessProbability).toBe('UNRESOLVED');
   expect(result.spec.policy.inferTreasurePointAwardAmounts).toBe(false);
   expect(result.spec.policy.inferTreasureHuntSuccessProbability).toBe(false);
   expect(result.spec.policy.inferStageTransitionRates).toBe(false);
   expect(result.spec.policy.inferRushPatternSelectionRates).toBe(false);
+  expect(result.spec.policy.inferRushPerPatternAwardsFromOverallAverage).toBe(false);
   expect(result.spec.policy.interpolateUnlistedContinuationPoints).toBe(false);
 });
 
