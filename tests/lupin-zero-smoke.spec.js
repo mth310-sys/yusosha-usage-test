@@ -176,3 +176,43 @@ test('VerifiedSpec locks published mode durations without inventing missing rout
   expect(result.policy.inferMissingLinks).toBe(false);
   expect(result.policy.inferAutomaticEntryProbability).toBe(false);
 });
+
+test('VerifiedSpec locks chance-zone categories while unresolved entry rates stay null', async ({ page }) => {
+  await bootZero(page);
+
+  const zones = await page.evaluate(async () => {
+    const { VERIFIED_SPEC } = await import('/test_lupin_zero/src/verified-spec.js');
+    return { chanceZones: VERIFIED_SPEC.chanceZones, policy: VERIFIED_SPEC.policy };
+  });
+
+  expect(zones.chanceZones.entryLotteryTrigger).toBe('CHANCE_EYE');
+  expect(zones.chanceZones.odoroboZone).toEqual({
+    category: 'SELF_CLEAR_CZ',
+    games: [10, 20],
+    expectedRatePercent: { min: 39.6, max: 43.2 },
+    successCondition: 'ODD_SYMBOL_ALIGNED',
+    successDestination: 'LUPIN_BONUS_OR_GOLDEN_TIME',
+    canUpgradeTo: 'FUJIKO_ZONE'
+  });
+  expect(zones.chanceZones.fujikoZone).toEqual({
+    category: 'SELF_CLEAR_CZ',
+    games: [10, 20],
+    expectedRatePercent: { min: 58.8, max: 63.2 },
+    successCondition: 'ODD_SYMBOL_ALIGNED',
+    successDestination: 'LUPIN_BONUS_OR_GOLDEN_TIME'
+  });
+  expect(zones.chanceZones.rizeZone).toEqual({
+    category: 'PRECURSOR_ZONE',
+    progressionRule: 'STEP_UP_INCREASES_EXPECTATION',
+    successDestination: 'LUPIN_BONUS_OR_GOLDEN_TIME',
+    games: null,
+    automaticEntryProbability: null
+  });
+  expect(zones.chanceZones.sevenZone).toEqual({
+    category: 'CONFIRMED_ART_PRECURSOR',
+    confirmedDestination: 'GOLDEN_TIME',
+    games: null,
+    automaticEntryProbability: null
+  });
+  expect(zones.policy.unresolvedChanceZoneEntryRates).toBe('DO_NOT_INVENT');
+});
