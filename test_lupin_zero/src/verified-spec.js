@@ -20,7 +20,22 @@ export const VERIFIED_SPEC = Object.freeze({
     gamesPer50Coins: Object.freeze({ min:46.1,max:48.7 })
   }),
   modeProfiles: Object.freeze({
-    wantedChance: Object.freeze({ baseGames:10,holdSlots:8,decrementPausesForChangedHold:true,wantedCounterMaxGames:480 }),
+    wantedChance: Object.freeze({
+      baseGames:10,
+      holdSlots:8,
+      decrementPausesForChangedHold:true,
+      wantedCounterMaxGames:480,
+      cycleRanges:Object.freeze(['1-32','33-64','65-96','97-128','129-160','161-192','193-224','225-256','257-288','289-320','321-352','353-384','385-416','417-448','449-480']),
+      afterWantedBySetting:Object.freeze({
+        1:Object.freeze([0.4,15.2,4.7,4.7,14.1,4.7,4.7,4.7,4.7,13.3,4.7,0,4.7,19.5,0]),
+        2:Object.freeze([0.4,15.2,5.1,5.1,14.1,5.1,5.1,5.1,5.1,12.9,4.7,0.8,4.7,16.8,0]),
+        3:Object.freeze([0.4,16.0,5.9,4.3,15.6,5.5,5.5,4.7,4.7,12.9,5.1,0.8,4.3,14.5,0]),
+        4:Object.freeze([0.4,17.2,5.9,4.3,17.2,5.5,5.5,4.7,4.7,12.1,5.1,0.8,3.9,12.1,0.8]),
+        5:Object.freeze([0.4,19.1,6.6,4.7,18.8,5.5,5.5,4.7,4.7,11.7,3.9,0.8,3.5,9.4,0.8]),
+        6:Object.freeze([0.4,23.8,7.8,4.7,20.7,5.9,5.9,4.3,4.3,9.4,3.1,0.8,3.1,5.1,0.8])
+      }),
+      afterBonusArtOrReset:Object.freeze([6.3,6.3,3.9,25.0,39.1,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0])
+    }),
     raiunHigh: Object.freeze({ entryCounterPoints:100,games:7,successCondition:'BLUE_SYMBOL_ALIGNED' }),
     raiunMode: Object.freeze({ games:20,artExpectedRatePercent:23,artTrigger:'SEVEN_SYMBOL_ALIGNED',pureIncreaseCoinsPerGame:2.0 }),
     lupinBonus: Object.freeze({ gamesApprox:35,artExpectedRatePercentApprox:50,pureIncreaseCoinsPerGame:2.0,finalBattleGames:5,artTrigger:'ZENIGATA_BATTLE_WIN' }),
@@ -28,6 +43,14 @@ export const VERIFIED_SPEC = Object.freeze({
   }),
   chanceZones: Object.freeze({
     entryLotteryTrigger:'CHANCE_EYE',
+    durationBySetting:Object.freeze({
+      1:Object.freeze({ tenGames:62.5,twentyGames:37.5 }),
+      2:Object.freeze({ tenGames:62.5,twentyGames:37.5 }),
+      3:Object.freeze({ tenGames:60.9,twentyGames:39.1 }),
+      4:Object.freeze({ tenGames:50.0,twentyGames:50.0 }),
+      5:Object.freeze({ tenGames:50.0,twentyGames:50.0 }),
+      6:Object.freeze({ tenGames:47.7,twentyGames:52.3 })
+    }),
     odoroboZone:Object.freeze({ category:'SELF_CLEAR_CZ',games:Object.freeze([10,20]),expectedRatePercent:Object.freeze({min:39.6,max:43.2}),successCondition:'ODD_SYMBOL_ALIGNED',successDestination:'LUPIN_BONUS_OR_GOLDEN_TIME',canUpgradeTo:'FUJIKO_ZONE' }),
     fujikoZone:Object.freeze({ category:'SELF_CLEAR_CZ',games:Object.freeze([10,20]),expectedRatePercent:Object.freeze({min:58.8,max:63.2}),successCondition:'ODD_SYMBOL_ALIGNED',successDestination:'LUPIN_BONUS_OR_GOLDEN_TIME' }),
     rizeZone:Object.freeze({ category:'PRECURSOR_ZONE',progressionRule:'STEP_UP_INCREASES_EXPECTATION',successDestination:'LUPIN_BONUS_OR_GOLDEN_TIME',games:null,automaticEntryProbability:null }),
@@ -63,7 +86,7 @@ export const VERIFIED_SPEC = Object.freeze({
   mb:Object.freeze({ stopLine:'MIDDLE',stopSymbols:Object.freeze(['次元','五エ門','ルパン']),followupGames:2,payoutEachGame:10 }),
   evidence:Object.freeze({
     normalRoleDenominators:'MULTI_SOURCE_MATCH',premiumLegendDenominators:'MULTI_SOURCE_MATCH',normalPlayRules:'PUBLISHED_ANALYSIS',rareRoleFamilies:'PUBLISHED_ANALYSIS',
-    wantedChanceProfile:'MULTI_SOURCE_MATCH',raiunHighProfile:'PUBLISHED_ANALYSIS',raiunModeProfile:'MULTI_SOURCE_MATCH',lupinBonusProfile:'MULTI_SOURCE_MATCH',goldenTimeProfile:'MULTI_SOURCE_MATCH',
+    wantedChanceProfile:'MULTI_SOURCE_MATCH',wantedChanceCycleDistribution:'MULTI_SOURCE_MATCH',chanceZoneDurationBySetting:'MULTI_SOURCE_MATCH',raiunHighProfile:'PUBLISHED_ANALYSIS',raiunModeProfile:'MULTI_SOURCE_MATCH',lupinBonusProfile:'MULTI_SOURCE_MATCH',goldenTimeProfile:'MULTI_SOURCE_MATCH',
     chanceZoneTypes:'MULTI_SOURCE_MATCH',chanceZoneEntryTrigger:'PUBLISHED_ANALYSIS',odoroboZoneProfile:'MULTI_SOURCE_MATCH',fujikoZoneProfile:'MULTI_SOURCE_MATCH',rizeZoneProfile:'MULTI_SOURCE_MATCH',sevenZoneProfile:'MULTI_SOURCE_MATCH',
     liquidReelChanceEyeRules:'MULTI_SOURCE_MATCH',liquidReelChanceEyeRates:'MULTI_SOURCE_MATCH',liquidReelOutcomeLottery:'MULTI_SOURCE_MATCH',liquidReelAlignedEffects:'MULTI_SOURCE_MATCH',
     physicalMainReelCharacterSymbols:'PUBLISHED_ANALYSIS_AND_MACHINE_VISUALS',mainReelTargetPrompt:'PUBLISHED_MACHINE_GUIDE',mainReelSpecialSymbolArtwork:'UNRESOLVED',mainReelSpecialSymbolStopPattern:'UNRESOLVED',mbStopPattern:'MULTI_SOURCE_MATCH',
