@@ -1,9 +1,9 @@
 import { RESEARCH_SYMBOLS } from './research-reel-engine.js';
 
 const CHANCE_EYE_VIEW = Object.freeze({
-  CHANCE_EYE_BLUE: Object.freeze({ label: 'BLUE CHANCE EYE', color: 0x2b8cff, textColor: '#8fc7ff' }),
-  CHANCE_EYE_RED: Object.freeze({ label: 'RED CHANCE EYE', color: 0xe52c39, textColor: '#ff9ba2' }),
-  CHANCE_EYE_GOLD: Object.freeze({ label: 'GOLD 7 CHANCE EYE', color: 0xffc83d, textColor: '#ffe99a' })
+  CHANCE_EYE_BLUE: Object.freeze({ label: 'BLUE CHANCE', color: 0x2b8cff, textColor: '#8fc7ff' }),
+  CHANCE_EYE_RED: Object.freeze({ label: 'RED CHANCE', color: 0xe52c39, textColor: '#ff9ba2' }),
+  CHANCE_EYE_GOLD: Object.freeze({ label: 'GOLD 7', color: 0xffc83d, textColor: '#ffe99a' })
 });
 
 export class LupinView extends Phaser.Scene {
@@ -20,12 +20,12 @@ export class LupinView extends Phaser.Scene {
     bg.fillGradientStyle(0x05070d, 0x05070d, 0x181006, 0x181006, 1);
     bg.fillRect(0, 0, width, height);
 
-    this.add.text(width / 2, 18, 'LUPIN SYSTEM // ZERO', {
+    this.add.text(width / 2, 18, 'LUPIN THE THIRD', {
       fontFamily: 'Arial Black, sans-serif', fontSize: '16px', color: '#f4d16b'
     }).setOrigin(.5, 0);
 
-    this.add.text(width / 2, 45, 'PHASER 4 RENDER LAYER', {
-      fontFamily: 'monospace', fontSize: '9px', color: '#8d96a6', letterSpacing: 2
+    this.add.text(width / 2, 45, '消されたルパン', {
+      fontFamily: 'sans-serif', fontSize: '11px', color: '#d6c9ae', letterSpacing: 2
     }).setOrigin(.5, 0);
 
     const reelY = 132;
@@ -47,8 +47,8 @@ export class LupinView extends Phaser.Scene {
       this.reels.push(symbol);
     }
 
-    this.status = this.add.text(width / 2, height - 34, 'VERIFIED LOGIC PORT: NOT LOADED', {
-      fontFamily: 'monospace', fontSize: '9px', color: '#d3b865'
+    this.status = this.add.text(width / 2, height - 34, '待機中', {
+      fontFamily: 'sans-serif', fontSize: '10px', color: '#d3b865'
     }).setOrigin(.5);
 
     this.chanceEyePanel = this.add.graphics().setDepth(20).setVisible(false);
@@ -56,7 +56,7 @@ export class LupinView extends Phaser.Scene {
       fontFamily: 'Arial Black, sans-serif', fontSize: '22px', color: '#ffffff', align: 'center', stroke: '#000000', strokeThickness: 4
     }).setOrigin(.5).setDepth(21).setVisible(false);
     this.chanceEyeMeta = this.add.text(width / 2, height / 2 + 34, '', {
-      fontFamily: 'monospace', fontSize: '9px', color: '#ffffff', align: 'center'
+      fontFamily: 'sans-serif', fontSize: '10px', color: '#ffffff', align: 'center'
     }).setOrigin(.5).setDepth(21).setVisible(false);
 
     this.events.emit('view-ready');
@@ -74,11 +74,11 @@ export class LupinView extends Phaser.Scene {
   startSpin() {
     this.running = [true, true, true];
     this.clearChanceEye();
-    this.status.setText('RESEARCH SPIN // GAME-SPECIFIC RNG DISABLED');
+    this.status.setText('SPIN');
   }
 
   endSpin() {
-    this.status.setText('IDLE // WAITING VERIFIED SYSTEM PORT');
+    this.status.setText('待機中');
     this.cameras.main.flash(90, 255, 201, 72, false);
   }
 
@@ -93,10 +93,9 @@ export class LupinView extends Phaser.Scene {
     this.chanceEyePanel.strokeRoundedRect(18, 70, width - 36, height - 112, 14);
     this.chanceEyePanel.setVisible(true);
     this.chanceEyeText.setText(view.label).setColor(view.textColor).setVisible(true);
-    const denominator = Number.isFinite(detail.denominator) ? `1/${detail.denominator}` : 'rate unresolved';
-    const outcome = detail.outcome?.destination ?? 'OUTCOME NOT DRAWN';
-    this.chanceEyeMeta.setText(`${detail.visualRule ?? 'SEMANTIC VIEW'} // ${denominator}\n${outcome}`).setVisible(true);
-    this.status.setText(`${view.label} // ${outcome}`);
+    const outcome = detail.outcome?.destination ?? null;
+    this.chanceEyeMeta.setText(outcome ? String(outcome).replaceAll('_', ' ') : '').setVisible(Boolean(outcome));
+    this.status.setText(view.label);
     this.cameras.main.flash(120, (view.color >> 16) & 255, (view.color >> 8) & 255, view.color & 255, false);
     return true;
   }
