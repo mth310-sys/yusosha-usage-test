@@ -1,15 +1,18 @@
 import { MachineCore, MachineState } from './machine-core.js';
 import { LupinView } from './phaser-view.js';
 import { ResearchReelEngine } from './research-reel-engine.js';
+import { PrismMechanismController } from './mechanism-controller.js';
 
 const core = new MachineCore({ credit: 50, maxBet: 3 });
 const researchReels = new ResearchReelEngine();
+const mechanism = new PrismMechanismController(document.querySelector('#prismMechanism'));
 
 const ui = {
   credit: document.querySelector('#creditValue'),
   bet: document.querySelector('#betValue'),
   state: document.querySelector('#stateValue'),
   message: document.querySelector('#message'),
+  phaseBadge: document.querySelector('#phaseBadge'),
   betBtn: document.querySelector('#betBtn'),
   maxBetBtn: document.querySelector('#maxBetBtn'),
   startBtn: document.querySelector('#startBtn'),
@@ -48,6 +51,11 @@ function render(snapshot = core.snapshot()) {
   });
 }
 
+function renderMechanismDebug(snapshot = mechanism.snapshot()) {
+  ui.phaseBadge.textContent = snapshot.circularElementVisible ? 'MECH REVEAL' : 'RESEARCH CORE';
+  ui.phaseBadge.setAttribute('aria-pressed', String(snapshot.circularElementVisible));
+}
+
 core.addEventListener('change', (event) => {
   render(event.detail.snapshot);
   ui.message.textContent = event.detail.snapshot.bet === 3 ? 'MAX BET — START可能' : 'BET受付中';
@@ -69,7 +77,7 @@ core.addEventListener('reel-stop', (event) => {
 core.addEventListener('spin-end', (event) => {
   render(event.detail.snapshot);
   scene().endSpin();
-  ui.message.textContent = '研究用1ゲーム完了 — 実機固有抽選は未接続';
+  ui.message.textContent = '研究用1ゲーム完了 — 実機固有抽選は段階接続中';
 });
 
 ui.betBtn.addEventListener('click', () => core.betOne());
@@ -78,6 +86,10 @@ ui.startBtn.addEventListener('click', () => core.start());
 ui.stopBtns.forEach((button) => {
   button.addEventListener('click', () => core.stop(Number(button.dataset.reel)));
 });
+ui.phaseBadge.addEventListener('click', () => {
+  renderMechanismDebug(mechanism.toggleDebug());
+});
 
 render();
-window.__LUPIN_ZERO__ = { core, game, researchReels };
+renderMechanismDebug();
+window.__LUPIN_ZERO__ = { core, game, researchReels, mechanism };
