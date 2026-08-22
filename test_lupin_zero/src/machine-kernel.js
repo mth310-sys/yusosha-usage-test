@@ -54,17 +54,13 @@ export function reduceMachine(state, command = {}) {
   const type = command.type;
 
   if (type === 'BET_ONE') {
-    if ([KernelPhase.SPINNING, KernelPhase.STOPPING].includes(state.phase) || state.bet >= state.maxBet || state.credit <= 0) {
-      return result(state, [], false);
-    }
+    if ([KernelPhase.SPINNING, KernelPhase.STOPPING].includes(state.phase) || state.bet >= state.maxBet || state.credit <= 0) return result(state, [], false);
     const next = { ...state, credit: state.credit - 1, bet: state.bet + 1, phase: KernelPhase.READY };
     return result(next, [{ type: 'CHANGE', reason: 'bet-one' }]);
   }
 
   if (type === 'MAX_BET') {
-    if ([KernelPhase.SPINNING, KernelPhase.STOPPING].includes(state.phase) || state.bet >= state.maxBet || state.credit <= 0) {
-      return result(state, [], false);
-    }
+    if ([KernelPhase.SPINNING, KernelPhase.STOPPING].includes(state.phase) || state.bet >= state.maxBet || state.credit <= 0) return result(state, [], false);
     const amount = Math.min(state.maxBet - state.bet, state.credit);
     if (amount <= 0) return result(state, [], false);
     const next = { ...state, credit: state.credit - amount, bet: state.bet + amount, phase: KernelPhase.READY };
@@ -83,16 +79,10 @@ export function reduceMachine(state, command = {}) {
     const index = command.reelIndex;
     if (![KernelPhase.SPINNING, KernelPhase.STOPPING].includes(state.phase)) return result(state, [], false);
     if (!Number.isInteger(index) || index < 0 || index > 2 || state.stopped[index]) return result(state, [], false);
-
     const stopped = [...state.stopped];
     stopped[index] = true;
     const complete = stopped.every(Boolean);
-    const next = {
-      ...state,
-      stopped,
-      phase: complete ? KernelPhase.IDLE : KernelPhase.STOPPING,
-      bet: complete ? 0 : state.bet
-    };
+    const next = { ...state, stopped, phase: complete ? KernelPhase.IDLE : KernelPhase.STOPPING, bet: complete ? 0 : state.bet };
     const events = [{ type: 'REEL_STOP', reelIndex: index, spinId: state.spinId, complete }];
     if (complete) events.push({ type: 'SPIN_END', reelIndex: index, spinId: state.spinId, mode: state.mode });
     return result(next, events);
@@ -108,24 +98,8 @@ export function reduceMachine(state, command = {}) {
     if (typeof role !== 'string' || !Number.isInteger(creditDelta) || creditDelta < 0) return result(state, [], false);
     if (!Number.isInteger(replayAutoBet) || replayAutoBet < 0 || replayAutoBet > state.maxBet) return result(state, [], false);
     if (!Number.isInteger(mbFollowupGames) || mbFollowupGames < 0) return result(state, [], false);
-
-    const next = {
-      ...state,
-      credit: state.credit + creditDelta,
-      bet: replayAutoBet,
-      phase: replayAutoBet > 0 ? KernelPhase.READY : KernelPhase.IDLE,
-      lastSettledRole: role,
-      lastPayout: creditDelta,
-      mbFollowupGamesRemaining: mbFollowupGames > 0 ? mbFollowupGames : state.mbFollowupGamesRemaining
-    };
-    return result(next, [{
-      type: 'NORMAL_ROLE_SETTLED',
-      role,
-      creditDelta,
-      replayAutoBet,
-      mbFollowupGames,
-      evidenceStatus
-    }]);
+    const next = { ...state, credit: state.credit + creditDelta, bet: replayAutoBet, phase: replayAutoBet > 0 ? KernelPhase.READY : KernelPhase.IDLE, lastSettledRole: role, lastPayout: creditDelta, mbFollowupGamesRemaining: mbFollowupGames > 0 ? mbFollowupGames : state.mbFollowupGamesRemaining };
+    return result(next, [{ type: 'NORMAL_ROLE_SETTLED', role, creditDelta, replayAutoBet, mbFollowupGames, evidenceStatus }]);
   }
 
   if (type === 'SETTLE_MB_FOLLOWUP_GAME') {
@@ -133,21 +107,9 @@ export function reduceMachine(state, command = {}) {
     const creditDelta = command.creditDelta;
     const evidenceStatus = command.evidenceStatus ?? 'UNRESOLVED';
     if (!Number.isInteger(creditDelta) || creditDelta < 0) return result(state, [], false);
-
     const remaining = state.mbFollowupGamesRemaining - 1;
-    const next = {
-      ...state,
-      credit: state.credit + creditDelta,
-      lastSettledRole: 'MB_FOLLOWUP_10_COIN',
-      lastPayout: creditDelta,
-      mbFollowupGamesRemaining: remaining
-    };
-    return result(next, [{
-      type: 'MB_FOLLOWUP_GAME_SETTLED',
-      creditDelta,
-      remaining,
-      evidenceStatus
-    }]);
+    const next = { ...state, credit: state.credit + creditDelta, lastSettledRole: 'MB_FOLLOWUP_10_COIN', lastPayout: creditDelta, mbFollowupGamesRemaining: remaining };
+    return result(next, [{ type: 'MB_FOLLOWUP_GAME_SETTLED', creditDelta, remaining, evidenceStatus }]);
   }
 
   if (type === 'CONFIGURE_WANTED_WINDOW') {
@@ -156,14 +118,7 @@ export function reduceMachine(state, command = {}) {
     const triggerGame = command.triggerGame;
     if (!window || !Number.isInteger(window.start) || !Number.isInteger(window.end)) return result(state, [], false);
     if (!Number.isInteger(triggerGame) || triggerGame < window.start || triggerGame > window.end) return result(state, [], false);
-    const next = {
-      ...state,
-      normalGamesSinceWantedReset: 0,
-      wantedWindow: { ...window },
-      wantedWindowContext: command.context ?? null,
-      wantedTriggerGame: triggerGame,
-      wantedTriggerEvidenceStatus: command.evidenceStatus ?? 'UNRESOLVED'
-    };
+    const next = { ...state, normalGamesSinceWantedReset: 0, wantedWindow: { ...window }, wantedWindowContext: command.context ?? null, wantedTriggerGame: triggerGame, wantedTriggerEvidenceStatus: command.evidenceStatus ?? 'UNRESOLVED' };
     return result(next, [{ type: 'WANTED_WINDOW_CONFIGURED', window: { ...window }, triggerGame, context: next.wantedWindowContext }]);
   }
 
@@ -174,21 +129,8 @@ export function reduceMachine(state, command = {}) {
     const events = [{ type: 'NORMAL_PROGRESSION_ADVANCED', games }];
     let next = { ...state, normalGamesSinceWantedReset: games };
     if (games >= state.wantedTriggerGame) {
-      next = {
-        ...next,
-        mode: GameMode.WANTED_CHANCE,
-        modeGamesRemaining: 10,
-        modeEvidenceStatus: state.wantedTriggerEvidenceStatus,
-        modeResult: ModeResult.NONE,
-        modeResultEvidenceStatus: null
-      };
-      events.push({
-        type: 'MODE_ENTER',
-        mode: GameMode.WANTED_CHANCE,
-        games: 10,
-        evidenceStatus: state.wantedTriggerEvidenceStatus,
-        sourceWindow: state.wantedWindow
-      });
+      next = { ...next, mode: GameMode.WANTED_CHANCE, modeGamesRemaining: 10, modeEvidenceStatus: state.wantedTriggerEvidenceStatus, modeResult: ModeResult.NONE, modeResultEvidenceStatus: null };
+      events.push({ type: 'MODE_ENTER', mode: GameMode.WANTED_CHANCE, games: 10, evidenceStatus: state.wantedTriggerEvidenceStatus, sourceWindow: state.wantedWindow });
     }
     return result(next, events);
   }
@@ -198,31 +140,29 @@ export function reduceMachine(state, command = {}) {
     const points = command.points;
     if (!Number.isInteger(points) || points < 0 || points > 100) return result(state, [], false);
     const reached = points >= 100;
-    const next = {
-      ...state,
-      raiunPoints: points,
-      raiunHighGamesRemaining: reached ? 7 : state.raiunHighGamesRemaining
-    };
+    const next = { ...state, raiunPoints: points, raiunHighGamesRemaining: reached ? 7 : state.raiunHighGamesRemaining };
     const events = [{ type: 'RAIUN_POINTS_SET', points, evidenceStatus: command.evidenceStatus ?? 'UNRESOLVED' }];
+    if (reached) events.push({ type: 'RAIUN_HIGH_ENTER', games: 7, points: 100 });
+    return result(next, events);
+  }
+
+  if (type === 'ADD_RAIUN_POINTS') {
+    if (state.phase !== KernelPhase.IDLE || state.mode !== GameMode.NORMAL) return result(state, [], false);
+    if (!Number.isInteger(state.raiunPoints) || state.raiunPoints < 0 || state.raiunPoints >= 100 || state.raiunHighGamesRemaining > 0) return result(state, [], false);
+    const points = command.points;
+    if (!Number.isInteger(points) || points <= 0) return result(state, [], false);
+    const from = state.raiunPoints;
+    const to = Math.min(100, from + points);
+    const reached = to >= 100;
+    const next = { ...state, raiunPoints: to, raiunHighGamesRemaining: reached ? 7 : state.raiunHighGamesRemaining };
+    const events = [{ type: 'RAIUN_POINTS_ADDED', from, points: to - from, to, evidenceStatus: command.evidenceStatus ?? 'UNRESOLVED' }];
     if (reached) events.push({ type: 'RAIUN_HIGH_ENTER', games: 7, points: 100 });
     return result(next, events);
   }
 
   if (type === 'EXIT_WANTED_CHANCE') {
     if (state.phase !== KernelPhase.IDLE || state.mode !== GameMode.WANTED_CHANCE || state.modeGamesRemaining !== 0) return result(state, [], false);
-    const next = {
-      ...state,
-      mode: GameMode.NORMAL,
-      modeGamesRemaining: null,
-      modeEvidenceStatus: 'VERIFIED_LINK',
-      modeResult: ModeResult.NONE,
-      modeResultEvidenceStatus: null,
-      normalGamesSinceWantedReset: 0,
-      wantedWindow: null,
-      wantedWindowContext: null,
-      wantedTriggerGame: null,
-      wantedTriggerEvidenceStatus: null
-    };
+    const next = { ...state, mode: GameMode.NORMAL, modeGamesRemaining: null, modeEvidenceStatus: 'VERIFIED_LINK', modeResult: ModeResult.NONE, modeResultEvidenceStatus: null, normalGamesSinceWantedReset: 0, wantedWindow: null, wantedWindowContext: null, wantedTriggerGame: null, wantedTriggerEvidenceStatus: null };
     return result(next, [{ type: 'MODE_EXIT', from: GameMode.WANTED_CHANCE, to: GameMode.NORMAL }]);
   }
 
@@ -233,15 +173,7 @@ export function reduceMachine(state, command = {}) {
     if (![GameMode.WANTED_CHANCE, GameMode.ODOROBO_ZONE, GameMode.FUJIKO_ZONE].includes(mode)) return result(state, [], false);
     if (!Number.isInteger(games) || (mode === GameMode.WANTED_CHANCE ? games !== 10 : ![10, 20].includes(games))) return result(state, [], false);
     if ([KernelPhase.SPINNING, KernelPhase.STOPPING].includes(state.phase)) return result(state, [], false);
-
-    const next = {
-      ...state,
-      mode,
-      modeGamesRemaining: games,
-      modeEvidenceStatus: evidenceStatus,
-      modeResult: ModeResult.NONE,
-      modeResultEvidenceStatus: null
-    };
+    const next = { ...state, mode, modeGamesRemaining: games, modeEvidenceStatus: evidenceStatus, modeResult: ModeResult.NONE, modeResultEvidenceStatus: null };
     return result(next, [{ type: 'MODE_ENTER', mode, games, evidenceStatus }]);
   }
 
@@ -260,21 +192,8 @@ export function reduceMachine(state, command = {}) {
     if (![GameMode.ODOROBO_ZONE, GameMode.FUJIKO_ZONE].includes(state.mode)) return result(state, [], false);
     if (state.modeResult === ModeResult.PENDING_BONUS_OR_ART) return result(state, [], false);
     if (!Number.isInteger(state.modeGamesRemaining) || state.modeGamesRemaining <= 0) return result(state, [], false);
-
-    const next = {
-      ...state,
-      modeGamesRemaining: 0,
-      modeResult: ModeResult.PENDING_BONUS_OR_ART,
-      modeResultEvidenceStatus: 'MULTI_SOURCE_MATCH'
-    };
-    return result(next, [{
-      type: 'CHANCE_ZONE_SUCCESS',
-      mode: state.mode,
-      successPresentation: 'ODD_LCD_SYMBOL_ALIGNED',
-      pendingDestination: ModeResult.PENDING_BONUS_OR_ART,
-      destinationSplitStatus: 'UNRESOLVED',
-      evidenceStatus: 'MULTI_SOURCE_MATCH'
-    }]);
+    const next = { ...state, modeGamesRemaining: 0, modeResult: ModeResult.PENDING_BONUS_OR_ART, modeResultEvidenceStatus: 'MULTI_SOURCE_MATCH' };
+    return result(next, [{ type: 'CHANCE_ZONE_SUCCESS', mode: state.mode, successPresentation: 'ODD_LCD_SYMBOL_ALIGNED', pendingDestination: ModeResult.PENDING_BONUS_OR_ART, destinationSplitStatus: 'UNRESOLVED', evidenceStatus: 'MULTI_SOURCE_MATCH' }]);
   }
 
   return result(state, [], false);
