@@ -23,7 +23,29 @@ export const VERIFIED_SPEC = Object.freeze({
       4: 23.45,
       5: 22.67,
       6: 21.94
+    }),
+    premiumBySetting: Object.freeze({
+      1: 65536.00,
+      2: 65536.00,
+      3: 65536.00,
+      4: 65536.00,
+      5: 32768.00,
+      6: 21845.33
+    }),
+    legendBySetting: Object.freeze({
+      1: 65536.00,
+      2: 65536.00,
+      3: 65536.00,
+      4: 65536.00,
+      5: 32768.00,
+      6: 32768.00
     })
+  }),
+  play: Object.freeze({
+    normalFreeStopAllowed: true,
+    normalPushOrderPenalty: false,
+    rareRoleFamilies: Object.freeze(['青チャンス目', '赤チャンス目', '金チャンス目']),
+    gamesPer50Coins: Object.freeze({ min: 46.1, max: 48.7 })
   }),
   mb: Object.freeze({
     stopLine: 'MIDDLE',
@@ -33,11 +55,16 @@ export const VERIFIED_SPEC = Object.freeze({
   }),
   evidence: Object.freeze({
     normalRoleDenominators: 'MULTI_SOURCE_MATCH',
+    premiumLegendDenominators: 'MULTI_SOURCE_MATCH',
+    normalPlayRules: 'PUBLISHED_ANALYSIS',
+    rareRoleFamilies: 'PUBLISHED_ANALYSIS',
     mbStopPattern: 'MULTI_SOURCE_MATCH',
-    fullPhysicalReelStrips: 'UNRESOLVED'
+    fullPhysicalReelStrips: 'UNRESOLVED',
+    rareRolePhysicalStopPatterns: 'UNRESOLVED'
   }),
   policy: Object.freeze({
     fullPhysicalReelStrips: 'DO_NOT_INVENT',
+    rareRolePhysicalStopPatterns: 'DO_NOT_INVENT',
     unlistedProbabilities: 'DO_NOT_INTERPOLATE'
   })
 });
@@ -50,5 +77,7 @@ export function getNormalRoleDenominator(role, setting = 1) {
   if (role === 'MB') return VERIFIED_SPEC.normalRoleDenominators.mb;
   if (role === 'NINE_COIN') return VERIFIED_SPEC.normalRoleDenominators.nineCoinBySetting[setting] ?? null;
   if (role === 'TEN_COIN') return VERIFIED_SPEC.normalRoleDenominators.tenCoinBySetting[setting] ?? null;
+  if (role === 'PREMIUM') return VERIFIED_SPEC.normalRoleDenominators.premiumBySetting[setting] ?? null;
+  if (role === 'LEGEND') return VERIFIED_SPEC.normalRoleDenominators.legendBySetting[setting] ?? null;
   return null;
 }
