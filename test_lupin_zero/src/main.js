@@ -87,7 +87,7 @@ function render(snapshot = core.snapshot()) {
   const pendingModeResult = Boolean(snapshot.modeResult);
   ui.betBtn.disabled = busy || pendingModeResult || snapshot.credit <= 0 || snapshot.bet >= 3;
   ui.maxBetBtn.disabled = busy || pendingModeResult || snapshot.credit <= 0 || snapshot.bet >= 3;
-  ui.startBtn.disabled = snapshot.state !== MachineState.READY || pendingModeResult;
+  ui.startBtn.disabled = snapshot.state !== MachineState.READY || snapshot.bet !== 3 || pendingModeResult;
   ui.stopBtns.forEach((button, i) => {
     button.disabled = !busy || snapshot.stopped[i];
   });
