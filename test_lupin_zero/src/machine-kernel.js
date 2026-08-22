@@ -1,3 +1,5 @@
+import { GameMode } from './game-flow-spec.js';
+
 export const KernelPhase = Object.freeze({
   IDLE: 'IDLE',
   READY: 'READY',
@@ -12,7 +14,10 @@ export function createMachineState({ credit = 50, maxBet = 3 } = {}) {
     bet: 0,
     phase: KernelPhase.IDLE,
     stopped: Object.freeze([true, true, true]),
-    spinId: 0
+    spinId: 0,
+    mode: GameMode.NORMAL,
+    modeGamesRemaining: null,
+    modeEvidenceStatus: 'VERIFIED_LINK'
   });
 }
 
@@ -67,7 +72,34 @@ export function reduceMachine(state, command = {}) {
       bet: complete ? 0 : state.bet
     };
     const events = [{ type: 'REEL_STOP', reelIndex: index, spinId: state.spinId, complete }];
-    if (complete) events.push({ type: 'SPIN_END', reelIndex: index, spinId: state.spinId });
+    if (complete) events.push({ type: 'SPIN_END', reelIndex: index, spinId: state.spinId, mode: state.mode });
+    return result(next, events);
+  }
+
+  if (type === 'ENTER_MODE') {
+    const mode = command.mode;
+    const games = command.games;
+    const evidenceStatus = command.evidenceStatus ?? 'UNRESOLVED';
+    if (![GameMode.ODOROBO_ZONE, GameMode.FUJIKO_ZONE].includes(mode)) return result(state, [], false);
+    if (!Number.isInteger(games) || ![10, 20].includes(games)) return result(state, [], false);
+    if ([KernelPhase.SPINNING, KernelPhase.STOPPING].includes(state.phase)) return result(state, [], false);
+
+    const next = {
+      ...state,
+      mode,
+      modeGamesRemaining: games,
+      modeEvidenceStatus: evidenceStatus
+    };
+    return result(next, [{ type: 'MODE_ENTER', mode, games, evidenceStatus }]);
+  }
+
+  if (type === 'ADVANCE_MODE_GAME') {
+    if (![GameMode.ODOROBO_ZONE, GameMode.FUJIKO_ZONE].includes(state.mode)) return result(state, [], false);
+    if (!Number.isInteger(state.modeGamesRemaining) || state.modeGamesRemaining <= 0) return result(state, [], false);
+    const remaining = state.modeGamesRemaining - 1;
+    const next = { ...state, modeGamesRemaining: remaining };
+    const events = [{ type: 'MODE_GAME_ADVANCED', mode: state.mode, remaining }];
+    if (remaining === 0) events.push({ type: 'MODE_WINDOW_EXHAUSTED', mode: state.mode });
     return result(next, events);
   }
 
