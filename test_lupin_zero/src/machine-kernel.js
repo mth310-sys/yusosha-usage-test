@@ -24,7 +24,10 @@ export function createMachineState({ credit = 50, maxBet = 3 } = {}) {
     modeGamesRemaining: null,
     modeEvidenceStatus: 'VERIFIED_LINK',
     modeResult: ModeResult.NONE,
-    modeResultEvidenceStatus: null
+    modeResultEvidenceStatus: null,
+    lastSettledRole: null,
+    lastPayout: 0,
+    mbFollowupGamesRemaining: 0
   });
 }
 
@@ -82,6 +85,36 @@ export function reduceMachine(state, command = {}) {
     const events = [{ type: 'REEL_STOP', reelIndex: index, spinId: state.spinId, complete }];
     if (complete) events.push({ type: 'SPIN_END', reelIndex: index, spinId: state.spinId, mode: state.mode });
     return result(next, events);
+  }
+
+  if (type === 'SETTLE_NORMAL_ROLE') {
+    if (state.phase !== KernelPhase.IDLE) return result(state, [], false);
+    const role = command.role;
+    const creditDelta = command.creditDelta;
+    const replayAutoBet = command.replayAutoBet ?? 0;
+    const mbFollowupGames = command.mbFollowupGames ?? 0;
+    const evidenceStatus = command.evidenceStatus ?? 'UNRESOLVED';
+    if (typeof role !== 'string' || !Number.isInteger(creditDelta) || creditDelta < 0) return result(state, [], false);
+    if (!Number.isInteger(replayAutoBet) || replayAutoBet < 0 || replayAutoBet > state.maxBet) return result(state, [], false);
+    if (!Number.isInteger(mbFollowupGames) || mbFollowupGames < 0) return result(state, [], false);
+
+    const next = {
+      ...state,
+      credit: state.credit + creditDelta,
+      bet: replayAutoBet,
+      phase: replayAutoBet > 0 ? KernelPhase.READY : KernelPhase.IDLE,
+      lastSettledRole: role,
+      lastPayout: creditDelta,
+      mbFollowupGamesRemaining: mbFollowupGames > 0 ? mbFollowupGames : state.mbFollowupGamesRemaining
+    };
+    return result(next, [{
+      type: 'NORMAL_ROLE_SETTLED',
+      role,
+      creditDelta,
+      replayAutoBet,
+      mbFollowupGames,
+      evidenceStatus
+    }]);
   }
 
   if (type === 'ENTER_MODE') {
