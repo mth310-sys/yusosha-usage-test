@@ -1,5 +1,11 @@
 import { RESEARCH_SYMBOLS } from './research-reel-engine.js';
 
+const CHANCE_EYE_VIEW = Object.freeze({
+  CHANCE_EYE_BLUE: Object.freeze({ label: 'BLUE CHANCE EYE', color: 0x2b8cff, textColor: '#8fc7ff' }),
+  CHANCE_EYE_RED: Object.freeze({ label: 'RED CHANCE EYE', color: 0xe52c39, textColor: '#ff9ba2' }),
+  CHANCE_EYE_GOLD: Object.freeze({ label: 'GOLD 7 CHANCE EYE', color: 0xffc83d, textColor: '#ffe99a' })
+});
+
 export class LupinView extends Phaser.Scene {
   constructor() {
     super('LupinView');
@@ -45,6 +51,14 @@ export class LupinView extends Phaser.Scene {
       fontFamily: 'monospace', fontSize: '9px', color: '#d3b865'
     }).setOrigin(.5);
 
+    this.chanceEyePanel = this.add.graphics().setDepth(20).setVisible(false);
+    this.chanceEyeText = this.add.text(width / 2, height / 2, '', {
+      fontFamily: 'Arial Black, sans-serif', fontSize: '22px', color: '#ffffff', align: 'center', stroke: '#000000', strokeThickness: 4
+    }).setOrigin(.5).setDepth(21).setVisible(false);
+    this.chanceEyeMeta = this.add.text(width / 2, height / 2 + 34, '', {
+      fontFamily: 'monospace', fontSize: '9px', color: '#ffffff', align: 'center'
+    }).setOrigin(.5).setDepth(21).setVisible(false);
+
     this.events.emit('view-ready');
   }
 
@@ -59,12 +73,37 @@ export class LupinView extends Phaser.Scene {
 
   startSpin() {
     this.running = [true, true, true];
+    this.clearChanceEye();
     this.status.setText('RESEARCH SPIN // GAME-SPECIFIC RNG DISABLED');
   }
 
   endSpin() {
     this.status.setText('IDLE // WAITING VERIFIED SYSTEM PORT');
     this.cameras.main.flash(90, 255, 201, 72, false);
+  }
+
+  showChanceEye(cue, detail = {}) {
+    const view = CHANCE_EYE_VIEW[cue];
+    if (!view) return false;
+    const { width, height } = this.scale;
+    this.chanceEyePanel.clear();
+    this.chanceEyePanel.fillStyle(view.color, 0.28);
+    this.chanceEyePanel.fillRoundedRect(18, 70, width - 36, height - 112, 14);
+    this.chanceEyePanel.lineStyle(3, view.color, 0.95);
+    this.chanceEyePanel.strokeRoundedRect(18, 70, width - 36, height - 112, 14);
+    this.chanceEyePanel.setVisible(true);
+    this.chanceEyeText.setText(view.label).setColor(view.textColor).setVisible(true);
+    const denominator = Number.isFinite(detail.denominator) ? `1/${detail.denominator}` : 'rate unresolved';
+    this.chanceEyeMeta.setText(`${detail.visualRule ?? 'SEMANTIC VIEW'} // ${denominator}`).setVisible(true);
+    this.status.setText(`${view.label} // PUBLISHED LIQUID-REEL SEMANTICS`);
+    this.cameras.main.flash(120, (view.color >> 16) & 255, (view.color >> 8) & 255, view.color & 255, false);
+    return true;
+  }
+
+  clearChanceEye() {
+    this.chanceEyePanel?.setVisible(false);
+    this.chanceEyeText?.setVisible(false);
+    this.chanceEyeMeta?.setVisible(false);
   }
 
   update(_, delta) {
