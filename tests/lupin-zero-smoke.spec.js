@@ -79,3 +79,38 @@ test('LUPIN ZERO research reel stops are deterministic without claiming real str
   expect(result.first).toEqual(result.second);
   expect(result.first.every((stop) => stop.source === 'PLACEHOLDER')).toBe(true);
 });
+
+test('VerifiedSpec keeps published base role denominators exact and reel strips unresolved', async ({ page }) => {
+  await bootZero(page);
+
+  const result = await page.evaluate(async () => {
+    const spec = await import('/test_lupin_zero/src/verified-spec.js');
+    return {
+      replay: spec.getNormalRoleDenominator('REPLAY', 1),
+      threeCoin: spec.getNormalRoleDenominator('THREE_COIN', 6),
+      mb: spec.getNormalRoleDenominator('MB', 3),
+      nineCoin: [1,2,3,4,5,6].map((setting) => spec.getNormalRoleDenominator('NINE_COIN', setting)),
+      tenCoin: [1,2,3,4,5,6].map((setting) => spec.getNormalRoleDenominator('TEN_COIN', setting)),
+      invalid: spec.getNormalRoleDenominator('UNKNOWN', 1),
+      evidence: spec.VERIFIED_SPEC.evidence,
+      policy: spec.VERIFIED_SPEC.policy,
+      mbSpec: spec.VERIFIED_SPEC.mb
+    };
+  });
+
+  expect(result.replay).toBe(7.30);
+  expect(result.threeCoin).toBe(99.99);
+  expect(result.mb).toBe(27.31);
+  expect(result.nineCoin).toEqual([25.28,25.46,25.62,25.78,25.94,26.11]);
+  expect(result.tenCoin).toEqual([26.27,25.18,24.28,23.45,22.67,21.94]);
+  expect(result.invalid).toBeNull();
+  expect(result.evidence.fullPhysicalReelStrips).toBe('UNRESOLVED');
+  expect(result.policy.fullPhysicalReelStrips).toBe('DO_NOT_INVENT');
+  expect(result.policy.unlistedProbabilities).toBe('DO_NOT_INTERPOLATE');
+  expect(result.mbSpec).toEqual({
+    stopLine: 'MIDDLE',
+    stopSymbols: ['次元', '五エ門', 'ルパン'],
+    followupGames: 2,
+    payoutEachGame: 10
+  });
+});
