@@ -1,4 +1,4 @@
-const SYMBOLS = ['7', 'BAR', 'L', 'R', '★', '◆', '●'];
+import { RESEARCH_SYMBOLS } from './research-reel-engine.js';
 
 export class LupinView extends Phaser.Scene {
   constructor() {
@@ -35,7 +35,7 @@ export class LupinView extends Phaser.Scene {
       panel.lineStyle(3, 0x4d3c20, 1);
       panel.strokeRoundedRect(x, reelY - 48, reelW, 108, 8);
 
-      const symbol = this.add.text(x + reelW / 2, reelY + 5, SYMBOLS[i], {
+      const symbol = this.add.text(x + reelW / 2, reelY + 5, RESEARCH_SYMBOLS[i], {
         fontFamily: 'Arial Black, sans-serif', fontSize: '30px', color: '#9f1118', stroke: '#2a1408', strokeThickness: 1
       }).setOrigin(.5);
       this.reels.push(symbol);
@@ -48,11 +48,10 @@ export class LupinView extends Phaser.Scene {
     this.events.emit('view-ready');
   }
 
-  setReelRunning(index, running) {
+  setReelRunning(index, running, stopSymbol = null) {
     this.running[index] = running;
-    if (!running) {
-      const pick = Math.floor(Math.random() * SYMBOLS.length);
-      this.reels[index].setText(SYMBOLS[pick]).setScale(1.08);
+    if (!running && stopSymbol !== null) {
+      this.reels[index].setText(stopSymbol).setScale(1.08);
       this.tweens.add({ targets: this.reels[index], scale: 1, duration: 120, ease: 'Back.Out' });
       this.cameras.main.shake(70, 0.0025);
     }
@@ -72,8 +71,8 @@ export class LupinView extends Phaser.Scene {
     for (let i = 0; i < this.reels.length; i++) {
       if (!this.running[i]) continue;
       this.phase[i] += delta * (0.02 + i * 0.002);
-      const index = Math.floor(this.phase[i]) % SYMBOLS.length;
-      this.reels[i].setText(SYMBOLS[index]);
+      const index = Math.floor(this.phase[i]) % RESEARCH_SYMBOLS.length;
+      this.reels[i].setText(RESEARCH_SYMBOLS[index]);
     }
   }
 }
