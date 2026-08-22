@@ -1,4 +1,23 @@
 export const RAIUN_MODE_SPEC = Object.freeze({
+  raiunCounter: Object.freeze({
+    maxPoints: 100,
+    initialPoints: Object.freeze({
+      average: 22.6,
+      exactDistribution: null
+    }),
+    acquisition: Object.freeze({
+      lotteryBasis: 'ALL_ROLES',
+      publishedHitDenominatorRange: Object.freeze([7.0, 7.1]),
+      averagePointsOnHit: 3.3,
+      exactPerRoleRates: null,
+      exactPointAwardTable: null,
+      averageGamesTo100Points: 190
+    }),
+    presentation: Object.freeze({
+      publishedVisibleIncrementCue: 'MIDDLE_AND_RIGHT_LCD_SYMBOLS_MATCH',
+      note: 'Onegeki describes point acquisition lottery across all roles, while DMM describes middle/right same-number LCD stops as the visible point-addition cue. These are preserved as internal lottery vs presentation rather than treated as contradictory mechanics.'
+    })
+  }),
   raiunHigh: Object.freeze({
     entryTrigger: 'RAIUN_COUNTER_REACHES_100',
     games: 7,
@@ -43,6 +62,13 @@ export const RAIUN_MODE_SPEC = Object.freeze({
     exactArtLotteryPerGame: null
   }),
   evidence: Object.freeze({
+    raiunCounterCore: 'MULTI_SOURCE_MATCH',
+    raiunCounterInitialAverage: 'PUBLISHED_ANALYSIS',
+    raiunCounterAcquisitionSummary: 'PUBLISHED_ANALYSIS',
+    raiunCounterExactInitialDistribution: 'UNRESOLVED',
+    raiunCounterExactPerRoleRates: 'UNRESOLVED',
+    raiunCounterExactPointAwardTable: 'UNRESOLVED',
+    raiunCounterVisibleIncrementCue: 'PUBLISHED_MACHINE_GUIDE',
     raiunHighCore: 'MULTI_SOURCE_MATCH',
     raiunHighExactRates: 'MULTI_SOURCE_MATCH',
     raiunModeCore: 'MULTI_SOURCE_MATCH',
@@ -56,6 +82,9 @@ export const RAIUN_MODE_SPEC = Object.freeze({
     shinRaiunExactArtLotteryPerGame: 'UNRESOLVED'
   }),
   policy: Object.freeze({
+    inferRaiunInitialDistributionFromAverage: false,
+    inferRaiunPerRolePointRatesFromOverallHitRate: false,
+    inferRaiunPointAwardTableFromAverage: false,
     inferRaiunPerRoleArtLotteryFromOverallExpectation: false,
     inferShinRaiunArtLotteryFromLegendGateRate: false,
     resolveLegendGateConflictByGuessing: false
