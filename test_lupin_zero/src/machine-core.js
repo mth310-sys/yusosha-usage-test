@@ -17,7 +17,9 @@ export class MachineCore extends EventTarget {
       spinId: this.kernelState.spinId,
       mode: this.kernelState.mode,
       modeGamesRemaining: this.kernelState.modeGamesRemaining,
-      modeEvidenceStatus: this.kernelState.modeEvidenceStatus
+      modeEvidenceStatus: this.kernelState.modeEvidenceStatus,
+      modeResult: this.kernelState.modeResult,
+      modeResultEvidenceStatus: this.kernelState.modeResultEvidenceStatus
     });
   }
 
@@ -63,6 +65,15 @@ export class MachineCore extends EventTarget {
       if (event.type === 'MODE_WINDOW_EXHAUSTED') {
         this.emit('mode-window-exhausted', { mode: event.mode });
       }
+      if (event.type === 'CHANCE_ZONE_SUCCESS') {
+        this.emit('chance-zone-success', {
+          mode: event.mode,
+          successPresentation: event.successPresentation,
+          pendingDestination: event.pendingDestination,
+          destinationSplitStatus: event.destinationSplitStatus,
+          evidenceStatus: event.evidenceStatus
+        });
+      }
     }
     return true;
   }
@@ -89,5 +100,9 @@ export class MachineCore extends EventTarget {
 
   advanceModeGame() {
     return this.apply({ type: 'ADVANCE_MODE_GAME' });
+  }
+
+  resolveChanceZoneOddAlignment() {
+    return this.apply({ type: 'CHANCE_ZONE_ODD_ALIGNED' });
   }
 }
