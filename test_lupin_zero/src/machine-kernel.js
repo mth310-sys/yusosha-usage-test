@@ -27,12 +27,23 @@ export function createMachineState({ credit = 50, maxBet = 3 } = {}) {
     modeResultEvidenceStatus: null,
     lastSettledRole: null,
     lastPayout: 0,
-    mbFollowupGamesRemaining: 0
+    mbFollowupGamesRemaining: 0,
+    normalGamesSinceWantedReset: 0,
+    wantedWindow: null,
+    wantedWindowContext: null,
+    wantedTriggerGame: null,
+    wantedTriggerEvidenceStatus: null,
+    raiunPoints: null,
+    raiunHighGamesRemaining: 0
   });
 }
 
 function freezeState(state) {
-  return Object.freeze({ ...state, stopped: Object.freeze([...state.stopped]) });
+  return Object.freeze({
+    ...state,
+    stopped: Object.freeze([...state.stopped]),
+    wantedWindow: state.wantedWindow ? Object.freeze({ ...state.wantedWindow }) : null
+  });
 }
 
 function result(state, events = [], accepted = true) {
@@ -61,7 +72,7 @@ export function reduceMachine(state, command = {}) {
   }
 
   if (type === 'START') {
-    if (state.phase !== KernelPhase.READY || state.bet <= 0) return result(state, [], false);
+    if (state.phase !== KernelPhase.READY || state.bet !== state.maxBet) return result(state, [], false);
     if (state.modeResult === ModeResult.PENDING_BONUS_OR_ART) return result(state, [], false);
     const spinId = state.spinId + 1;
     const next = { ...state, phase: KernelPhase.SPINNING, stopped: [false, false, false], spinId };
@@ -139,12 +150,88 @@ export function reduceMachine(state, command = {}) {
     }]);
   }
 
+  if (type === 'CONFIGURE_WANTED_WINDOW') {
+    if (state.phase !== KernelPhase.IDLE || state.mode !== GameMode.NORMAL) return result(state, [], false);
+    const window = command.window;
+    const triggerGame = command.triggerGame;
+    if (!window || !Number.isInteger(window.start) || !Number.isInteger(window.end)) return result(state, [], false);
+    if (!Number.isInteger(triggerGame) || triggerGame < window.start || triggerGame > window.end) return result(state, [], false);
+    const next = {
+      ...state,
+      normalGamesSinceWantedReset: 0,
+      wantedWindow: { ...window },
+      wantedWindowContext: command.context ?? null,
+      wantedTriggerGame: triggerGame,
+      wantedTriggerEvidenceStatus: command.evidenceStatus ?? 'UNRESOLVED'
+    };
+    return result(next, [{ type: 'WANTED_WINDOW_CONFIGURED', window: { ...window }, triggerGame, context: next.wantedWindowContext }]);
+  }
+
+  if (type === 'ADVANCE_NORMAL_PROGRESSION') {
+    if (state.phase !== KernelPhase.IDLE || state.mode !== GameMode.NORMAL || state.mbFollowupGamesRemaining > 0) return result(state, [], false);
+    if (!Number.isInteger(state.wantedTriggerGame) || !state.wantedWindow) return result(state, [], false);
+    const games = state.normalGamesSinceWantedReset + 1;
+    const events = [{ type: 'NORMAL_PROGRESSION_ADVANCED', games }];
+    let next = { ...state, normalGamesSinceWantedReset: games };
+    if (games >= state.wantedTriggerGame) {
+      next = {
+        ...next,
+        mode: GameMode.WANTED_CHANCE,
+        modeGamesRemaining: 10,
+        modeEvidenceStatus: state.wantedTriggerEvidenceStatus,
+        modeResult: ModeResult.NONE,
+        modeResultEvidenceStatus: null
+      };
+      events.push({
+        type: 'MODE_ENTER',
+        mode: GameMode.WANTED_CHANCE,
+        games: 10,
+        evidenceStatus: state.wantedTriggerEvidenceStatus,
+        sourceWindow: state.wantedWindow
+      });
+    }
+    return result(next, events);
+  }
+
+  if (type === 'SET_RAIUN_POINTS') {
+    if (state.phase !== KernelPhase.IDLE || state.mode !== GameMode.NORMAL) return result(state, [], false);
+    const points = command.points;
+    if (!Number.isInteger(points) || points < 0 || points > 100) return result(state, [], false);
+    const reached = points >= 100;
+    const next = {
+      ...state,
+      raiunPoints: points,
+      raiunHighGamesRemaining: reached ? 7 : state.raiunHighGamesRemaining
+    };
+    const events = [{ type: 'RAIUN_POINTS_SET', points, evidenceStatus: command.evidenceStatus ?? 'UNRESOLVED' }];
+    if (reached) events.push({ type: 'RAIUN_HIGH_ENTER', games: 7, points: 100 });
+    return result(next, events);
+  }
+
+  if (type === 'EXIT_WANTED_CHANCE') {
+    if (state.phase !== KernelPhase.IDLE || state.mode !== GameMode.WANTED_CHANCE || state.modeGamesRemaining !== 0) return result(state, [], false);
+    const next = {
+      ...state,
+      mode: GameMode.NORMAL,
+      modeGamesRemaining: null,
+      modeEvidenceStatus: 'VERIFIED_LINK',
+      modeResult: ModeResult.NONE,
+      modeResultEvidenceStatus: null,
+      normalGamesSinceWantedReset: 0,
+      wantedWindow: null,
+      wantedWindowContext: null,
+      wantedTriggerGame: null,
+      wantedTriggerEvidenceStatus: null
+    };
+    return result(next, [{ type: 'MODE_EXIT', from: GameMode.WANTED_CHANCE, to: GameMode.NORMAL }]);
+  }
+
   if (type === 'ENTER_MODE') {
     const mode = command.mode;
     const games = command.games;
     const evidenceStatus = command.evidenceStatus ?? 'UNRESOLVED';
-    if (![GameMode.ODOROBO_ZONE, GameMode.FUJIKO_ZONE].includes(mode)) return result(state, [], false);
-    if (!Number.isInteger(games) || ![10, 20].includes(games)) return result(state, [], false);
+    if (![GameMode.WANTED_CHANCE, GameMode.ODOROBO_ZONE, GameMode.FUJIKO_ZONE].includes(mode)) return result(state, [], false);
+    if (!Number.isInteger(games) || (mode === GameMode.WANTED_CHANCE ? games !== 10 : ![10, 20].includes(games))) return result(state, [], false);
     if ([KernelPhase.SPINNING, KernelPhase.STOPPING].includes(state.phase)) return result(state, [], false);
 
     const next = {
@@ -159,7 +246,7 @@ export function reduceMachine(state, command = {}) {
   }
 
   if (type === 'ADVANCE_MODE_GAME') {
-    if (![GameMode.ODOROBO_ZONE, GameMode.FUJIKO_ZONE].includes(state.mode)) return result(state, [], false);
+    if (![GameMode.WANTED_CHANCE, GameMode.ODOROBO_ZONE, GameMode.FUJIKO_ZONE].includes(state.mode)) return result(state, [], false);
     if (state.modeResult === ModeResult.PENDING_BONUS_OR_ART) return result(state, [], false);
     if (!Number.isInteger(state.modeGamesRemaining) || state.modeGamesRemaining <= 0) return result(state, [], false);
     const remaining = state.modeGamesRemaining - 1;
