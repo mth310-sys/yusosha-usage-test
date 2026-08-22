@@ -1,3 +1,4 @@
+import { LUPIN_ZERO_TARGET } from './target-lock.js';
 import { ReuseEvidenceStatus, evaluateReuseCandidate } from './reuse-registry.js';
 
 export const NORMAL_ROLE_PRODUCTION_INFERENCE = Object.freeze({
@@ -17,7 +18,7 @@ export const NORMAL_ROLE_PRODUCTION_INFERENCE = Object.freeze({
 
 const inferenceGate = evaluateReuseCandidate({
   sourcePath: 'test_lupin_zero/src/normal-role-production-adapter.js',
-  targetIdentityKey: '2016_OLYMPIA_LUPIN_KESARETA_B4',
+  targetIdentityKey: LUPIN_ZERO_TARGET.identityKey,
   evidenceStatus: ReuseEvidenceStatus.INFERRED_HIGH_CONFIDENCE,
   responsibility: 'MACHINE_RULE',
   productionBehavior: true,
