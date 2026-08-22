@@ -1,4 +1,5 @@
 import { MACHINE_EVENTS, MACHINE_SURFACES, machineEvent } from './machine-event-contract.js';
+import { resolveNormalRole } from './normal-role-resolver.js';
 
 const KNOWN_PAYOUTS = Object.freeze({
   REPLAY: 0,
@@ -11,14 +12,16 @@ const KNOWN_PAYOUTS = Object.freeze({
 });
 
 export class NormalGameKernel {
-  constructor({ credit = 50, maxBet = 3 } = {}) {
+  constructor({ credit = 50, maxBet = 3, setting = 1 } = {}) {
     this.credit = credit;
     this.maxBet = maxBet;
+    this.setting = setting;
     this.bet = 0;
     this.game = 0;
     this.spinId = 0;
     this.phase = 'IDLE';
     this.resolvedRole = null;
+    this.lastRoleResolution = null;
     this.stopped = [true, true, true];
     this.trace = [];
   }
@@ -29,8 +32,10 @@ export class NormalGameKernel {
       bet: this.bet,
       game: this.game,
       spinId: this.spinId,
+      setting: this.setting,
       phase: this.phase,
       resolvedRole: this.resolvedRole,
+      lastRoleResolution: this.lastRoleResolution,
       stopped: [...this.stopped]
     });
   }
@@ -60,14 +65,30 @@ export class NormalGameKernel {
     return true;
   }
 
-  resolveKnownRole(role) {
+  resolveKnownRole(role, metadata = {}) {
     if (this.phase !== 'AWAITING_ROLE') return false;
     if (!(role in KNOWN_PAYOUTS)) return false;
     this.resolvedRole = role;
+    this.lastRoleResolution = Object.freeze({ kind: 'KNOWN_ROLE', role, ...metadata });
     this.phase = 'SPINNING';
-    this.emit(MACHINE_EVENTS.ROLE_RESOLVED, { role });
+    this.emit(MACHINE_EVENTS.ROLE_RESOLVED, { role, ...metadata });
     this.emit(MACHINE_EVENTS.STOP_BUTTON_ARMED, { surface: MACHINE_SURFACES.STOP_BUTTONS });
     return true;
+  }
+
+  resolveRoleFromRandom(randomSource) {
+    if (this.phase !== 'AWAITING_ROLE') return Object.freeze({ accepted: false, reason: 'INVALID_PHASE' });
+    const result = resolveNormalRole(randomSource, this.setting);
+    this.lastRoleResolution = result;
+    if (result.kind !== 'KNOWN_ROLE') {
+      return Object.freeze({ accepted: false, reason: 'UNRESOLVED_OTHER', result });
+    }
+    const accepted = this.resolveKnownRole(result.role, {
+      evidenceStatus: result.evidenceStatus,
+      setting: result.setting,
+      draw: result.draw
+    });
+    return Object.freeze({ accepted, reason: accepted ? 'KNOWN_ROLE_RESOLVED' : 'REJECTED', result });
   }
 
   stop(index) {
@@ -97,9 +118,11 @@ export class NormalGameKernel {
 }
 
 export const NORMAL_GAME_KERNEL_POLICY = Object.freeze({
-  internalRoleLotteryImplemented: false,
-  reason: 'Exact complete role-resolution relationship is not inferred from partial published denominators.',
-  unresolvedRoleLottery: 'UNRESOLVED',
+  internalKnownRoleLotteryImplemented: true,
+  completeRoleLotteryImplemented: false,
+  knownRoleSource: 'VERIFIED_SPEC.normalRoleDenominators',
+  unresolvedResidual: 'UNRESOLVED_OTHER',
+  unresolvedResidualAutoPayout: false,
   presentationMayReactToEvents: true,
   presentationMayChangeLotteryResult: false
 });
