@@ -3,8 +3,21 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     maxPoints: 1000000,
     maxEffect: 'SET_CONTINUE_AND_EXTRA_BONUS',
     overflowCarryToNextSet: true,
-    acquisitionTriggers: Object.freeze(['T_SYMBOL_ALIGNED', 'CHANCE_EYE']),
+    acquisitionLottery: Object.freeze({
+      eligibleRoles: 'ALL_ROLES',
+      stageDependent: true,
+      publishedOverallHitRangeDenominator: Object.freeze({ min: 3.0, max: 16.9 }),
+      note: 'Published analyses agree that all roles can participate in treasure acquisition; exact per-role award tables remain unresolved.'
+    }),
+    directAcquisitionTriggers: Object.freeze(['T_SYMBOL_ALIGNED', 'CHANCE_EYE']),
     tSymbols: Object.freeze(['SILVER', 'GOLD']),
+    publishedMinimumAwards: Object.freeze({
+      goldTSymbol: 300000,
+      goldClassPresentation: 500000,
+      flameLupinHold: 200000,
+      fujikoHold: 300000,
+      tamaChanHold: 1000000
+    }),
     continuationExpectationByPoints: Object.freeze({
       100000: 69.7,
       150000: 70.5,
@@ -66,12 +79,15 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     timing: 'SET_START',
     games: 4,
     patterns: Object.freeze(['WALTHER', 'SILHOUETTE', 'REVOLVER_VISION', 'ATTACK_VISION']),
-    averageTreasurePoints: 342000
+    averageTreasurePoints: 342000,
+    patternSelectionRates: null
   }),
   treasureRush: Object.freeze({
     trigger: 'TREASURE_HUNT_SUCCESS',
     games: Object.freeze({ min: 4, max: 9 }),
-    averageTreasurePoints: 499000
+    averageTreasurePoints: 499000,
+    perGameAwardTable: null,
+    treasureHuntSuccessProbability: null
   }),
   extraBonus: Object.freeze({
     triggerPoints: 1000000,
@@ -97,12 +113,18 @@ export const GT_SYSTEM_SPEC = Object.freeze({
   evidence: Object.freeze({
     treasureMaxAndExtraBonusRoute: 'MULTI_SOURCE_MATCH',
     treasureContinuationTable: 'MULTI_SOURCE_MATCH',
+    treasureAllRoleLottery: 'MULTI_SOURCE_MATCH',
+    treasurePublishedMinimumAwards: 'PUBLISHED_ANALYSIS',
+    exactTreasureAwardTable: 'UNRESOLVED',
     stageTreasureHitRates: 'MULTI_SOURCE_MATCH',
     stageScenarioSelection: 'MULTI_SOURCE_MATCH',
     stageScenarioInitialStages: 'MULTI_SOURCE_MATCH',
     stageScenarioUpgradeRates: 'MULTI_SOURCE_MATCH',
     lupinRushProfile: 'PUBLISHED_ANALYSIS',
+    lupinRushPatternSelectionRates: 'UNRESOLVED',
     treasureRushProfile: 'MULTI_SOURCE_MATCH',
+    treasureRushPerGameAwardTable: 'UNRESOLVED',
+    treasureHuntSuccessProbability: 'UNRESOLVED',
     extraBonusCoreRoute: 'MULTI_SOURCE_MATCH',
     extraBonusExactRates: 'PUBLISHED_ANALYSIS',
     goldRushCoreRoute: 'MULTI_SOURCE_MATCH',
@@ -111,6 +133,7 @@ export const GT_SYSTEM_SPEC = Object.freeze({
   }),
   policy: Object.freeze({
     inferTreasurePointAwardAmounts: false,
+    inferTreasureHuntSuccessProbability: false,
     inferStageTransitionRates: false,
     inferRushPatternSelectionRates: false,
     interpolateUnlistedContinuationPoints: false
