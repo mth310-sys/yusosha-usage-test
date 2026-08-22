@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('reuse registry accepts safe Yusosha assets and rejects unsafe production reuse', async ({ page }) => {
+test('reuse registry accepts safe and high-confidence provisional assets while rejecting unsafe reuse', async ({ page }) => {
   await page.goto('/test_lupin_zero/');
   await page.waitForLoadState('networkidle');
 
@@ -31,6 +31,30 @@ test('reuse registry accepts safe Yusosha assets and rejects unsafe production r
       adaptationCost: 'LOW'
     });
 
+    const provisionalExact = evaluateReuseCandidate({
+      sourcePath: 'published-b4-analysis.js',
+      targetIdentityKey: 'OLYMPIA_2016_LUPIN_KESARETA_B4',
+      evidenceStatus: ReuseEvidenceStatus.PROVISIONAL_HIGH_CONFIDENCE,
+      responsibility: 'RULES',
+      productionBehavior: true,
+      zeroYen: true,
+      adaptationCost: 'LOW',
+      sourceSpecificToTarget: true,
+      exactPublishedValue: true
+    });
+
+    const provisionalDerived = evaluateReuseCandidate({
+      sourcePath: 'derived-estimate.js',
+      targetIdentityKey: 'OLYMPIA_2016_LUPIN_KESARETA_B4',
+      evidenceStatus: ReuseEvidenceStatus.PROVISIONAL_HIGH_CONFIDENCE,
+      responsibility: 'RULES',
+      productionBehavior: true,
+      zeroYen: true,
+      adaptationCost: 'LOW',
+      sourceSpecificToTarget: true,
+      exactPublishedValue: false
+    });
+
     const otherMachine = evaluateReuseCandidate({
       sourcePath: 'other-lupin.js',
       targetIdentityKey: 'OTHER_LUPIN_MACHINE',
@@ -51,13 +75,30 @@ test('reuse registry accepts safe Yusosha assets and rejects unsafe production r
       adaptationCost: 'LOW'
     });
 
-    return { safeVisual, unresolvedRule, otherMachine, mixed, HIGH_VALUE_REUSE_SOURCES };
+    return {
+      safeVisual,
+      unresolvedRule,
+      provisionalExact,
+      provisionalDerived,
+      otherMachine,
+      mixed,
+      HIGH_VALUE_REUSE_SOURCES
+    };
   });
 
   expect(result.safeVisual.reusable).toBe(true);
   expect(result.safeVisual.mode).toBe('ADAPT_PRESENTATION');
+
   expect(result.unresolvedRule.reusable).toBe(false);
   expect(result.unresolvedRule.gates.evidence).toBe(false);
+
+  expect(result.provisionalExact.reusable).toBe(true);
+  expect(result.provisionalExact.provisional).toBe(true);
+  expect(result.provisionalExact.mode).toBe('ADAPT_OR_PORT_PROVISIONAL');
+
+  expect(result.provisionalDerived.reusable).toBe(false);
+  expect(result.provisionalDerived.gates.provisional).toBe(false);
+
   expect(result.otherMachine.reusable).toBe(false);
   expect(result.otherMachine.gates.target).toBe(false);
   expect(result.mixed.reusable).toBe(false);
