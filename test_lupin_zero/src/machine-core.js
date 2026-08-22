@@ -61,6 +61,13 @@ export class MachineCore extends EventTarget {
           evidenceStatus: event.evidenceStatus
         });
       }
+      if (event.type === 'MB_FOLLOWUP_GAME_SETTLED') {
+        this.emit('mb-followup-game-settled', {
+          creditDelta: event.creditDelta,
+          remaining: event.remaining,
+          evidenceStatus: event.evidenceStatus
+        });
+      }
       if (event.type === 'MODE_ENTER') {
         this.emit('mode-enter', {
           mode: event.mode,
@@ -114,6 +121,15 @@ export class MachineCore extends EventTarget {
       creditDelta: settlement.creditDelta,
       replayAutoBet: settlement.replayAutoBet,
       mbFollowupGames: settlement.mbFollowupGames,
+      evidenceStatus: settlement.evidenceStatus
+    });
+  }
+
+  settleMbFollowupGame(settlement) {
+    if (!settlement?.accepted) return false;
+    return this.apply({
+      type: 'SETTLE_MB_FOLLOWUP_GAME',
+      creditDelta: settlement.creditDelta,
       evidenceStatus: settlement.evidenceStatus
     });
   }
