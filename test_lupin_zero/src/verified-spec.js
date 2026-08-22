@@ -27,6 +27,38 @@ export const VERIFIED_SPEC = Object.freeze({
     rareRoleFamilies: Object.freeze(['青チャンス目', '赤チャンス目', '金チャンス目']),
     gamesPer50Coins: Object.freeze({ min: 46.1, max: 48.7 })
   }),
+  modeProfiles: Object.freeze({
+    wantedChance: Object.freeze({
+      baseGames: 10,
+      holdSlots: 8,
+      decrementPausesForChangedHold: true,
+      wantedCounterMaxGames: 480
+    }),
+    raiunHigh: Object.freeze({
+      entryCounterPoints: 100,
+      games: 7,
+      successCondition: 'BLUE_SYMBOL_ALIGNED'
+    }),
+    raiunMode: Object.freeze({
+      games: 20,
+      artExpectedRatePercent: 23,
+      artTrigger: 'SEVEN_SYMBOL_ALIGNED',
+      pureIncreaseCoinsPerGame: 2.0
+    }),
+    lupinBonus: Object.freeze({
+      gamesApprox: 35,
+      artExpectedRatePercentApprox: 50,
+      pureIncreaseCoinsPerGame: 2.0,
+      finalBattleGames: 5,
+      artTrigger: 'ZENIGATA_BATTLE_WIN'
+    }),
+    goldenTime: Object.freeze({
+      setGamesApprox: 40,
+      pureIncreaseCoinsPerGame: 2.0,
+      continuationExpectationPercent: Object.freeze({ min: 80.4, max: 83.3 }),
+      expectedSets: Object.freeze({ min: 5.1, max: 6.0 })
+    })
+  }),
   liquidReel: Object.freeze({
     chanceEyes: Object.freeze({
       weak: Object.freeze({ label: '青チャンス目', visualRule: 'BLUE_SAME_COLOR', normalDenominator: 53.6, wantedChanceDenominator: 13.9 }),
@@ -70,6 +102,11 @@ export const VERIFIED_SPEC = Object.freeze({
     premiumLegendDenominators: 'MULTI_SOURCE_MATCH',
     normalPlayRules: 'PUBLISHED_ANALYSIS',
     rareRoleFamilies: 'PUBLISHED_ANALYSIS',
+    wantedChanceProfile: 'MULTI_SOURCE_MATCH',
+    raiunHighProfile: 'PUBLISHED_ANALYSIS',
+    raiunModeProfile: 'MULTI_SOURCE_MATCH',
+    lupinBonusProfile: 'MULTI_SOURCE_MATCH',
+    goldenTimeProfile: 'MULTI_SOURCE_MATCH',
     liquidReelChanceEyeRules: 'MULTI_SOURCE_MATCH',
     liquidReelChanceEyeRates: 'MULTI_SOURCE_MATCH',
     liquidReelAlignedEffects: 'MULTI_SOURCE_MATCH',
