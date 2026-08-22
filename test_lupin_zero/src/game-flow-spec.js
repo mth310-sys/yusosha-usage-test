@@ -9,6 +9,8 @@ export const FlowEvidence = Object.freeze({
 export const GameMode = Object.freeze({
   NORMAL: 'NORMAL',
   WANTED_CHANCE: 'WANTED_CHANCE',
+  ODOROBO_ZONE: 'ODOROBO_ZONE',
+  FUJIKO_ZONE: 'FUJIKO_ZONE',
   RAIUN_MODE: 'RAIUN_MODE',
   LUPIN_BONUS: 'LUPIN_BONUS',
   GOLDEN_TIME: 'GOLDEN_TIME',
@@ -20,6 +22,18 @@ export const GameMode = Object.freeze({
 export const GAME_FLOW_SPEC = Object.freeze({
   modes: Object.freeze(Object.values(GameMode)),
   links: Object.freeze([
+    Object.freeze({
+      from: GameMode.NORMAL,
+      trigger: 'CHANCE_EYE_OUTCOME_ODOROBO_ZONE',
+      to: GameMode.ODOROBO_ZONE,
+      evidence: FlowEvidence.VERIFIED_LINK
+    }),
+    Object.freeze({
+      from: GameMode.NORMAL,
+      trigger: 'CHANCE_EYE_OUTCOME_FUJIKO_ZONE',
+      to: GameMode.FUJIKO_ZONE,
+      evidence: FlowEvidence.VERIFIED_LINK
+    }),
     Object.freeze({
       from: GameMode.NORMAL,
       trigger: 'LIQUID_REEL_RED_SYMBOL_ALIGNED',
@@ -53,6 +67,18 @@ export const GAME_FLOW_SPEC = Object.freeze({
       evidence: 'MULTI_SOURCE_MATCH',
       automaticEntryRoute: null,
       automaticEntryProbability: null
+    }),
+    Object.freeze({
+      mode: GameMode.ODOROBO_ZONE,
+      fact: 'SUCCESS_DESTINATION_IS_LUPIN_BONUS_OR_GOLDEN_TIME',
+      evidence: 'MULTI_SOURCE_MATCH',
+      exactBonusVsArtSplit: null
+    }),
+    Object.freeze({
+      mode: GameMode.FUJIKO_ZONE,
+      fact: 'SUCCESS_DESTINATION_IS_LUPIN_BONUS_OR_GOLDEN_TIME',
+      evidence: 'MULTI_SOURCE_MATCH',
+      exactBonusVsArtSplit: null
     })
   ]),
   policy: Object.freeze({
