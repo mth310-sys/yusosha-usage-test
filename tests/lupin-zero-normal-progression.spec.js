@@ -1,15 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { SequenceRandomSource } from '../test_lupin_zero/src/random-source.js';
 import { selectWantedWindow, WANTED_RESET_CONTEXT, RAIUN_COUNTER_SPEC } from '../test_lupin_zero/src/normal-progression.js';
+import { resolveInitialRaiunPoints, resolveRaiunPointAcquisition, RAIUN_COUNTER_PRODUCTION_POLICY } from '../test_lupin_zero/src/raiun-counter-resolver.js';
 import { createMachineState, reduceMachine } from '../test_lupin_zero/src/machine-kernel.js';
 import { GameMode } from '../test_lupin_zero/src/game-flow-spec.js';
 
 test('reset profile selects a published WANTED 32G window without inventing a range', () => {
-  const selection = selectWantedWindow(
-    new SequenceRandomSource([0.2]),
-    1,
-    WANTED_RESET_CONTEXT.AFTER_BONUS_ART_OR_RESET
-  );
+  const selection = selectWantedWindow(new SequenceRandomSource([0.2]), 1, WANTED_RESET_CONTEXT.AFTER_BONUS_ART_OR_RESET);
   expect(selection.window.label).toBe('97-128');
   expect(selection.productionTriggerGame).toBe(128);
   expect(selection.exactGameWithinWindowKnown).toBe(false);
@@ -68,8 +65,41 @@ test('Raiun counter 100pt opens the published seven-game high boundary', () => {
   expect(result.events.some((event) => event.type === 'RAIUN_HIGH_ENTER')).toBe(true);
 });
 
-test('unknown Raiun point distributions remain unimplemented', () => {
+test('Raiun production initial model preserves published 22.6pt mean exactly', () => {
+  expect(resolveInitialRaiunPoints(new SequenceRandomSource([0.39])).points).toBe(22);
+  expect(resolveInitialRaiunPoints(new SequenceRandomSource([0.40])).points).toBe(23);
+  const mean = 22 * 0.4 + 23 * 0.6;
+  expect(mean).toBe(22.6);
+  expect(RAIUN_COUNTER_PRODUCTION_POLICY.evidenceStatus).toBe('INFERRED_HIGH_CONFIDENCE');
+  expect(RAIUN_COUNTER_PRODUCTION_POLICY.mayPromoteToVerifiedAutomatically).toBe(false);
+});
+
+test('Raiun production acquisition uses published range and exact 3.3pt inferred mean', () => {
+  const miss = resolveRaiunPointAcquisition(new SequenceRandomSource([0.20]));
+  expect(miss.hit).toBe(false);
+
+  const three = resolveRaiunPointAcquisition(new SequenceRandomSource([0.10, 0.69]));
+  const four = resolveRaiunPointAcquisition(new SequenceRandomSource([0.10, 0.70]));
+  expect(three.points).toBe(3);
+  expect(four.points).toBe(4);
+  expect(3 * 0.7 + 4 * 0.3).toBe(3.3);
+  expect(three.hitDenominator).toBe(7.05);
+});
+
+test('automatic Raiun addition caps at 100 and opens seven-game high', () => {
+  let state = createMachineState();
+  state = reduceMachine(state, { type: 'SET_RAIUN_POINTS', points: 99, evidenceStatus: 'INFERRED_HIGH_CONFIDENCE' }).state;
+  const result = reduceMachine(state, { type: 'ADD_RAIUN_POINTS', points: 4, evidenceStatus: 'INFERRED_HIGH_CONFIDENCE' });
+  expect(result.accepted).toBe(true);
+  expect(result.state.raiunPoints).toBe(100);
+  expect(result.state.raiunHighGamesRemaining).toBe(7);
+  expect(result.events.find((event) => event.type === 'RAIUN_POINTS_ADDED')?.points).toBe(1);
+  expect(result.events.some((event) => event.type === 'RAIUN_HIGH_ENTER')).toBe(true);
+});
+
+test('exact Raiun distributions remain unresolved while production inference is enabled', () => {
   expect(RAIUN_COUNTER_SPEC.exactInitialPointDistributionKnown).toBe(false);
   expect(RAIUN_COUNTER_SPEC.exactIncrementDistributionKnown).toBe(false);
-  expect(RAIUN_COUNTER_SPEC.automaticPointGenerationImplemented).toBe(false);
+  expect(RAIUN_COUNTER_SPEC.automaticPointGenerationImplemented).toBe(true);
+  expect(RAIUN_COUNTER_SPEC.evidenceStatus).toBe('INFERRED_HIGH_CONFIDENCE');
 });
