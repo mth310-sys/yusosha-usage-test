@@ -63,8 +63,6 @@ core.addEventListener('reel-stop', (event) => {
 });
 
 core.addEventListener('spin-end', (event) => {
-  const finalIndex = event.detail.snapshot.stopped.findIndex(Boolean);
-  void finalIndex;
   render(event.detail.snapshot);
   scene().endSpin();
   ui.message.textContent = '研究用1ゲーム完了 — 実機固有抽選は未接続';
@@ -74,10 +72,7 @@ ui.betBtn.addEventListener('click', () => core.betOne());
 ui.maxBetBtn.addEventListener('click', () => core.maxBetNow());
 ui.startBtn.addEventListener('click', () => core.start());
 ui.stopBtns.forEach((button) => {
-  button.addEventListener('click', () => {
-    const index = Number(button.dataset.reel);
-    if (core.stop(index)) scene().setReelRunning(index, false);
-  });
+  button.addEventListener('click', () => core.stop(Number(button.dataset.reel)));
 });
 
 render();
