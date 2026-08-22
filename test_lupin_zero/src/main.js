@@ -3,20 +3,13 @@ import { LupinView } from './phaser-view.js';
 import { ResearchReelEngine } from './research-reel-engine.js';
 import { PrismMechanismController } from './mechanism-controller.js';
 import { PresentationOrchestrator, PRESENTATION_CUES } from './presentation-orchestrator.js';
+import { getChanceEyePresentation } from './chance-eye-presentation-map.js';
 
 const core = new MachineCore({ credit: 50, maxBet: 3 });
 const researchReels = new ResearchReelEngine();
 const machineRoot = document.querySelector('.machine');
 const lcdShell = document.querySelector('.lcd-shell');
 const mechanism = new PrismMechanismController(document.querySelector('#prismMechanism'));
-const presentation = new PresentationOrchestrator({
-  machineRoot,
-  mechanism,
-  lcdCue(cue) {
-    lcdShell.dataset.cue = String(cue).toLowerCase();
-  }
-});
-let researchRevealActive = false;
 
 const ui = {
   credit: document.querySelector('#creditValue'),
@@ -27,7 +20,8 @@ const ui = {
   betBtn: document.querySelector('#betBtn'),
   maxBetBtn: document.querySelector('#maxBetBtn'),
   startBtn: document.querySelector('#startBtn'),
-  stopBtns: [...document.querySelectorAll('.stop')]
+  stopBtns: [...document.querySelectorAll('.stop')],
+  chanceEyeBtns: [...document.querySelectorAll('[data-chance-eye]')]
 };
 
 const game = new Phaser.Game({
@@ -48,6 +42,17 @@ const game = new Phaser.Game({
 function scene() {
   return game.scene.getScene('LupinView');
 }
+
+const presentation = new PresentationOrchestrator({
+  machineRoot,
+  mechanism,
+  lcdCue(cue, detail) {
+    lcdShell.dataset.cue = String(cue).toLowerCase();
+    if (String(cue).startsWith('CHANCE_EYE_')) scene().showChanceEye(cue, detail);
+    if (cue === 'RESEARCH_RESET') scene().clearChanceEye();
+  }
+});
+let researchRevealActive = false;
 
 function render(snapshot = core.snapshot()) {
   ui.credit.textContent = snapshot.credit;
@@ -70,6 +75,13 @@ function renderResearchPresentation() {
   ui.message.textContent = visible
     ? '研究用連動キュー — LED / 役物 / LCD 同期'
     : '研究用連動キュー解除 — 自動発動条件は未接続';
+}
+
+function playChanceEye(kind, mode = 'normal') {
+  const spec = getChanceEyePresentation(kind, mode);
+  presentation.runCue(spec.presentationCue, spec);
+  ui.message.textContent = `${spec.label} — ${spec.visualRule} / 1/${spec.denominator}`;
+  return spec;
 }
 
 core.addEventListener('change', (event) => {
@@ -102,6 +114,9 @@ ui.startBtn.addEventListener('click', () => core.start());
 ui.stopBtns.forEach((button) => {
   button.addEventListener('click', () => core.stop(Number(button.dataset.reel)));
 });
+ui.chanceEyeBtns.forEach((button) => {
+  button.addEventListener('click', () => playChanceEye(button.dataset.chanceEye));
+});
 ui.phaseBadge.addEventListener('click', () => {
   researchRevealActive = !researchRevealActive;
   presentation.runCue(researchRevealActive
@@ -112,4 +127,4 @@ ui.phaseBadge.addEventListener('click', () => {
 
 render();
 renderResearchPresentation();
-window.__LUPIN_ZERO__ = { core, game, researchReels, mechanism, presentation };
+window.__LUPIN_ZERO__ = { core, game, researchReels, mechanism, presentation, playChanceEye };
