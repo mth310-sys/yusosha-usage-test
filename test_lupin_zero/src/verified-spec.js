@@ -39,6 +39,19 @@ export const VERIFIED_SPEC = Object.freeze({
       sevenSymbol: 'GOLDEN_TIME'
     })
   }),
+  physicalMainReels: Object.freeze({
+    confirmedSymbols: Object.freeze(['ルパン', '次元', '五エ門']),
+    confirmedMiddleLinePattern: Object.freeze({
+      role: 'MB',
+      left: '次元',
+      center: '五エ門',
+      right: 'ルパン'
+    }),
+    fullStrips: null,
+    stripLength: null,
+    symbolOrder: null,
+    note: 'Only directly published/observable physical-reel facts are stored. Complete reel strips remain unresolved.'
+  }),
   mb: Object.freeze({
     stopLine: 'MIDDLE',
     stopSymbols: Object.freeze(['次元', '五エ門', 'ルパン']),
@@ -53,12 +66,17 @@ export const VERIFIED_SPEC = Object.freeze({
     liquidReelChanceEyeRules: 'MULTI_SOURCE_MATCH',
     liquidReelChanceEyeRates: 'MULTI_SOURCE_MATCH',
     liquidReelAlignedEffects: 'MULTI_SOURCE_MATCH',
+    physicalMainReelCharacterSymbols: 'PUBLISHED_ANALYSIS_AND_MACHINE_VISUALS',
     mbStopPattern: 'MULTI_SOURCE_MATCH',
     fullPhysicalReelStrips: 'UNRESOLVED',
+    physicalReelStripLength: 'UNRESOLVED',
+    physicalReelSymbolOrder: 'UNRESOLVED',
     rareRolePhysicalStopPatterns: 'UNRESOLVED'
   }),
   policy: Object.freeze({
     fullPhysicalReelStrips: 'DO_NOT_INVENT',
+    physicalReelStripLength: 'DO_NOT_INVENT',
+    physicalReelSymbolOrder: 'DO_NOT_INVENT',
     rareRolePhysicalStopPatterns: 'DO_NOT_INVENT',
     unlistedProbabilities: 'DO_NOT_INTERPOLATE'
   })
