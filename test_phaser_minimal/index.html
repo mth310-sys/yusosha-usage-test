@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>遊創舎 Phaser 最小試験機</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #111;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    #game {
+      width: min(100vw, 390px);
+      margin: 0 auto;
+    }
+    canvas {
+      display: block;
+      width: 100% !important;
+      height: auto !important;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="game"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+  <script>
+    const config = {
+      type: Phaser.AUTO,
+      width: 390,
+      height: 600,
+      parent: 'game',
+      backgroundColor: '#101820',
+      scene: {
+        create
+      },
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_HORIZONTALLY
+      }
+    };
+
+    new Phaser.Game(config);
+
+    function create() {
+      this.add.text(195, 72, '遊創舎', {
+        fontSize: '32px',
+        color: '#ffffff',
+        fontStyle: 'bold'
+      }).setOrigin(0.5);
+
+      this.add.text(195, 112, 'Phaser 最小試験機', {
+        fontSize: '20px',
+        color: '#ffffff'
+      }).setOrigin(0.5);
+
+      const box = this.add.rectangle(195, 300, 120, 120, 0xf2c94c)
+        .setStrokeStyle(4, 0xffffff)
+        .setInteractive();
+
+      const status = this.add.text(195, 410, '黄色い四角をタップ', {
+        fontSize: '18px',
+        color: '#ffffff'
+      }).setOrigin(0.5);
+
+      this.add.text(195, 548, 'Phaser 3.90.0 / 390 × 600', {
+        fontSize: '14px',
+        color: '#aaaaaa'
+      }).setOrigin(0.5);
+
+      box.on('pointerdown', () => {
+        status.setText('タップ入力 OK');
+        this.tweens.add({
+          targets: box,
+          angle: box.angle + 180,
+          scaleX: 1.2,
+          scaleY: 1.2,
+          duration: 220,
+          yoyo: true,
+          ease: 'Sine.easeInOut'
+        });
+      });
+    }
+  </script>
+</body>
+</html>
