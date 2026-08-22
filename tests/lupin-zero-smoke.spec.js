@@ -127,3 +127,52 @@ test('VerifiedSpec keeps published base role denominators exact and reel strips 
     payoutEachGame: 10
   });
 });
+
+test('VerifiedSpec locks published mode durations without inventing missing routes', async ({ page }) => {
+  await bootZero(page);
+
+  const result = await page.evaluate(async () => {
+    const { VERIFIED_SPEC } = await import('/test_lupin_zero/src/verified-spec.js');
+    const flow = await import('/test_lupin_zero/src/game-flow-spec.js');
+    return {
+      modes: VERIFIED_SPEC.modeProfiles,
+      wantedFlow: flow.GAME_FLOW_SPEC.knownButUnresolved.find((entry) => entry.mode === flow.GameMode.WANTED_CHANCE),
+      policy: flow.GAME_FLOW_SPEC.policy
+    };
+  });
+
+  expect(result.modes.wantedChance).toEqual({
+    baseGames: 10,
+    holdSlots: 8,
+    decrementPausesForChangedHold: true,
+    wantedCounterMaxGames: 480
+  });
+  expect(result.modes.raiunHigh).toEqual({
+    entryCounterPoints: 100,
+    games: 7,
+    successCondition: 'BLUE_SYMBOL_ALIGNED'
+  });
+  expect(result.modes.raiunMode).toEqual({
+    games: 20,
+    artExpectedRatePercent: 23,
+    artTrigger: 'SEVEN_SYMBOL_ALIGNED',
+    pureIncreaseCoinsPerGame: 2
+  });
+  expect(result.modes.lupinBonus).toEqual({
+    gamesApprox: 35,
+    artExpectedRatePercentApprox: 50,
+    pureIncreaseCoinsPerGame: 2,
+    finalBattleGames: 5,
+    artTrigger: 'ZENIGATA_BATTLE_WIN'
+  });
+  expect(result.modes.goldenTime).toEqual({
+    setGamesApprox: 40,
+    pureIncreaseCoinsPerGame: 2,
+    continuationExpectationPercent: { min: 80.4, max: 83.3 },
+    expectedSets: { min: 5.1, max: 6 }
+  });
+  expect(result.wantedFlow.automaticEntryRoute).toBeNull();
+  expect(result.wantedFlow.automaticEntryProbability).toBeNull();
+  expect(result.policy.inferMissingLinks).toBe(false);
+  expect(result.policy.inferAutomaticEntryProbability).toBe(false);
+});
