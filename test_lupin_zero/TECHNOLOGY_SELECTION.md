@@ -83,10 +83,23 @@ Existing Yusosha assets are classified per module, not per project.
 A candidate may be reused only if all required gates pass:
 
 1. **Target gate** — it is generic or specifically belongs to 2016 B4.
-2. **Evidence gate** — machine behavior encoded by the asset is VERIFIED, MULTI_SOURCE_MATCH, PUBLISHED_ANALYSIS, or explicitly presentation-only. UNVERIFIED/UNRESOLVED/CONFLICT behavior cannot become automatic production behavior.
+2. **Evidence gate** — machine behavior encoded by the asset is VERIFIED, MULTI_SOURCE_MATCH, PUBLISHED_ANALYSIS, PUBLISHED_MACHINE_GUIDE, or explicitly presentation-only. A currently `UNRESOLVED` probability/value may also be used as **PROVISIONAL_HIGH_CONFIDENCE** when a strong target-specific source exists and the value is explicitly preserved as provisional rather than verified. `CONFLICT` values stay out of automatic production behavior until a source-selection decision is recorded.
 3. **Responsibility gate** — the asset fits the new layer. Rendering code cannot decide machine probability. Research code cannot silently become production logic.
 4. **Quality gate** — reuse is actually faster/safer than rewriting.
 5. **Zero-yen gate** — no metered/paid dependency is introduced.
+
+### Provisional probability/value rule
+
+A previously unresolved probability/value may enter the playable runtime when all of the following are true:
+
+- the source is explicitly about the 2016 B4 target machine;
+- the source is high-confidence (for example official/manual/direct-real-machine evidence, or a reputable contemporaneous published analysis/machine guide with a concrete value);
+- the published value is copied exactly rather than interpolated, averaged, rounded beyond the source, or reverse-derived from another metric;
+- source identity/evidence status is retained next to the value;
+- runtime/debug inspection can distinguish `PROVISIONAL_HIGH_CONFIDENCE` from `VERIFIED`;
+- if a stronger contradictory source appears later, the value is moved to `CONFLICT` and automatic use is reviewed.
+
+This policy intentionally allows development to move faster without pretending that a strong published value is an official confirmed value.
 
 ## High-value reuse sources already present
 
@@ -123,6 +136,6 @@ Before writing a subsystem from scratch:
 1. Search B4, Visual Lab, body/frame tests, Phaser tests and older Yusosha test machines.
 2. Score the existing candidate for reuse.
 3. Reuse or adapt it when that is faster and does not violate the architecture/evidence gates.
-4. Rewrite only when the old asset couples responsibilities, contains guesses, belongs to another machine, or costs more to adapt.
+4. Rewrite only when the old asset couples responsibilities, contains unsupported guesses, belongs to another machine, or costs more to adapt.
 
-**Architecture is zero-based. Assets are reuse-first. Accuracy remains evidence-first.**
+**Architecture is zero-based. Assets are reuse-first. Accuracy remains evidence-first. High-confidence unresolved values may be used provisionally with explicit provenance.**
