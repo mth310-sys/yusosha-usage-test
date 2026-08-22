@@ -16,7 +16,11 @@ async function bootZero(page) {
 test('LUPIN ZERO boots and exposes the research core', async ({ page }) => {
   await bootZero(page);
 
-  const exposed = await page.evaluate(() => Boolean(window.__LUPIN_ZERO__?.core && window.__LUPIN_ZERO__?.game));
+  const exposed = await page.evaluate(() => Boolean(
+    window.__LUPIN_ZERO__?.core &&
+    window.__LUPIN_ZERO__?.game &&
+    window.__LUPIN_ZERO__?.researchReels
+  ));
   expect(exposed).toBe(true);
 });
 
@@ -48,11 +52,30 @@ test('LUPIN ZERO completes one deterministic control-flow game', async ({ page }
 test('LUPIN ZERO keeps real-machine probability logic disconnected', async ({ page }) => {
   await bootZero(page);
 
-  await page.locator('#maxBetBtn').click();
-  await page.locator('#startBtn').click();
+  const profile = await page.evaluate(() => window.__LUPIN_ZERO__.researchReels.snapshot().profile);
+  expect(profile).toEqual({
+    mode: 'RESEARCH_ONLY',
+    source: 'PLACEHOLDER',
+    realMachineStrip: 'UNVERIFIED',
+    probabilityModel: 'DISCONNECTED'
+  });
+});
 
-  const status = await page.evaluate(() => window.__LUPIN_ZERO__.core.snapshot());
-  expect(status.state).toBe('SPINNING');
-  expect(status.spinId).toBe(1);
-  expect(status.stopped).toEqual([false, false, false]);
+test('LUPIN ZERO research reel stops are deterministic without claiming real strips', async ({ page }) => {
+  await bootZero(page);
+
+  const result = await page.evaluate(async () => {
+    const { ResearchReelEngine } = await import('/test_lupin_zero/src/research-reel-engine.js');
+    const first = new ResearchReelEngine();
+    const second = new ResearchReelEngine();
+    first.start(7);
+    second.start(7);
+    return {
+      first: [first.stop(0), first.stop(1), first.stop(2)],
+      second: [second.stop(0), second.stop(1), second.stop(2)]
+    };
+  });
+
+  expect(result.first).toEqual(result.second);
+  expect(result.first.every((stop) => stop.source === 'PLACEHOLDER')).toBe(true);
 });
