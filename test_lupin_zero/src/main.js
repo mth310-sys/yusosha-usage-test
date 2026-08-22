@@ -1,7 +1,9 @@
 import { MachineCore, MachineState } from './machine-core.js';
 import { LupinView } from './phaser-view.js';
+import { ResearchReelEngine } from './research-reel-engine.js';
 
 const core = new MachineCore({ credit: 50, maxBet: 3 });
+const researchReels = new ResearchReelEngine();
 
 const ui = {
   credit: document.querySelector('#creditValue'),
@@ -52,13 +54,15 @@ core.addEventListener('change', (event) => {
 });
 
 core.addEventListener('spin-start', (event) => {
+  researchReels.start(event.detail.spinId);
   render(event.detail.snapshot);
   ui.message.textContent = 'SPIN — STOPボタンで停止';
   scene().startSpin();
 });
 
 core.addEventListener('reel-stop', (event) => {
-  scene().setReelRunning(event.detail.reelIndex, false);
+  const stop = researchReels.stop(event.detail.reelIndex);
+  scene().setReelRunning(event.detail.reelIndex, false, stop?.symbol ?? null);
   render(event.detail.snapshot);
 });
 
@@ -76,4 +80,4 @@ ui.stopBtns.forEach((button) => {
 });
 
 render();
-window.__LUPIN_ZERO__ = { core, game };
+window.__LUPIN_ZERO__ = { core, game, researchReels };
