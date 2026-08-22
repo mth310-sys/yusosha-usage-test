@@ -2,10 +2,21 @@ import { MachineCore, MachineState } from './machine-core.js';
 import { LupinView } from './phaser-view.js';
 import { ResearchReelEngine } from './research-reel-engine.js';
 import { PrismMechanismController } from './mechanism-controller.js';
+import { PresentationOrchestrator, PRESENTATION_CUES } from './presentation-orchestrator.js';
 
 const core = new MachineCore({ credit: 50, maxBet: 3 });
 const researchReels = new ResearchReelEngine();
+const machineRoot = document.querySelector('.machine');
+const lcdShell = document.querySelector('.lcd-shell');
 const mechanism = new PrismMechanismController(document.querySelector('#prismMechanism'));
+const presentation = new PresentationOrchestrator({
+  machineRoot,
+  mechanism,
+  lcdCue(cue) {
+    lcdShell.dataset.cue = String(cue).toLowerCase();
+  }
+});
+let researchRevealActive = false;
 
 const ui = {
   credit: document.querySelector('#creditValue'),
@@ -51,9 +62,14 @@ function render(snapshot = core.snapshot()) {
   });
 }
 
-function renderMechanismDebug(snapshot = mechanism.snapshot()) {
-  ui.phaseBadge.textContent = snapshot.circularElementVisible ? 'MECH REVEAL' : 'RESEARCH CORE';
-  ui.phaseBadge.setAttribute('aria-pressed', String(snapshot.circularElementVisible));
+function renderResearchPresentation() {
+  const snapshot = presentation.snapshot();
+  const visible = snapshot.mechanism.circularElementVisible;
+  ui.phaseBadge.textContent = visible ? 'PRESENTATION REVEAL' : 'RESEARCH CORE';
+  ui.phaseBadge.setAttribute('aria-pressed', String(visible));
+  ui.message.textContent = visible
+    ? '研究用連動キュー — LED / 役物 / LCD 同期'
+    : '研究用連動キュー解除 — 自動発動条件は未接続';
 }
 
 core.addEventListener('change', (event) => {
@@ -87,9 +103,13 @@ ui.stopBtns.forEach((button) => {
   button.addEventListener('click', () => core.stop(Number(button.dataset.reel)));
 });
 ui.phaseBadge.addEventListener('click', () => {
-  renderMechanismDebug(mechanism.toggleDebug());
+  researchRevealActive = !researchRevealActive;
+  presentation.runCue(researchRevealActive
+    ? PRESENTATION_CUES.RESEARCH_REVEAL
+    : PRESENTATION_CUES.RESEARCH_RESET);
+  renderResearchPresentation();
 });
 
 render();
-renderMechanismDebug();
-window.__LUPIN_ZERO__ = { core, game, researchReels, mechanism };
+renderResearchPresentation();
+window.__LUPIN_ZERO__ = { core, game, researchReels, mechanism, presentation };
