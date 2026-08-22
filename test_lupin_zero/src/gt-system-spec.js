@@ -34,6 +34,34 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     undergroundCity: Object.freeze({ treasureHitDenominator: 3.0 }),
     alternateSpace: Object.freeze({ games: 10, averageTreasurePoints: 702000 })
   }),
+  stageScenario: Object.freeze({
+    selectionBySetting: Object.freeze({
+      1: Object.freeze({ A:71.9, B:23.4, C:3.1, D:1.6 }),
+      2: Object.freeze({ A:79.7, B:15.6, C:3.1, D:1.6 }),
+      3: Object.freeze({ A:69.9, B:25.4, C:3.1, D:1.6 }),
+      4: Object.freeze({ A:64.5, B:29.3, C:3.1, D:3.1 }),
+      5: Object.freeze({ A:53.5, B:37.1, C:6.3, D:3.1 }),
+      6: Object.freeze({ A:51.6, B:39.1, C:6.3, D:3.1 })
+    }),
+    internalStages: Object.freeze([
+      'JAPAN_A','JAPAN_B','SWITZERLAND_A','SWITZERLAND_B',
+      'CARIBBEAN_A','CARIBBEAN_B','UNDERGROUND_CITY_A','UNDERGROUND_CITY_B'
+    ]),
+    initialStageByScenario: Object.freeze({
+      A: Object.freeze([62.5,12.5,12.5,6.3,1.6,1.6,1.6,1.6]),
+      B: Object.freeze([46.9,18.8,18.8,9.4,1.6,1.6,1.6,1.6]),
+      C: Object.freeze([29.7,18.8,18.8,18.8,9.4,1.6,1.6,1.6]),
+      D: Object.freeze([12.5,18.8,18.8,18.8,18.8,9.4,1.6,1.6])
+    }),
+    upgradeEveryGames: 10,
+    upgradeStepByScenario: Object.freeze({
+      A: Object.freeze({ oneStep:75.0, twoSteps:25.0 }),
+      B: Object.freeze({ oneStep:62.5, twoSteps:37.5 }),
+      C: Object.freeze({ oneStep:50.0, twoSteps:50.0 }),
+      D: Object.freeze({ oneStep:25.0, twoSteps:75.0 })
+    }),
+    visibleStageMayLagInternalStage: true
+  }),
   lupinRush: Object.freeze({
     timing: 'SET_START',
     games: 4,
@@ -70,6 +98,9 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     treasureMaxAndExtraBonusRoute: 'MULTI_SOURCE_MATCH',
     treasureContinuationTable: 'MULTI_SOURCE_MATCH',
     stageTreasureHitRates: 'MULTI_SOURCE_MATCH',
+    stageScenarioSelection: 'MULTI_SOURCE_MATCH',
+    stageScenarioInitialStages: 'MULTI_SOURCE_MATCH',
+    stageScenarioUpgradeRates: 'MULTI_SOURCE_MATCH',
     lupinRushProfile: 'PUBLISHED_ANALYSIS',
     treasureRushProfile: 'MULTI_SOURCE_MATCH',
     extraBonusCoreRoute: 'MULTI_SOURCE_MATCH',
