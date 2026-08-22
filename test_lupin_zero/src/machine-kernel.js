@@ -88,7 +88,7 @@ export function reduceMachine(state, command = {}) {
   }
 
   if (type === 'SETTLE_NORMAL_ROLE') {
-    if (state.phase !== KernelPhase.IDLE) return result(state, [], false);
+    if (state.phase !== KernelPhase.IDLE || state.mbFollowupGamesRemaining > 0) return result(state, [], false);
     const role = command.role;
     const creditDelta = command.creditDelta;
     const replayAutoBet = command.replayAutoBet ?? 0;
@@ -113,6 +113,28 @@ export function reduceMachine(state, command = {}) {
       creditDelta,
       replayAutoBet,
       mbFollowupGames,
+      evidenceStatus
+    }]);
+  }
+
+  if (type === 'SETTLE_MB_FOLLOWUP_GAME') {
+    if (state.phase !== KernelPhase.IDLE || state.mbFollowupGamesRemaining <= 0) return result(state, [], false);
+    const creditDelta = command.creditDelta;
+    const evidenceStatus = command.evidenceStatus ?? 'UNRESOLVED';
+    if (!Number.isInteger(creditDelta) || creditDelta < 0) return result(state, [], false);
+
+    const remaining = state.mbFollowupGamesRemaining - 1;
+    const next = {
+      ...state,
+      credit: state.credit + creditDelta,
+      lastSettledRole: 'MB_FOLLOWUP_10_COIN',
+      lastPayout: creditDelta,
+      mbFollowupGamesRemaining: remaining
+    };
+    return result(next, [{
+      type: 'MB_FOLLOWUP_GAME_SETTLED',
+      creditDelta,
+      remaining,
       evidenceStatus
     }]);
   }
