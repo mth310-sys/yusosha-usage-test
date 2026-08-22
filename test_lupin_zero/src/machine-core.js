@@ -67,13 +67,15 @@ export class MachineCore extends EventTarget {
   stop(reelIndex) {
     if (![MachineState.SPINNING, MachineState.STOPPING].includes(this.state)) return false;
     if (!Number.isInteger(reelIndex) || reelIndex < 0 || reelIndex > 2 || this.stopped[reelIndex]) return false;
+
     this.stopped[reelIndex] = true;
-    this.state = this.stopped.every(Boolean) ? MachineState.IDLE : MachineState.STOPPING;
-    if (this.state === MachineState.IDLE) {
+    const complete = this.stopped.every(Boolean);
+    this.state = complete ? MachineState.IDLE : MachineState.STOPPING;
+    this.emit('reel-stop', { reelIndex, spinId: this.spinId, complete });
+
+    if (complete) {
       this.bet = 0;
-      this.emit('spin-end', { spinId: this.spinId });
-    } else {
-      this.emit('reel-stop', { reelIndex, spinId: this.spinId });
+      this.emit('spin-end', { reelIndex, spinId: this.spinId });
     }
     return true;
   }
