@@ -15,106 +15,24 @@
 const DPR=Math.min(window.devicePixelRatio||1,3);
 const textRes=t=>{if(t&&t.setResolution)t.setResolution(DPR);return t};
 const txt=(scene,x,y,s,style={})=>textRes(scene.add.text(x,y,s,style));
-
-class MenuScene extends Phaser.Scene{
- constructor(){super('menu')}
- create(){
-  this.cameras.main.setBackgroundColor('#111827');
-  txt(this,195,30,'遊創舎 Phaser 展示場',{fontSize:'24px',fontStyle:'bold',color:'#fff'}).setOrigin(.5);
-  txt(this,195,58,`Retina ${DPR}x / 触って機能確認`,{fontSize:'12px',color:'#9fb0cc'}).setOrigin(.5);
-  const items=[
-   ['タップ移動','tap'],['ドラッグ','drag'],['Tween','tween'],['物理','physics'],
-   ['Particles','particles'],['Camera','camera'],['Scene','sceneDemo'],['衝突判定','collision'],
-   ['Timer','timer'],['Mask','mask'],['UIゲージ','ui'],['Path移動','path'],
-   ['Blend','blend'],['RenderTexture','rendertex']
-  ];
-  items.forEach((it,i)=>{
-   const col=i%2,row=Math.floor(i/2),x=102+col*186,y=100+row*63;
-   const b=this.add.rectangle(x,y,174,48,0x243047).setStrokeStyle(1.5,0x60789c).setInteractive();
-   txt(this,x,y,it[0],{fontSize:'15px',color:'#fff'}).setOrigin(.5);
-   b.on('pointerdown',()=>this.scene.start(it[1]));
-  });
-  txt(this,195,566,'Phaser 3.90.0 • 390×600 logical pixels',{fontSize:'11px',color:'#75829a'}).setOrigin(.5);
- }
-}
-
-class BaseScene extends Phaser.Scene{
- header(title,desc){
-  txt(this,16,16,'← 戻る',{fontSize:'15px',color:'#8fd3ff',backgroundColor:'#1d2a3f',padding:{x:8,y:6}}).setInteractive().on('pointerdown',()=>this.scene.start('menu')).setScrollFactor(0).setDepth(1000);
-  txt(this,195,66,title,{fontSize:'23px',fontStyle:'bold',color:'#fff'}).setOrigin(.5).setScrollFactor(0).setDepth(1000);
-  txt(this,195,99,desc,{fontSize:'12px',color:'#c8d0df',align:'center',wordWrap:{width:350}}).setOrigin(.5).setScrollFactor(0).setDepth(1000);
- }
-}
-
-class TapScene extends BaseScene{
- constructor(){super('tap')}
- create(){this.cameras.main.setBackgroundColor('#10202c');this.header('タップ移動','画面をタップするとオブジェクトがそこへ移動');const p=this.add.circle(195,300,28,0x55d6be).setStrokeStyle(4,0xffffff);txt(this,195,500,'好きな場所をタップ',{fontSize:'18px',color:'#fff'}).setOrigin(.5);this.input.on('pointerdown',pointer=>{if(pointer.y<130)return;this.tweens.add({targets:p,x:pointer.x,y:pointer.y,duration:350,ease:'Sine.easeInOut'})})}
-}
-class DragScene extends BaseScene{
- constructor(){super('drag')}
- create(){this.cameras.main.setBackgroundColor('#20142a');this.header('ドラッグ操作','ブロックを指でつかんで自由に移動');[0xff6b6b,0xffd166,0x6bcbef].forEach((c,i)=>{const r=this.add.rectangle(110+i*85,300,64,64,c).setStrokeStyle(3,0xffffff).setInteractive({draggable:true});this.input.setDraggable(r);r.on('drag',(p,x,y)=>{r.x=Phaser.Math.Clamp(x,35,355);r.y=Phaser.Math.Clamp(y,145,555)})})}
-}
-class TweenScene extends BaseScene{
- constructor(){super('tween')}
- create(){this.cameras.main.setBackgroundColor('#181b27');this.header('Tween演出','位置・回転・拡大・透明度を滑らかに変化');const star=this.add.star(195,310,5,28,58,0xf7d154).setStrokeStyle(4,0xffffff);txt(this,195,500,'星をタップ',{fontSize:'18px',color:'#fff'}).setOrigin(.5);star.setInteractive().on('pointerdown',()=>this.tweens.add({targets:star,angle:'+=720',scale:1.7,y:220,alpha:.25,duration:700,ease:'Back.easeInOut',yoyo:true}))}
-}
-class PhysicsScene extends BaseScene{
- constructor(){super('physics')}
- create(){this.cameras.main.setBackgroundColor('#15231a');this.header('物理・バウンド','重力・速度・壁反射をArcade Physicsで処理');this.physics.world.setBounds(15,135,360,430);const balls=[];for(let i=0;i<5;i++){const b=this.add.circle(75+i*60,190+i*16,18,Phaser.Display.Color.RandomRGB(100).color);this.physics.add.existing(b);b.body.setCircle(18).setCollideWorldBounds(true).setBounce(1).setVelocity(Phaser.Math.Between(-180,180),Phaser.Math.Between(-30,80));balls.push(b)}txt(this,195,530,'タップ → 全ボールをジャンプ',{fontSize:'15px',color:'#fff'}).setOrigin(.5);this.input.on('pointerdown',p=>{if(p.y<130)return;balls.forEach(b=>b.body.setVelocityY(Phaser.Math.Between(-420,-260)))})}
-}
-class ParticlesScene extends BaseScene{
- constructor(){super('particles')}
- create(){this.cameras.main.setBackgroundColor('#25151b');this.header('Particles','Phaser標準ParticleEmitterで発光粒子を大量生成');const g=this.add.graphics();g.fillStyle(0xffffff,1).fillCircle(8,8,8);g.generateTexture('particleDot',16,16);g.destroy();const emitter=this.add.particles(195,320,'particleDot',{speed:{min:80,max:240},angle:{min:0,max:360},scale:{start:.8,end:0},alpha:{start:1,end:0},tint:[0xffd166,0xff6b9d,0x65d6ff],lifespan:{min:400,max:900},frequency:-1,quantity:28,blendMode:'ADD'});txt(this,195,510,'好きな場所をタップ',{fontSize:'17px',color:'#fff'}).setOrigin(.5);this.input.on('pointerdown',p=>{if(p.y<130)return;emitter.emitParticleAt(p.x,p.y,32)})}
-}
-class CameraScene extends BaseScene{
- constructor(){super('camera')}
- create(){this.cameras.main.setBackgroundColor('#101526');this.header('カメラ演出','SHAKE / FLASH / ZOOM / FADE');for(let y=165;y<490;y+=65){for(let x=48;x<365;x+=58)this.add.circle(x,y,14,(x+y)%116?0x4064a8:0xf78c6b)}const buttons=[['SHAKE',55,()=>this.cameras.main.shake(350,.025)],['FLASH',145,()=>this.cameras.main.flash(350,255,255,255)],['ZOOM',235,()=>{this.cameras.main.zoomTo(1.35,250,'Sine.easeInOut');this.time.delayedCall(500,()=>this.cameras.main.zoomTo(1,250,'Sine.easeInOut'))}],['FADE',325,()=>{this.cameras.main.fadeOut(250,0,0,0);this.time.delayedCall(350,()=>this.cameras.main.fadeIn(250,0,0,0))}];buttons.forEach(([l,x,f])=>{const b=this.add.rectangle(x,540,82,36,0x293a60).setStrokeStyle(1,0xffffff).setInteractive().setScrollFactor(0).setDepth(1000);txt(this,x,540,l,{fontSize:'11px',color:'#fff'}).setOrigin(.5).setScrollFactor(0).setDepth(1001);b.on('pointerdown',f)})}
-}
-class SceneDemo extends BaseScene{
- constructor(){super('sceneDemo')}
- create(){this.cameras.main.setBackgroundColor('#13272b');this.header('Scene切替','タイトル→ゲーム→結果のように画面単位で管理');txt(this,195,255,'SCENE A',{fontSize:'42px',fontStyle:'bold',color:'#8ef0dd'}).setOrigin(.5);const b=this.add.rectangle(195,390,250,54,0x1f6f78).setInteractive();txt(this,195,390,'SCENE Bへ',{fontSize:'20px',color:'#fff'}).setOrigin(.5);b.on('pointerdown',()=>this.scene.start('sceneB'))}
-}
-class SceneB extends BaseScene{
- constructor(){super('sceneB')}
- create(){this.cameras.main.setBackgroundColor('#2d1730');this.header('Scene切替','別Sceneへ完全に切り替わった状態');txt(this,195,255,'SCENE B',{fontSize:'42px',fontStyle:'bold',color:'#ff9de2'}).setOrigin(.5);const b=this.add.rectangle(195,390,250,54,0x823d77).setInteractive();txt(this,195,390,'SCENE Aへ戻る',{fontSize:'20px',color:'#fff'}).setOrigin(.5);b.on('pointerdown',()=>this.scene.start('sceneDemo'))}
-}
-class CollisionScene extends BaseScene{
- constructor(){super('collision')}
- create(){this.cameras.main.setBackgroundColor('#18251d');this.header('衝突判定','動くボールとブロックの接触を検出');const ball=this.add.circle(70,300,20,0x78e08f);this.physics.add.existing(ball);ball.body.setCircle(20).setVelocityX(180).setCollideWorldBounds(true).setBounce(1);const block=this.add.rectangle(250,300,65,120,0xf0a45d);this.physics.add.existing(block,true);const status=txt(this,195,500,'衝突待ち…',{fontSize:'18px',color:'#fff'}).setOrigin(.5);this.physics.add.collider(ball,block,()=>{status.setText('HIT! 当たり判定OK');this.cameras.main.shake(100,.01)})}
-}
-class TimerScene extends BaseScene{
- constructor(){super('timer')}
- create(){this.cameras.main.setBackgroundColor('#1f1c2b');this.header('Timer / Clock','一定時間後・繰り返し処理・カウントダウン');let n=10;const t=txt(this,195,280,String(n),{fontSize:'86px',fontStyle:'bold',color:'#f5d76e'}).setOrigin(.5);const info=txt(this,195,400,'1秒ごとに実行',{fontSize:'18px',color:'#fff'}).setOrigin(.5);this.time.addEvent({delay:1000,repeat:9,callback:()=>{n--;t.setText(String(n));if(n===0)info.setText('終了イベント発火!')}})}
-}
-class MaskScene extends BaseScene{
- constructor(){super('mask')}
- create(){this.cameras.main.setBackgroundColor('#171a25');this.header('Mask','見せたい範囲だけを切り抜いて表示');const stripes=this.add.graphics();for(let i=0;i<12;i++){stripes.fillStyle(i%2?0xff5f8f:0x65d6ff,1).fillRect(30+i*30,180,30,260)}const shape=this.make.graphics({x:0,y:0,add:false});shape.fillStyle(0xffffff).fillCircle(195,310,90);const mask=shape.createGeometryMask();stripes.setMask(mask);const ring=this.add.circle(195,310,90).setStrokeStyle(4,0xffffff);this.tweens.add({targets:[ring,shape],x:{from:-70,to:70},duration:1600,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});txt(this,195,510,'丸い窓の中だけ見える',{fontSize:'17px',color:'#fff'}).setOrigin(.5)}
-}
-class UIScene extends BaseScene{
- constructor(){super('ui')}
- create(){this.cameras.main.setBackgroundColor('#15202b');this.header('UIゲージ','HP・メーター・ボタン等をゲーム画面上に構築');let hp=100;this.add.rectangle(195,260,304,34,0x222831).setStrokeStyle(2,0xffffff);const bar=this.add.rectangle(45,260,300,30,0x57d68d).setOrigin(0,.5);const label=txt(this,195,260,'HP 100',{fontSize:'16px',fontStyle:'bold',color:'#07120b'}).setOrigin(.5);const set=()=>{bar.width=300*hp/100;label.setText('HP '+hp)};[['-10',105,-10],['+10',285,10]].forEach(([s,x,d])=>{const b=this.add.rectangle(x,390,130,52,d<0?0x8b3d49:0x2c6e58).setInteractive();txt(this,x,390,s,{fontSize:'22px',color:'#fff'}).setOrigin(.5);b.on('pointerdown',()=>{hp=Phaser.Math.Clamp(hp+d,0,100);set()})})}
-}
-class PathScene extends BaseScene{
- constructor(){super('path')}
- create(){this.cameras.main.setBackgroundColor('#141f29');this.header('Path移動','直線だけでなく曲線に沿ってオブジェクトを移動');const path=new Phaser.Curves.Path(45,400);path.cubicBezierTo(345,180,50,170,345,410);const gr=this.add.graphics();gr.lineStyle(3,0x657b9a,1);path.draw(gr);const follower=this.add.follower(path,45,400,'');follower.setTexture(this.makeDot());follower.startFollow({duration:2600,repeat:-1,yoyo:true,rotateToPath:true});txt(this,195,520,'ベジェ曲線を自動追従',{fontSize:'16px',color:'#fff'}).setOrigin(.5)}
- makeDot(){if(!this.textures.exists('pathDot')){const g=this.add.graphics();g.fillStyle(0xffd166).fillTriangle(0,0,34,14,0,28);g.generateTexture('pathDot',34,28);g.destroy()}return 'pathDot'}
-}
-class BlendScene extends BaseScene{
- constructor(){super('blend')}
- create(){this.cameras.main.setBackgroundColor('#090b12');this.header('Blend Mode','ADD等で光が重なるような合成表現');const a=this.add.circle(155,300,80,0xff245b).setBlendMode(Phaser.BlendModes.ADD);const b=this.add.circle(235,300,80,0x2c7dff).setBlendMode(Phaser.BlendModes.ADD);this.tweens.add({targets:a,x:245,duration:1100,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});this.tweens.add({targets:b,x:145,duration:1100,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});txt(this,195,500,'重なった部分が加算発光',{fontSize:'17px',color:'#fff'}).setOrigin(.5)}
-}
-class RenderTextureScene extends BaseScene{
- constructor(){super('rendertex')}
- create(){this.cameras.main.setBackgroundColor('#1d1820');this.header('RenderTexture','描いた結果を1枚のテクスチャとして保持・再利用');const rt=this.add.renderTexture(195,315,300,300).setOrigin(.5).setInteractive();const brush=this.add.circle(-100,-100,12,0xffd166);txt(this,195,500,'四角の中を指でなぞる',{fontSize:'17px',color:'#fff'}).setOrigin(.5);this.input.on('pointermove',p=>{if(!p.isDown||p.y<160||p.y>460||p.x<45||p.x>345)return;rt.draw(brush,p.x-45,p.y-165)})}
-}
-
-new Phaser.Game({
- type:Phaser.AUTO,width:390,height:600,parent:'game',backgroundColor:'#111827',resolution:DPR,
- antialias:true,antialiasGL:true,pixelArt:false,roundPixels:false,
- scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_HORIZONTALLY,width:390,height:600},
- physics:{default:'arcade',arcade:{gravity:{y:300},debug:false}},
- scene:[MenuScene,TapScene,DragScene,TweenScene,PhysicsScene,ParticlesScene,CameraScene,SceneDemo,SceneB,CollisionScene,TimerScene,MaskScene,UIScene,PathScene,BlendScene,RenderTextureScene]
-});
+class MenuScene extends Phaser.Scene{constructor(){super('menu')}create(){this.cameras.main.setBackgroundColor('#111827');txt(this,195,30,'遊創舎 Phaser 展示場',{fontSize:'24px',fontStyle:'bold',color:'#fff'}).setOrigin(.5);txt(this,195,58,`Retina ${DPR}x / 触って機能確認`,{fontSize:'12px',color:'#9fb0cc'}).setOrigin(.5);const items=[['タップ移動','tap'],['ドラッグ','drag'],['Tween','tween'],['物理','physics'],['Particles','particles'],['Camera','camera'],['Scene','sceneDemo'],['衝突判定','collision'],['Timer','timer'],['Mask','mask'],['UIゲージ','ui'],['Path移動','path'],['Blend','blend'],['RenderTexture','rendertex']];items.forEach((it,i)=>{const col=i%2,row=Math.floor(i/2),x=102+col*186,y=100+row*63;const b=this.add.rectangle(x,y,174,48,0x243047).setStrokeStyle(1.5,0x60789c).setInteractive();txt(this,x,y,it[0],{fontSize:'15px',color:'#fff'}).setOrigin(.5);b.on('pointerdown',()=>this.scene.start(it[1]))});txt(this,195,566,'Phaser 3.90.0 • 390×600 logical pixels',{fontSize:'11px',color:'#75829a'}).setOrigin(.5)}}
+class BaseScene extends Phaser.Scene{header(title,desc){txt(this,16,16,'← 戻る',{fontSize:'15px',color:'#8fd3ff',backgroundColor:'#1d2a3f',padding:{x:8,y:6}}).setInteractive().on('pointerdown',()=>this.scene.start('menu')).setScrollFactor(0).setDepth(1000);txt(this,195,66,title,{fontSize:'23px',fontStyle:'bold',color:'#fff'}).setOrigin(.5).setScrollFactor(0).setDepth(1000);txt(this,195,99,desc,{fontSize:'12px',color:'#c8d0df',align:'center',wordWrap:{width:350}}).setOrigin(.5).setScrollFactor(0).setDepth(1000)}}
+class TapScene extends BaseScene{constructor(){super('tap')}create(){this.cameras.main.setBackgroundColor('#10202c');this.header('タップ移動','画面をタップするとオブジェクトがそこへ移動');const p=this.add.circle(195,300,28,0x55d6be).setStrokeStyle(4,0xffffff);txt(this,195,500,'好きな場所をタップ',{fontSize:'18px',color:'#fff'}).setOrigin(.5);this.input.on('pointerdown',pointer=>{if(pointer.y<130)return;this.tweens.add({targets:p,x:pointer.x,y:pointer.y,duration:350,ease:'Sine.easeInOut'})})}}
+class DragScene extends BaseScene{constructor(){super('drag')}create(){this.cameras.main.setBackgroundColor('#20142a');this.header('ドラッグ操作','ブロックを指でつかんで自由に移動');[0xff6b6b,0xffd166,0x6bcbef].forEach((c,i)=>{const r=this.add.rectangle(110+i*85,300,64,64,c).setStrokeStyle(3,0xffffff).setInteractive({draggable:true});this.input.setDraggable(r);r.on('drag',(p,x,y)=>{r.x=Phaser.Math.Clamp(x,35,355);r.y=Phaser.Math.Clamp(y,145,555)})})}}
+class TweenScene extends BaseScene{constructor(){super('tween')}create(){this.cameras.main.setBackgroundColor('#181b27');this.header('Tween演出','位置・回転・拡大・透明度を滑らかに変化');const star=this.add.star(195,310,5,28,58,0xf7d154).setStrokeStyle(4,0xffffff);txt(this,195,500,'星をタップ',{fontSize:'18px',color:'#fff'}).setOrigin(.5);star.setInteractive().on('pointerdown',()=>this.tweens.add({targets:star,angle:'+=720',scale:1.7,y:220,alpha:.25,duration:700,ease:'Back.easeInOut',yoyo:true}))}}
+class PhysicsScene extends BaseScene{constructor(){super('physics')}create(){this.cameras.main.setBackgroundColor('#15231a');this.header('物理・バウンド','重力・速度・壁反射をArcade Physicsで処理');this.physics.world.setBounds(15,135,360,430);const balls=[];for(let i=0;i<5;i++){const b=this.add.circle(75+i*60,190+i*16,18,Phaser.Display.Color.RandomRGB(100).color);this.physics.add.existing(b);b.body.setCircle(18).setCollideWorldBounds(true).setBounce(1).setVelocity(Phaser.Math.Between(-180,180),Phaser.Math.Between(-30,80));balls.push(b)}txt(this,195,530,'タップ → 全ボールをジャンプ',{fontSize:'15px',color:'#fff'}).setOrigin(.5);this.input.on('pointerdown',p=>{if(p.y<130)return;balls.forEach(b=>b.body.setVelocityY(Phaser.Math.Between(-420,-260)))})}}
+class ParticlesScene extends BaseScene{constructor(){super('particles')}create(){this.cameras.main.setBackgroundColor('#25151b');this.header('Particles','Phaser標準ParticleEmitterで発光粒子を大量生成');const g=this.add.graphics();g.fillStyle(0xffffff,1).fillCircle(8,8,8);g.generateTexture('particleDot',16,16);g.destroy();const emitter=this.add.particles(195,320,'particleDot',{speed:{min:80,max:240},angle:{min:0,max:360},scale:{start:.8,end:0},alpha:{start:1,end:0},tint:[0xffd166,0xff6b9d,0x65d6ff],lifespan:{min:400,max:900},frequency:-1,quantity:28,blendMode:'ADD'});txt(this,195,510,'好きな場所をタップ',{fontSize:'17px',color:'#fff'}).setOrigin(.5);this.input.on('pointerdown',p=>{if(p.y<130)return;emitter.emitParticleAt(p.x,p.y,32)})}}
+class CameraScene extends BaseScene{constructor(){super('camera')}create(){this.cameras.main.setBackgroundColor('#101526');this.header('カメラ演出','SHAKE / FLASH / ZOOM / FADE');for(let y=165;y<490;y+=65){for(let x=48;x<365;x+=58)this.add.circle(x,y,14,(x+y)%116?0x4064a8:0xf78c6b)}const buttons=[['SHAKE',55,()=>this.cameras.main.shake(350,.025)],['FLASH',145,()=>this.cameras.main.flash(350,255,255,255)],['ZOOM',235,()=>{this.cameras.main.zoomTo(1.35,250,'Sine.easeInOut');this.time.delayedCall(500,()=>this.cameras.main.zoomTo(1,250,'Sine.easeInOut'))}],['FADE',325,()=>{this.cameras.main.fadeOut(250,0,0,0);this.time.delayedCall(350,()=>this.cameras.main.fadeIn(250,0,0,0))}];buttons.forEach(([l,x,f])=>{const b=this.add.rectangle(x,540,82,36,0x293a60).setStrokeStyle(1,0xffffff).setInteractive().setScrollFactor(0).setDepth(1000);txt(this,x,540,l,{fontSize:'11px',color:'#fff'}).setOrigin(.5).setScrollFactor(0).setDepth(1001);b.on('pointerdown',f)})}}
+class SceneDemo extends BaseScene{constructor(){super('sceneDemo')}create(){this.cameras.main.setBackgroundColor('#13272b');this.header('Scene切替','タイトル→ゲーム→結果のように画面単位で管理');txt(this,195,255,'SCENE A',{fontSize:'42px',fontStyle:'bold',color:'#8ef0dd'}).setOrigin(.5);const b=this.add.rectangle(195,390,250,54,0x1f6f78).setInteractive();txt(this,195,390,'SCENE Bへ',{fontSize:'20px',color:'#fff'}).setOrigin(.5);b.on('pointerdown',()=>this.scene.start('sceneB'))}}
+class SceneB extends BaseScene{constructor(){super('sceneB')}create(){this.cameras.main.setBackgroundColor('#2d1730');this.header('Scene切替','別Sceneへ完全に切り替わった状態');txt(this,195,255,'SCENE B',{fontSize:'42px',fontStyle:'bold',color:'#ff9de2'}).setOrigin(.5);const b=this.add.rectangle(195,390,250,54,0x823d77).setInteractive();txt(this,195,390,'SCENE Aへ戻る',{fontSize:'20px',color:'#fff'}).setOrigin(.5);b.on('pointerdown',()=>this.scene.start('sceneDemo'))}}
+class CollisionScene extends BaseScene{constructor(){super('collision')}create(){this.cameras.main.setBackgroundColor('#18251d');this.header('衝突判定','動くボールとブロックの接触を検出');const ball=this.add.circle(70,300,20,0x78e08f);this.physics.add.existing(ball);ball.body.setCircle(20).setVelocityX(180).setCollideWorldBounds(true).setBounce(1);const block=this.add.rectangle(250,300,65,120,0xf0a45d);this.physics.add.existing(block,true);const status=txt(this,195,500,'衝突待ち…',{fontSize:'18px',color:'#fff'}).setOrigin(.5);this.physics.add.collider(ball,block,()=>{status.setText('HIT! 当たり判定OK');this.cameras.main.shake(100,.01)})}}
+class TimerScene extends BaseScene{constructor(){super('timer')}create(){this.cameras.main.setBackgroundColor('#1f1c2b');this.header('Timer / Clock','一定時間後・繰り返し処理・カウントダウン');let n=10;const t=txt(this,195,280,String(n),{fontSize:'86px',fontStyle:'bold',color:'#f5d76e'}).setOrigin(.5);const info=txt(this,195,400,'1秒ごとに実行',{fontSize:'18px',color:'#fff'}).setOrigin(.5);this.time.addEvent({delay:1000,repeat:9,callback:()=>{n--;t.setText(String(n));if(n===0)info.setText('終了イベント発火!')}})}}
+class MaskScene extends BaseScene{constructor(){super('mask')}create(){this.cameras.main.setBackgroundColor('#171a25');this.header('Mask','見せたい範囲だけを切り抜いて表示');const stripes=this.add.graphics();for(let i=0;i<12;i++){stripes.fillStyle(i%2?0xff5f8f:0x65d6ff,1).fillRect(30+i*30,180,30,260)}const shape=this.make.graphics({x:0,y:0,add:false});shape.fillStyle(0xffffff).fillCircle(195,310,90);const mask=shape.createGeometryMask();stripes.setMask(mask);const ring=this.add.circle(195,310,90).setStrokeStyle(4,0xffffff);this.tweens.add({targets:[ring,shape],x:{from:-70,to:70},duration:1600,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});txt(this,195,510,'丸い窓の中だけ見える',{fontSize:'17px',color:'#fff'}).setOrigin(.5)}}
+class UIScene extends BaseScene{constructor(){super('ui')}create(){this.cameras.main.setBackgroundColor('#15202b');this.header('UIゲージ','HP・メーター・ボタン等をゲーム画面上に構築');let hp=100;this.add.rectangle(195,260,304,34,0x222831).setStrokeStyle(2,0xffffff);const bar=this.add.rectangle(45,260,300,30,0x57d68d).setOrigin(0,.5);const label=txt(this,195,260,'HP 100',{fontSize:'16px',fontStyle:'bold',color:'#07120b'}).setOrigin(.5);const set=()=>{bar.width=300*hp/100;label.setText('HP '+hp)};[['-10',105,-10],['+10',285,10]].forEach(([s,x,d])=>{const b=this.add.rectangle(x,390,130,52,d<0?0x8b3d49:0x2c6e58).setInteractive();txt(this,x,390,s,{fontSize:'22px',color:'#fff'}).setOrigin(.5);b.on('pointerdown',()=>{hp=Phaser.Math.Clamp(hp+d,0,100);set()})})}}
+class PathScene extends BaseScene{constructor(){super('path')}create(){this.cameras.main.setBackgroundColor('#141f29');this.header('Path移動','直線だけでなく曲線に沿ってオブジェクトを移動');const path=new Phaser.Curves.Path(45,400);path.cubicBezierTo(345,180,50,170,345,410);const gr=this.add.graphics();gr.lineStyle(3,0x657b9a,1);path.draw(gr);const follower=this.add.follower(path,45,400,this.makeDot());follower.startFollow({duration:2600,repeat:-1,yoyo:true,rotateToPath:true});txt(this,195,520,'ベジェ曲線を自動追従',{fontSize:'16px',color:'#fff'}).setOrigin(.5)}makeDot(){if(!this.textures.exists('pathDot')){const g=this.add.graphics();g.fillStyle(0xffd166).fillTriangle(0,0,34,14,0,28);g.generateTexture('pathDot',34,28);g.destroy()}return 'pathDot'}}
+class BlendScene extends BaseScene{constructor(){super('blend')}create(){this.cameras.main.setBackgroundColor('#090b12');this.header('Blend Mode','ADD等で光が重なるような合成表現');const a=this.add.circle(155,300,80,0xff245b).setBlendMode(Phaser.BlendModes.ADD);const b=this.add.circle(235,300,80,0x2c7dff).setBlendMode(Phaser.BlendModes.ADD);this.tweens.add({targets:a,x:245,duration:1100,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});this.tweens.add({targets:b,x:145,duration:1100,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});txt(this,195,500,'重なった部分が加算発光',{fontSize:'17px',color:'#fff'}).setOrigin(.5)}}
+class RenderTextureScene extends BaseScene{constructor(){super('rendertex')}create(){this.cameras.main.setBackgroundColor('#1d1820');this.header('RenderTexture','描いた結果を1枚のテクスチャとして保持・再利用');const rt=this.add.renderTexture(195,315,300,300).setOrigin(.5).setInteractive();const brush=this.add.circle(-100,-100,12,0xffd166);txt(this,195,500,'四角の中を指でなぞる',{fontSize:'17px',color:'#fff'}).setOrigin(.5);this.input.on('pointermove',p=>{if(!p.isDown||p.y<165||p.y>465||p.x<45||p.x>345)return;rt.draw(brush,p.x-45,p.y-165)})}}
+new Phaser.Game({type:Phaser.AUTO,width:390,height:600,parent:'game',backgroundColor:'#111827',resolution:DPR,antialias:true,antialiasGL:true,pixelArt:false,roundPixels:false,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_HORIZONTALLY,width:390,height:600},physics:{default:'arcade',arcade:{gravity:{y:300},debug:false}},scene:[MenuScene,TapScene,DragScene,TweenScene,PhysicsScene,ParticlesScene,CameraScene,SceneDemo,SceneB,CollisionScene,TimerScene,MaskScene,UIScene,PathScene,BlendScene,RenderTextureScene]});
 </script>
 </body>
 </html>
