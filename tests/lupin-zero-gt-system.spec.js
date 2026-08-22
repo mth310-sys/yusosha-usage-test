@@ -22,6 +22,16 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.continuation100).toBe(100);
   expect(result.unlisted).toBeNull();
 
+  expect(result.spec.treasure.acquisitionLottery.eligibleRoles).toBe('ALL_ROLES');
+  expect(result.spec.treasure.acquisitionLottery.stageDependent).toBe(true);
+  expect(result.spec.treasure.publishedMinimumAwards).toEqual({
+    goldTSymbol: 300000,
+    goldClassPresentation: 500000,
+    flameLupinHold: 200000,
+    fujikoHold: 300000,
+    tamaChanHold: 1000000
+  });
+
   expect(result.spec.stages.japan.treasureHitDenominator).toBe(16.9);
   expect(result.spec.stages.switzerland.treasureHitDenominator).toBe(12.6);
   expect(result.spec.stages.caribbean.treasureHitDenominator).toBe(7.5);
@@ -30,8 +40,11 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
 
   expect(result.spec.lupinRush.games).toBe(4);
   expect(result.spec.lupinRush.averageTreasurePoints).toBe(342000);
+  expect(result.spec.lupinRush.patternSelectionRates).toBeNull();
   expect(result.spec.treasureRush.games).toEqual({ min: 4, max: 9 });
   expect(result.spec.treasureRush.averageTreasurePoints).toBe(499000);
+  expect(result.spec.treasureRush.perGameAwardTable).toBeNull();
+  expect(result.spec.treasureRush.treasureHuntSuccessProbability).toBeNull();
 
   expect(result.spec.extraBonus.triggerPoints).toBe(1000000);
   expect(result.spec.extraBonus.gamesRule).toBe('15_PLUS_REMAINING_ART_GAMES');
@@ -43,7 +56,10 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.spec.goldRush.averageGames).toBe(2.1);
 
   expect(result.spec.continuationBattle.trigger).toBe('SET_GAMES_EXHAUSTED_WITHOUT_STOCK');
+  expect(result.spec.evidence.exactTreasureAwardTable).toBe('UNRESOLVED');
+  expect(result.spec.evidence.treasureHuntSuccessProbability).toBe('UNRESOLVED');
   expect(result.spec.policy.inferTreasurePointAwardAmounts).toBe(false);
+  expect(result.spec.policy.inferTreasureHuntSuccessProbability).toBe(false);
   expect(result.spec.policy.inferStageTransitionRates).toBe(false);
   expect(result.spec.policy.inferRushPatternSelectionRates).toBe(false);
   expect(result.spec.policy.interpolateUnlistedContinuationPoints).toBe(false);
