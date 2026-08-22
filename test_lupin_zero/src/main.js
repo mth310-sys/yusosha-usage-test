@@ -4,12 +4,15 @@ import { ResearchReelEngine } from './research-reel-engine.js';
 import { PrismMechanismController } from './mechanism-controller.js';
 import { PresentationOrchestrator, PRESENTATION_CUES } from './presentation-orchestrator.js';
 import { getChanceEyePresentation } from './chance-eye-presentation-map.js';
-import { resolveChanceEyeOutcome, CHANCE_EYE_CONTEXT } from './chance-eye-outcome-resolver.js';
+import { resolveChanceEyeOutcome, CHANCE_EYE_CONTEXT, CHANCE_EYE_DESTINATION } from './chance-eye-outcome-resolver.js';
+import { resolveChanceZoneDuration } from './chance-zone-duration-resolver.js';
 import { SeededRandomSource } from './random-source.js';
 
+const RESEARCH_SETTING = 1;
 const core = new MachineCore({ credit: 50, maxBet: 3 });
 const researchReels = new ResearchReelEngine();
 const chanceEyeRandom = new SeededRandomSource(0x20160801);
+const chanceZoneRandom = new SeededRandomSource(0x20160802);
 const machineRoot = document.querySelector('.machine');
 const lcdShell = document.querySelector('.lcd-shell');
 const mechanism = new PrismMechanismController(document.querySelector('#prismMechanism'));
@@ -60,7 +63,9 @@ let researchRevealActive = false;
 function render(snapshot = core.snapshot()) {
   ui.credit.textContent = snapshot.credit;
   ui.bet.textContent = snapshot.bet;
-  ui.state.textContent = snapshot.state;
+  ui.state.textContent = snapshot.mode === 'NORMAL'
+    ? snapshot.state
+    : `${snapshot.mode} ${snapshot.modeGamesRemaining ?? '?'}G`;
   const busy = [MachineState.SPINNING, MachineState.STOPPING].includes(snapshot.state);
   ui.betBtn.disabled = busy || snapshot.credit <= 0 || snapshot.bet >= 3;
   ui.maxBetBtn.disabled = busy || snapshot.credit <= 0 || snapshot.bet >= 3;
@@ -80,20 +85,46 @@ function renderResearchPresentation() {
     : '研究用連動キュー解除 — 自動発動条件は未接続';
 }
 
+function enterChanceZone(destination) {
+  if (![CHANCE_EYE_DESTINATION.FUJIKO_ZONE, CHANCE_EYE_DESTINATION.ODOROBO_ZONE].includes(destination)) return null;
+  const duration = resolveChanceZoneDuration(chanceZoneRandom, RESEARCH_SETTING, destination);
+  const entered = core.enterMode(destination, duration.games, duration.evidenceStatus);
+  return entered ? duration : null;
+}
+
 function playChanceEye(kind, mode = CHANCE_EYE_CONTEXT.NORMAL) {
   const spec = getChanceEyePresentation(kind, mode);
   const key = kind.toLowerCase() === 'weak' ? 'weak' : kind.toLowerCase() === 'middle' ? 'middle' : 'strong';
   const outcome = resolveChanceEyeOutcome(chanceEyeRandom, key, mode);
-  presentation.runCue(spec.presentationCue, { ...spec, outcome });
-  ui.message.textContent = outcome.hit
-    ? `${spec.label} HIT ${spec.totalHitPercent ?? outcome.totalHitPercent}% → ${outcome.destination}`
-    : `${spec.label} MISS / hit ${outcome.totalHitPercent}%`;
-  return Object.freeze({ spec, outcome });
+  const chanceZone = outcome.hit ? enterChanceZone(outcome.destination) : null;
+  presentation.runCue(spec.presentationCue, { ...spec, outcome, chanceZone });
+  ui.message.textContent = chanceZone
+    ? `${spec.label} HIT → ${outcome.destination} ${chanceZone.games}G / 設定${RESEARCH_SETTING}`
+    : outcome.hit
+      ? `${spec.label} HIT ${outcome.totalHitPercent}% → ${outcome.destination}`
+      : `${spec.label} MISS / hit ${outcome.totalHitPercent}%`;
+  render();
+  return Object.freeze({ spec, outcome, chanceZone });
 }
 
 core.addEventListener('change', (event) => {
   render(event.detail.snapshot);
   ui.message.textContent = event.detail.snapshot.bet === 3 ? 'MAX BET — START可能' : 'BET受付中';
+});
+
+core.addEventListener('mode-enter', (event) => {
+  render(event.detail.snapshot);
+  ui.message.textContent = `${event.detail.mode} 突入 — ${event.detail.games}G`;
+});
+
+core.addEventListener('mode-game-advanced', (event) => {
+  render(event.detail.snapshot);
+  ui.message.textContent = `${event.detail.mode} — 残り${event.detail.remaining}G`;
+});
+
+core.addEventListener('mode-window-exhausted', (event) => {
+  render(event.detail.snapshot);
+  ui.message.textContent = `${event.detail.mode} 規定G消化 — 終了後遷移は未接続`;
 });
 
 core.addEventListener('spin-start', (event) => {
@@ -110,9 +141,12 @@ core.addEventListener('reel-stop', (event) => {
 });
 
 core.addEventListener('spin-end', (event) => {
-  render(event.detail.snapshot);
+  if (event.detail.snapshot.modeGamesRemaining > 0) core.advanceModeGame();
+  render();
   scene().endSpin();
-  ui.message.textContent = '研究用1ゲーム完了 — 実機固有抽選は段階接続中';
+  if (core.snapshot().mode === 'NORMAL') {
+    ui.message.textContent = '研究用1ゲーム完了 — 実機固有抽選は段階接続中';
+  }
 });
 
 ui.betBtn.addEventListener('click', () => core.betOne());
@@ -134,4 +168,14 @@ ui.phaseBadge.addEventListener('click', () => {
 
 render();
 renderResearchPresentation();
-window.__LUPIN_ZERO__ = { core, game, researchReels, mechanism, presentation, playChanceEye, chanceEyeRandom };
+window.__LUPIN_ZERO__ = {
+  core,
+  game,
+  researchReels,
+  mechanism,
+  presentation,
+  playChanceEye,
+  chanceEyeRandom,
+  chanceZoneRandom,
+  researchSetting: RESEARCH_SETTING
+};
