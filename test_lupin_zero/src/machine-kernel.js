@@ -7,6 +7,11 @@ export const KernelPhase = Object.freeze({
   STOPPING: 'STOPPING'
 });
 
+export const ModeResult = Object.freeze({
+  NONE: null,
+  PENDING_BONUS_OR_ART: 'PENDING_BONUS_OR_ART'
+});
+
 export function createMachineState({ credit = 50, maxBet = 3 } = {}) {
   return Object.freeze({
     credit,
@@ -17,7 +22,9 @@ export function createMachineState({ credit = 50, maxBet = 3 } = {}) {
     spinId: 0,
     mode: GameMode.NORMAL,
     modeGamesRemaining: null,
-    modeEvidenceStatus: 'VERIFIED_LINK'
+    modeEvidenceStatus: 'VERIFIED_LINK',
+    modeResult: ModeResult.NONE,
+    modeResultEvidenceStatus: null
   });
 }
 
@@ -52,6 +59,7 @@ export function reduceMachine(state, command = {}) {
 
   if (type === 'START') {
     if (state.phase !== KernelPhase.READY || state.bet <= 0) return result(state, [], false);
+    if (state.modeResult === ModeResult.PENDING_BONUS_OR_ART) return result(state, [], false);
     const spinId = state.spinId + 1;
     const next = { ...state, phase: KernelPhase.SPINNING, stopped: [false, false, false], spinId };
     return result(next, [{ type: 'SPIN_START', spinId }]);
@@ -88,19 +96,43 @@ export function reduceMachine(state, command = {}) {
       ...state,
       mode,
       modeGamesRemaining: games,
-      modeEvidenceStatus: evidenceStatus
+      modeEvidenceStatus: evidenceStatus,
+      modeResult: ModeResult.NONE,
+      modeResultEvidenceStatus: null
     };
     return result(next, [{ type: 'MODE_ENTER', mode, games, evidenceStatus }]);
   }
 
   if (type === 'ADVANCE_MODE_GAME') {
     if (![GameMode.ODOROBO_ZONE, GameMode.FUJIKO_ZONE].includes(state.mode)) return result(state, [], false);
+    if (state.modeResult === ModeResult.PENDING_BONUS_OR_ART) return result(state, [], false);
     if (!Number.isInteger(state.modeGamesRemaining) || state.modeGamesRemaining <= 0) return result(state, [], false);
     const remaining = state.modeGamesRemaining - 1;
     const next = { ...state, modeGamesRemaining: remaining };
     const events = [{ type: 'MODE_GAME_ADVANCED', mode: state.mode, remaining }];
     if (remaining === 0) events.push({ type: 'MODE_WINDOW_EXHAUSTED', mode: state.mode });
     return result(next, events);
+  }
+
+  if (type === 'CHANCE_ZONE_ODD_ALIGNED') {
+    if (![GameMode.ODOROBO_ZONE, GameMode.FUJIKO_ZONE].includes(state.mode)) return result(state, [], false);
+    if (state.modeResult === ModeResult.PENDING_BONUS_OR_ART) return result(state, [], false);
+    if (!Number.isInteger(state.modeGamesRemaining) || state.modeGamesRemaining <= 0) return result(state, [], false);
+
+    const next = {
+      ...state,
+      modeGamesRemaining: 0,
+      modeResult: ModeResult.PENDING_BONUS_OR_ART,
+      modeResultEvidenceStatus: 'MULTI_SOURCE_MATCH'
+    };
+    return result(next, [{
+      type: 'CHANCE_ZONE_SUCCESS',
+      mode: state.mode,
+      successPresentation: 'ODD_LCD_SYMBOL_ALIGNED',
+      pendingDestination: ModeResult.PENDING_BONUS_OR_ART,
+      destinationSplitStatus: 'UNRESOLVED',
+      evidenceStatus: 'MULTI_SOURCE_MATCH'
+    }]);
   }
 
   return result(state, [], false);
