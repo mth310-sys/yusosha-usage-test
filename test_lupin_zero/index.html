@@ -12,8 +12,17 @@
     <section class="machine" aria-label="LUPIN ZERO research cabinet">
       <header class="crown">
         <div class="brand">YUSOSHA // LUPIN ZERO</div>
-        <div id="phaseBadge" class="phase-badge">RESEARCH CORE</div>
+        <button id="phaseBadge" class="phase-badge" type="button" aria-label="Toggle mechanism research state">RESEARCH CORE</button>
       </header>
+
+      <div id="prismMechanism" class="prism-mechanism" data-state="closed" aria-label="Observed prism mechanism closed prototype">
+        <div class="prism-round-led" aria-hidden="true"><span></span></div>
+        <div class="prism-body" aria-hidden="true">
+          <span class="prism-face prism-face-a"></span>
+          <span class="prism-face prism-face-b"></span>
+          <span class="prism-face prism-face-c"></span>
+        </div>
+      </div>
 
       <section class="lcd-shell">
         <div id="game" class="game-host" aria-label="Phaser render surface"></div>
