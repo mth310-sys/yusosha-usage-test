@@ -9,6 +9,7 @@ import { resolveChanceEyeOccurrence } from './chance-eye-occurrence-resolver.js'
 import { resolveChanceZoneDuration } from './chance-zone-duration-resolver.js';
 import { PhysicalRoleSession } from './physical-role-session.js';
 import { getNormalRoleSettlement } from './normal-role-settlement.js';
+import { getMbFollowupGameSettlement } from './mb-followup.js';
 import { SeededRandomSource } from './random-source.js';
 
 const MACHINE_SETTING = 1;
@@ -69,11 +70,13 @@ const presentation = new PresentationOrchestrator({
 function render(snapshot = core.snapshot()) {
   ui.credit.textContent = snapshot.credit;
   ui.bet.textContent = snapshot.bet;
-  ui.state.textContent = snapshot.mode === 'NORMAL'
-    ? snapshot.state
-    : snapshot.modeResult
-      ? `${snapshot.mode} SUCCESS`
-      : `${snapshot.mode} ${snapshot.modeGamesRemaining ?? '?'}G`;
+  ui.state.textContent = snapshot.mbFollowupGamesRemaining > 0
+    ? `MB ${snapshot.mbFollowupGamesRemaining}G`
+    : snapshot.mode === 'NORMAL'
+      ? snapshot.state
+      : snapshot.modeResult
+        ? `${snapshot.mode} SUCCESS`
+        : `${snapshot.mode} ${snapshot.modeGamesRemaining ?? '?'}G`;
   ui.phaseBadge.textContent = snapshot.mbFollowupGamesRemaining > 0
     ? `MB ${snapshot.mbFollowupGamesRemaining}G`
     : snapshot.mode === 'NORMAL'
@@ -143,6 +146,11 @@ core.addEventListener('normal-role-settled', (event) => {
   else if (event.detail.creditDelta > 0) ui.message.textContent = `${event.detail.creditDelta} PAY`;
 });
 
+core.addEventListener('mb-followup-game-settled', (event) => {
+  render(event.detail.snapshot);
+  ui.message.textContent = event.detail.remaining > 0 ? '10 PAY — MB' : '10 PAY — MB END';
+});
+
 core.addEventListener('mode-enter', (event) => {
   render(event.detail.snapshot);
   ui.message.textContent = event.detail.mode === CHANCE_EYE_DESTINATION.FUJIKO_ZONE
@@ -168,15 +176,16 @@ core.addEventListener('chance-zone-success', (event) => {
 
 core.addEventListener('spin-start', (event) => {
   const snapshot = event.detail.snapshot;
-  pendingChanceEyeOccurrence = snapshot.mode === 'NORMAL'
+  const mbFollowupActive = snapshot.mbFollowupGamesRemaining > 0;
+  pendingChanceEyeOccurrence = snapshot.mode === 'NORMAL' && !mbFollowupActive
     ? resolveChanceEyeOccurrence(chanceEyeOccurrenceRandom, CHANCE_EYE_CONTEXT.NORMAL)
     : null;
-  pendingPhysicalRole = snapshot.mode === 'NORMAL'
+  pendingPhysicalRole = snapshot.mode === 'NORMAL' && !mbFollowupActive
     ? physicalRoleSession.start(event.detail.spinId)
     : null;
   researchReels.start(event.detail.spinId);
   render(snapshot);
-  ui.message.textContent = 'SPIN';
+  ui.message.textContent = mbFollowupActive ? 'MB' : 'SPIN';
   scene().startSpin();
 });
 
@@ -189,16 +198,19 @@ core.addEventListener('reel-stop', (event) => {
 
 core.addEventListener('spin-end', (event) => {
   const completedMode = event.detail.snapshot.mode;
+  const completedMbFollowup = event.detail.snapshot.mbFollowupGamesRemaining > 0;
   if (event.detail.snapshot.modeGamesRemaining > 0) core.advanceModeGame();
   scene().endSpin();
 
-  let settlement = null;
-  if (completedMode === 'NORMAL') {
-    settlement = settlePendingPhysicalRole();
+  if (completedMbFollowup) {
+    core.settleMbFollowupGame(getMbFollowupGameSettlement());
+  } else if (completedMode === 'NORMAL') {
+    const settlement = settlePendingPhysicalRole();
     const chanceEye = resolvePendingChanceEye();
     if (!chanceEye && !settlement?.accepted) ui.message.textContent = '1ゲーム完了';
   }
   pendingPhysicalRole = null;
+  pendingChanceEyeOccurrence = null;
   render();
 });
 
