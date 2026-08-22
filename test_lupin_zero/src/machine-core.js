@@ -19,7 +19,10 @@ export class MachineCore extends EventTarget {
       modeGamesRemaining: this.kernelState.modeGamesRemaining,
       modeEvidenceStatus: this.kernelState.modeEvidenceStatus,
       modeResult: this.kernelState.modeResult,
-      modeResultEvidenceStatus: this.kernelState.modeResultEvidenceStatus
+      modeResultEvidenceStatus: this.kernelState.modeResultEvidenceStatus,
+      lastSettledRole: this.kernelState.lastSettledRole,
+      lastPayout: this.kernelState.lastPayout,
+      mbFollowupGamesRemaining: this.kernelState.mbFollowupGamesRemaining
     });
   }
 
@@ -47,6 +50,15 @@ export class MachineCore extends EventTarget {
           reelIndex: event.reelIndex,
           spinId: event.spinId,
           mode: event.mode
+        });
+      }
+      if (event.type === 'NORMAL_ROLE_SETTLED') {
+        this.emit('normal-role-settled', {
+          role: event.role,
+          creditDelta: event.creditDelta,
+          replayAutoBet: event.replayAutoBet,
+          mbFollowupGames: event.mbFollowupGames,
+          evidenceStatus: event.evidenceStatus
         });
       }
       if (event.type === 'MODE_ENTER') {
@@ -92,6 +104,18 @@ export class MachineCore extends EventTarget {
 
   stop(reelIndex) {
     return this.apply({ type: 'STOP_REEL', reelIndex });
+  }
+
+  settleNormalRole(settlement) {
+    if (!settlement?.accepted) return false;
+    return this.apply({
+      type: 'SETTLE_NORMAL_ROLE',
+      role: settlement.role,
+      creditDelta: settlement.creditDelta,
+      replayAutoBet: settlement.replayAutoBet,
+      mbFollowupGames: settlement.mbFollowupGames,
+      evidenceStatus: settlement.evidenceStatus
+    });
   }
 
   enterMode(mode, games, evidenceStatus = 'UNRESOLVED') {
