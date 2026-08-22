@@ -12,6 +12,7 @@ import { getNormalRoleSettlement } from './normal-role-settlement.js';
 import { getMbFollowupGameSettlement } from './mb-followup.js';
 import { selectWantedWindow, WANTED_RESET_CONTEXT } from './normal-progression.js';
 import { resolveInitialRaiunPoints, resolveRaiunPointAcquisition } from './raiun-counter-resolver.js';
+import { resolveRaiunHighGame } from './raiun-high-resolver.js';
 import { GameMode } from './game-flow-spec.js';
 import { SeededRandomSource } from './random-source.js';
 
@@ -25,12 +26,14 @@ const physicalRoleRandom = new SeededRandomSource(0x20160803);
 const wantedWindowRandom = new SeededRandomSource(0x20160804);
 const raiunInitialRandom = new SeededRandomSource(0x20160805);
 const raiunPointRandom = new SeededRandomSource(0x20160806);
+const raiunHighRandom = new SeededRandomSource(0x20160807);
 const physicalRoleSession = new PhysicalRoleSession({ randomSource: physicalRoleRandom, setting: MACHINE_SETTING });
 const machineRoot = document.querySelector('.machine');
 const lcdShell = document.querySelector('.lcd-shell');
 const mechanism = new PrismMechanismController(document.querySelector('#prismMechanism'));
 let pendingChanceEyeOccurrence = null;
 let pendingPhysicalRole = null;
+let spinStartedInRaiunHigh = false;
 
 const ui = {
   credit: document.querySelector('#creditValue'),
@@ -87,7 +90,7 @@ function render(snapshot = core.snapshot()) {
     ? `MB ${snapshot.mbFollowupGamesRemaining}G`
     : snapshot.mode === GameMode.NORMAL
       ? snapshot.raiunHighGamesRemaining > 0
-        ? '雷雲高確'
+        ? `雷雲高確 ${snapshot.raiunHighRank}`
         : 'SYSTEM'
       : snapshot.mode;
 
@@ -109,12 +112,25 @@ function initializeRaiunCounter() {
   return core.setRaiunPoints(initial.points, initial.evidenceStatus) ? initial : null;
 }
 
+function resetRaiunCounterAfterHigh() {
+  const initial = resolveInitialRaiunPoints(raiunInitialRandom);
+  return core.resetRaiunCounter(initial.points, initial.evidenceStatus) ? initial : null;
+}
+
 function advanceRaiunCounterForNormalGame() {
   const snapshot = core.snapshot();
   if (snapshot.mode !== GameMode.NORMAL || snapshot.raiunHighGamesRemaining > 0 || !Number.isInteger(snapshot.raiunPoints) || snapshot.raiunPoints >= 100) return null;
   const acquisition = resolveRaiunPointAcquisition(raiunPointRandom);
   if (acquisition.hit) core.addRaiunPoints(acquisition.points, acquisition.evidenceStatus);
   return acquisition;
+}
+
+function resolveCurrentRaiunHighGame() {
+  const snapshot = core.snapshot();
+  if (snapshot.mode !== GameMode.NORMAL || snapshot.raiunHighGamesRemaining <= 0) return null;
+  const resolution = resolveRaiunHighGame(raiunHighRandom, snapshot.raiunHighRank);
+  core.resolveRaiunHighGame(resolution);
+  return resolution;
 }
 
 function enterChanceZone(destination) {
@@ -169,13 +185,29 @@ core.addEventListener('mb-followup-game-settled', (event) => {
   ui.message.textContent = event.detail.remaining > 0 ? '10 PAY — MB' : '10 PAY — MB END';
 });
 
-core.addEventListener('raiun-points-added', (event) => {
+core.addEventListener('raiun-points-added', (event) => { render(event.detail.snapshot); });
+
+core.addEventListener('raiun-high-enter', (event) => {
   render(event.detail.snapshot);
+  ui.message.textContent = `雷雲高確 ${event.detail.games}G`;
+});
+
+core.addEventListener('raiun-high-game-resolved', (event) => {
+  render(event.detail.snapshot);
+  if (event.detail.hit) ui.message.textContent = '雷雲モード';
+  else if (event.detail.remaining > 0) ui.message.textContent = `雷雲高確 ${event.detail.remaining}G`;
+});
+
+core.addEventListener('raiun-high-exhausted', (event) => {
+  resetRaiunCounterAfterHigh();
+  render();
+  ui.message.textContent = '雷雲高確 END';
 });
 
 core.addEventListener('mode-enter', (event) => {
   render(event.detail.snapshot);
   if (event.detail.mode === GameMode.WANTED_CHANCE) ui.message.textContent = 'WANTED CHANCE';
+  else if (event.detail.mode === GameMode.RAIUN_MODE) ui.message.textContent = '雷雲モード';
   else if (event.detail.mode === CHANCE_EYE_DESTINATION.FUJIKO_ZONE) ui.message.textContent = '不二子ゾーン';
   else if (event.detail.mode === CHANCE_EYE_DESTINATION.ODOROBO_ZONE) ui.message.textContent = '大泥棒ゾーン';
   else ui.message.textContent = event.detail.mode;
@@ -197,21 +229,29 @@ core.addEventListener('chance-zone-success', (event) => {
   ui.message.textContent = 'チャンスゾーン成功';
 });
 
-core.addEventListener('raiun-high-enter', (event) => {
-  render(event.detail.snapshot);
-  ui.message.textContent = `雷雲高確 ${event.detail.games}G`;
-});
-
 core.addEventListener('spin-start', (event) => {
   const snapshot = event.detail.snapshot;
   const mbFollowupActive = snapshot.mbFollowupGamesRemaining > 0;
+  spinStartedInRaiunHigh = snapshot.mode === GameMode.NORMAL && snapshot.raiunHighGamesRemaining > 0;
   const normalLikeMode = [GameMode.NORMAL, GameMode.WANTED_CHANCE].includes(snapshot.mode);
   const chanceEyeContext = snapshot.mode === GameMode.WANTED_CHANCE ? CHANCE_EYE_CONTEXT.WANTED_CHANCE : CHANCE_EYE_CONTEXT.NORMAL;
-  pendingChanceEyeOccurrence = normalLikeMode && !mbFollowupActive ? resolveChanceEyeOccurrence(chanceEyeOccurrenceRandom, chanceEyeContext) : null;
-  pendingPhysicalRole = normalLikeMode && !mbFollowupActive ? physicalRoleSession.start(event.detail.spinId) : null;
+
+  pendingChanceEyeOccurrence = normalLikeMode && !mbFollowupActive && !spinStartedInRaiunHigh
+    ? resolveChanceEyeOccurrence(chanceEyeOccurrenceRandom, chanceEyeContext)
+    : null;
+  pendingPhysicalRole = normalLikeMode && !mbFollowupActive
+    ? physicalRoleSession.start(event.detail.spinId)
+    : null;
+
   researchReels.start(event.detail.spinId);
   render(snapshot);
-  ui.message.textContent = mbFollowupActive ? 'MB' : snapshot.mode === GameMode.WANTED_CHANCE ? 'WANTED CHANCE' : 'SPIN';
+  ui.message.textContent = mbFollowupActive
+    ? 'MB'
+    : spinStartedInRaiunHigh
+      ? '雷雲高確'
+      : snapshot.mode === GameMode.WANTED_CHANCE
+        ? 'WANTED CHANCE'
+        : 'SPIN';
   scene().startSpin();
 });
 
@@ -231,18 +271,27 @@ core.addEventListener('spin-end', (event) => {
     core.settleMbFollowupGame(getMbFollowupGameSettlement());
   } else if ([GameMode.NORMAL, GameMode.WANTED_CHANCE].includes(completedMode)) {
     const settlement = settlePendingPhysicalRole();
-    if (completedMode === GameMode.NORMAL) advanceRaiunCounterForNormalGame();
-    const chanceEye = resolvePendingChanceEye(completedMode);
-    const modeAfterChanceEye = core.snapshot().mode;
 
-    if (completedMode === GameMode.NORMAL && modeAfterChanceEye === GameMode.NORMAL) core.advanceNormalProgression();
-    else if (completedMode === GameMode.WANTED_CHANCE && modeAfterChanceEye === GameMode.WANTED_CHANCE) core.advanceModeGame();
+    if (spinStartedInRaiunHigh && completedMode === GameMode.NORMAL) {
+      resolveCurrentRaiunHighGame();
+    } else {
+      if (completedMode === GameMode.NORMAL) advanceRaiunCounterForNormalGame();
+      const chanceEye = resolvePendingChanceEye(completedMode);
+      const modeAfterChanceEye = core.snapshot().mode;
+      const highAfterCounter = core.snapshot().raiunHighGamesRemaining > 0;
 
-    if (!chanceEye && !settlement?.accepted) ui.message.textContent = '1ゲーム完了';
-  } else if (event.detail.snapshot.modeGamesRemaining > 0) core.advanceModeGame();
+      if (completedMode === GameMode.NORMAL && modeAfterChanceEye === GameMode.NORMAL && !highAfterCounter) core.advanceNormalProgression();
+      else if (completedMode === GameMode.WANTED_CHANCE && modeAfterChanceEye === GameMode.WANTED_CHANCE) core.advanceModeGame();
+
+      if (!chanceEye && !settlement?.accepted) ui.message.textContent = '1ゲーム完了';
+    }
+  } else if (event.detail.snapshot.modeGamesRemaining > 0) {
+    core.advanceModeGame();
+  }
 
   pendingPhysicalRole = null;
   pendingChanceEyeOccurrence = null;
+  spinStartedInRaiunHigh = false;
   render();
 });
 
@@ -270,6 +319,7 @@ window.__LUPIN_ZERO__ = {
   wantedWindowRandom,
   raiunInitialRandom,
   raiunPointRandom,
+  raiunHighRandom,
   physicalRoleSession,
   machineSetting: MACHINE_SETTING
 };
