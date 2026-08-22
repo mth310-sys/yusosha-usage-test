@@ -48,3 +48,26 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.spec.policy.inferRushPatternSelectionRates).toBe(false);
   expect(result.spec.policy.interpolateUnlistedContinuationPoints).toBe(false);
 });
+
+test('GOLDEN TIME stage scenarios stay exact across setting, initial stage and 10G upgrades', async ({ page }) => {
+  await page.goto('/test_lupin_zero/');
+  await page.waitForLoadState('networkidle');
+
+  const scenario = await page.evaluate(async () => {
+    const { GT_SYSTEM_SPEC } = await import('/test_lupin_zero/src/gt-system-spec.js');
+    return GT_SYSTEM_SPEC.stageScenario;
+  });
+
+  expect(scenario.selectionBySetting[1]).toEqual({ A:71.9, B:23.4, C:3.1, D:1.6 });
+  expect(scenario.selectionBySetting[6]).toEqual({ A:51.6, B:39.1, C:6.3, D:3.1 });
+  expect(scenario.internalStages).toEqual([
+    'JAPAN_A','JAPAN_B','SWITZERLAND_A','SWITZERLAND_B',
+    'CARIBBEAN_A','CARIBBEAN_B','UNDERGROUND_CITY_A','UNDERGROUND_CITY_B'
+  ]);
+  expect(scenario.initialStageByScenario.A).toEqual([62.5,12.5,12.5,6.3,1.6,1.6,1.6,1.6]);
+  expect(scenario.initialStageByScenario.D).toEqual([12.5,18.8,18.8,18.8,18.8,9.4,1.6,1.6]);
+  expect(scenario.upgradeEveryGames).toBe(10);
+  expect(scenario.upgradeStepByScenario.A).toEqual({ oneStep:75, twoSteps:25 });
+  expect(scenario.upgradeStepByScenario.D).toEqual({ oneStep:25, twoSteps:75 });
+  expect(scenario.visibleStageMayLagInternalStage).toBe(true);
+});
