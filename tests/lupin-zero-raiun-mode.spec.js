@@ -9,6 +9,17 @@ test('Raiun and Shin Raiun keep verified structure and unresolved boundaries exa
     return RAIUN_MODE_SPEC;
   });
 
+  expect(spec.raiunCounter.maxPoints).toBe(100);
+  expect(spec.raiunCounter.initialPoints.average).toBe(22.6);
+  expect(spec.raiunCounter.initialPoints.exactDistribution).toBeNull();
+  expect(spec.raiunCounter.acquisition.lotteryBasis).toBe('ALL_ROLES');
+  expect(spec.raiunCounter.acquisition.publishedHitDenominatorRange).toEqual([7.0, 7.1]);
+  expect(spec.raiunCounter.acquisition.averagePointsOnHit).toBe(3.3);
+  expect(spec.raiunCounter.acquisition.exactPerRoleRates).toBeNull();
+  expect(spec.raiunCounter.acquisition.exactPointAwardTable).toBeNull();
+  expect(spec.raiunCounter.acquisition.averageGamesTo100Points).toBe(190);
+  expect(spec.raiunCounter.presentation.publishedVisibleIncrementCue).toBe('MIDDLE_AND_RIGHT_LCD_SYMBOLS_MATCH');
+
   expect(spec.raiunHigh.entryTrigger).toBe('RAIUN_COUNTER_REACHES_100');
   expect(spec.raiunHigh.games).toBe(7);
   expect(spec.raiunHigh.states.LOW).toEqual({ raiunModeHitDenominator: 30.5, expectationPercent: 20 });
@@ -36,7 +47,12 @@ test('Raiun and Shin Raiun keep verified structure and unresolved boundaries exa
   expect(spec.shinRaiunMode.legendGateRelationship.duringModeHitDenominator).toBe(88.9);
   expect(spec.shinRaiunMode.exactArtLotteryPerGame).toBeNull();
 
+  expect(spec.evidence.raiunCounterAcquisitionSummary).toBe('PUBLISHED_ANALYSIS');
+  expect(spec.evidence.raiunCounterExactPerRoleRates).toBe('UNRESOLVED');
   expect(spec.evidence.shinRaiunLegendGateRelationship).toBe('CONFLICT');
+  expect(spec.policy.inferRaiunInitialDistributionFromAverage).toBe(false);
+  expect(spec.policy.inferRaiunPerRolePointRatesFromOverallHitRate).toBe(false);
+  expect(spec.policy.inferRaiunPointAwardTableFromAverage).toBe(false);
   expect(spec.policy.inferRaiunPerRoleArtLotteryFromOverallExpectation).toBe(false);
   expect(spec.policy.inferShinRaiunArtLotteryFromLegendGateRate).toBe(false);
   expect(spec.policy.resolveLegendGateConflictByGuessing).toBe(false);
