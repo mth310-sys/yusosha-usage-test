@@ -108,6 +108,24 @@ export class MachineCore extends EventTarget {
   settleRaiunModeGame(resolution) { return this.apply({ type: 'SETTLE_RAIUN_MODE_GAME', resolution }); }
   enterGoldenTime(profile) { return this.apply({ type: 'ENTER_GOLDEN_TIME', profile }); }
   settleGoldenTimeGame(payoutCoins, evidenceStatus = 'INFERRED_HIGH_CONFIDENCE') { return this.apply({ type: 'SETTLE_GOLDEN_TIME_GAME', payoutCoins, evidenceStatus }); }
+
+  addGoldenTimeTreasure(acquisition) {
+    const snapshot = this.snapshot();
+    if (snapshot.mode !== 'GOLDEN_TIME' || snapshot.modeResult || !acquisition?.hit || !Number.isInteger(acquisition.treasure) || acquisition.treasure <= 0) return false;
+    const from = snapshot.goldenTimeTreasure;
+    const to = Math.min(1000000, from + acquisition.treasure);
+    this.kernelState = Object.freeze({ ...this.kernelState, goldenTimeTreasure: to });
+    this.emit('golden-time-treasure-acquired', {
+      from,
+      added: to - from,
+      to,
+      extraBonusReached: to >= 1000000,
+      evidenceStatus: acquisition.evidenceStatus,
+      inference: acquisition.inference ?? null
+    });
+    return true;
+  }
+
   resolveGoldenTimeContinuation(resolution, profile) { return this.apply({ type: 'RESOLVE_GOLDEN_TIME_CONTINUATION', resolution, profile }); }
   exitRaiunMode() { return this.apply({ type: 'EXIT_RAIUN_MODE' }); }
   exitWantedChance() { return this.apply({ type: 'EXIT_WANTED_CHANCE' }); }
