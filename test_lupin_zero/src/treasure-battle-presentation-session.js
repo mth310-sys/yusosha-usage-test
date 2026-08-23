@@ -13,6 +13,7 @@ export const TREASURE_BATTLE_PRESENTATION_SESSION_POLICY = Object.freeze({
   consumesNormalGtStageGame: false,
   resolvesOutcomeBeforeFinalPhase: false,
   exactBattleEntryTimingRequiredFromCaller: true,
+  phaseMeaningReusedWithoutChanceUpLottery: true,
   evidenceStatus: TREASURE_BATTLE_REUSE_POLICY.presentationStructureStatus
 });
 
@@ -38,6 +39,7 @@ export function createTreasureBattlePresentationSession(preparedResolution) {
       completedGames,
       nextGame,
       nextPhase: phase?.key ?? null,
+      nextPhaseNote: phase?.note ?? null,
       hiddenOutcome: completed ? null : 'HIDDEN',
       revealedOutcome: completed ? preparedResolution.hiddenOutcome : null,
       continuation: completed ? preparedResolution.continuation : null,
@@ -66,6 +68,7 @@ export function createTreasureBattlePresentationSession(preparedResolution) {
       ...state,
       justCompletedGame: game,
       justCompletedPhase: phase.key,
+      justCompletedPhaseNote: phase.note ?? null,
       outcomeRevealedNow: completed,
       revealedOutcome: completed ? preparedResolution.hiddenOutcome : null,
       continuation: completed ? preparedResolution.continuation : null
