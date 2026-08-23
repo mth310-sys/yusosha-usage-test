@@ -8,6 +8,10 @@ export const LUPIN_BONUS_BATTLE_SPEC = Object.freeze({
   exactPerRoleLotteryKnown: false,
   exactPerGameWinRateKnown: false,
   earlyVictoryRouteVerified: false,
+  verifiedBattleStructure: 'ZENIGATA_ATTACK_POINTS_AND_AVOIDANCE',
+  exactAttackPatternSelectionKnown: false,
+  exactAvoidanceRatePerPointKnown: false,
+  intermediateAvoidanceDoesNotChangeHiddenOutcome: true,
   resultSource: 'PREDETERMINED_LUPIN_BONUS_OUTCOME',
   evidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS
 });
@@ -20,6 +24,7 @@ export function createLupinBonusBattleState(hiddenOutcome) {
     step: 0,
     artHit: hiddenOutcome.artHit,
     revealed: false,
+    phase: 'ZENIGATA_ATTACK_POINT',
     evidenceStatus: LUPIN_BONUS_BATTLE_SPEC.evidenceStatus
   });
 }
@@ -34,6 +39,9 @@ export function advanceLupinBonusBattle(state) {
     gamesRemaining,
     step,
     revealed,
+    phase: revealed ? 'FINAL_RESULT' : 'ZENIGATA_ATTACK_POINT',
+    presentationCue: revealed ? (state.artHit ? 'ZENIGATA_BATTLE_WIN' : 'ZENIGATA_BATTLE_LOSE') : 'ZENIGATA_ATTACK_AVOIDANCE_CHANCE',
+    avoidanceResolved: revealed ? state.artHit : null,
     result: revealed ? (state.artHit ? 'WIN' : 'LOSE') : null,
     destination: revealed && state.artHit ? LUPIN_BONUS_BATTLE_SPEC.successDestination : null
   });
