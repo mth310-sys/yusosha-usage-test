@@ -22,6 +22,9 @@ test('GT stage resolver uses published scenario, stage and upgrade tables', asyn
   expect(result.upgradeA1.steps).toBe(1);
   expect(result.upgradeA2.steps).toBe(2);
   expect(result.denominators).toEqual([16.9, 12.6, 7.5, 3]);
+  expect(result.policy.scenarioSelectionTiming).toBe('ART_INITIAL_HIT');
+  expect(result.policy.scenarioLifetime).toBe('ART_INITIAL_HIT_TO_ART_END');
+  expect(result.policy.initialStageSelectionTiming).toBe('EACH_SET_START');
   expect(result.policy.upgradeEveryGames).toBe(10);
   expect(result.policy.noSyntheticStageRates).toBe(true);
 });
