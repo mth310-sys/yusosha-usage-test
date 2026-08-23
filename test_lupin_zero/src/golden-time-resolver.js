@@ -77,5 +77,9 @@ export const GOLDEN_TIME_PRODUCTION_POLICY = Object.freeze({
   exactTreasureAcquisitionDuringSetImplemented: false,
   continuationTableUsedDirectly: true,
   oneMillionTreasureContinuationGuaranteed: true,
-  extraBonusAtOneMillionImplemented: false
+  extraBonusAtOneMillionImplemented: true,
+  extraBonusOddAlignmentStockImplemented: true,
+  goldRushEntryBoundaryImplemented: true,
+  goldRushRuntimeImplemented: false,
+  treasureRushAutomaticEntryImplemented: false
 });
