@@ -8,8 +8,12 @@ export const GOLDEN_TIME_TREASURE_SPEC = Object.freeze({
   productionAwardTreasure: 50000,
   treasureCap: 1000000,
   extraBonusTriggerTreasure: 1000000,
+  directAddPresentation: 'TRIPLE_T_SYMBOL_ALIGNED',
+  treasureVisualClasses: Object.freeze(['SILVER', 'GOLD']),
+  exactVisualClassSelectionRateKnown: false,
   productionEvidenceStatus: ReuseEvidenceStatus.INFERRED_HIGH_CONFIDENCE,
   stageHitRatesEvidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS,
+  directAddPresentationEvidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS,
   exactStateTransitionRatesKnown: true,
   exactAwardDistributionKnown: false,
   replaceable: true
@@ -32,11 +36,15 @@ export function resolveGoldenTimeTreasureAcquisition(randomSource, denominator =
     denominator,
     treasure: hit ? GOLDEN_TIME_TREASURE_SPEC.productionAwardTreasure : 0,
     lotteryBasis: GOLDEN_TIME_TREASURE_SPEC.lotteryBasis,
+    presentation: hit ? GOLDEN_TIME_TREASURE_SPEC.directAddPresentation : null,
+    treasureVisualClass: null,
+    treasureVisualClassSelectionStatus: hit ? 'UNRESOLVED' : null,
     hitRateEvidenceStatus: denominator === GOLDEN_TIME_TREASURE_SPEC.productionDenominator
       ? ReuseEvidenceStatus.INFERRED_HIGH_CONFIDENCE
       : ReuseEvidenceStatus.PUBLISHED_ANALYSIS,
+    presentationEvidenceStatus: hit ? GOLDEN_TIME_TREASURE_SPEC.directAddPresentationEvidenceStatus : null,
     evidenceStatus: GOLDEN_TIME_TREASURE_SPEC.productionEvidenceStatus,
-    inference: 'Treasure hit probability may use the published GT stage denominator. The exact award table remains unresolved, so a replaceable 50,000T award step is still used after a hit.',
+    inference: 'Treasure hit probability uses the published GT stage denominator. A hit is presented as the published triple-T direct-add cue. Exact silver/gold selection and award-size distribution remain unresolved; production still uses the replaceable 50,000T award step.',
     replaceable: true
   });
 }
@@ -50,6 +58,8 @@ export function applyGoldenTimeTreasure(currentTreasure, acquisition) {
     added: nextTreasure - currentTreasure,
     to: nextTreasure,
     extraBonusReached: nextTreasure >= GOLDEN_TIME_TREASURE_SPEC.extraBonusTriggerTreasure,
+    presentation: acquisition.presentation ?? null,
+    treasureVisualClass: acquisition.treasureVisualClass ?? null,
     evidenceStatus: acquisition.evidenceStatus,
     replaceable: true
   });
