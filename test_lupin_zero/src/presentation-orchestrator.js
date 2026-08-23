@@ -56,9 +56,9 @@ export class PresentationOrchestrator {
       ]);
     }
     if ([PRESENTATION_CUES.CHANCE_EYE_BLUE, PRESENTATION_CUES.CHANCE_EYE_RED, PRESENTATION_CUES.CHANCE_EYE_GOLD].includes(cue)) {
-      return Object.freeze([
-        this.applyEvent(machineEvent(MACHINE_EVENTS.LCD_CUE, { cue, ...detail }))
-      ]);
+      const event = this.applyEvent(machineEvent(MACHINE_EVENTS.LCD_CUE, { cue, ...detail }));
+      this.machineRoot.dispatchEvent(new CustomEvent('chance-eye-presented', { detail: Object.freeze({ cue, ...detail }) }));
+      return Object.freeze([event]);
     }
     throw new Error(`Unknown presentation cue: ${cue}`);
   }
@@ -76,7 +76,8 @@ export const PRESENTATION_ORCHESTRATOR_POLICY = Object.freeze({
   researchCueIsVerifiedAutomaticBehavior: false,
   automaticTriggerImplemented: false,
   chanceEyeLcdSemanticsImplemented: true,
+  chanceEyeOutcomeEventExposed: true,
   chanceEyePhysicalLedReactionImplemented: false,
   chanceEyeMechanismReactionImplemented: false,
-  note: 'Research cue coordinates observed surfaces. Chance-eye cues drive only verified liquid/LCD semantics until physical reactions are evidenced.'
+  note: 'Research cue coordinates observed surfaces. Chance-eye cues drive verified liquid/LCD semantics and expose the resolved outcome to downstream routing without changing the lottery.'
 });
