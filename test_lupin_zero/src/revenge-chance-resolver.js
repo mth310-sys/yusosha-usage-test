@@ -4,6 +4,8 @@ export const REVENGE_CHANCE_SPEC = Object.freeze({
   games: 10,
   averagePullbackPercent: 5.6,
   destination: 'LUPIN_BONUS',
+  bonusEndEntryDenominator: 25,
+  bonusEndHitExpectationPercent: 39,
   publishedRatesByTreasure: Object.freeze({
     50000: 2.3,
     150000: 0.8,
@@ -25,6 +27,34 @@ function requireRandomSource(randomSource) {
   }
 }
 
+export function resolveBonusEndRevengeEntry(randomSource) {
+  requireRandomSource(randomSource);
+  const draw = randomSource.nextFloat();
+  const hit = draw < 1 / REVENGE_CHANCE_SPEC.bonusEndEntryDenominator;
+  return Object.freeze({
+    hit,
+    draw,
+    denominator: REVENGE_CHANCE_SPEC.bonusEndEntryDenominator,
+    games: REVENGE_CHANCE_SPEC.games,
+    source: 'LUPIN_BONUS_END',
+    evidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS
+  });
+}
+
+export function resolveBonusEndRevengeOutcome(randomSource) {
+  requireRandomSource(randomSource);
+  const draw = randomSource.nextFloat();
+  const hit = draw < REVENGE_CHANCE_SPEC.bonusEndHitExpectationPercent / 100;
+  return Object.freeze({
+    hit,
+    draw,
+    percent: REVENGE_CHANCE_SPEC.bonusEndHitExpectationPercent,
+    destination: hit ? REVENGE_CHANCE_SPEC.destination : null,
+    source: 'LUPIN_BONUS_END',
+    evidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS
+  });
+}
+
 export function getRevengePullbackPercent(treasure) {
   if (!Number.isInteger(treasure) || treasure < 0 || treasure >= 1000000) return null;
   const direct = REVENGE_CHANCE_SPEC.publishedRatesByTreasure[treasure];
@@ -36,10 +66,6 @@ export function getRevengePullbackPercent(treasure) {
     });
   }
 
-  // The published table exposes 100k-T-spaced points at 50k offsets.
-  // ZERO's current replaceable GT treasure model can land on the midpoint
-  // between those published points. Use straight midpoint interpolation only
-  // for those exact 50k midpoints; never present it as a published value.
   const lower = Math.floor((treasure - 50000) / 100000) * 100000 + 50000;
   const upper = lower + 100000;
   const lowerRate = REVENGE_CHANCE_SPEC.publishedRatesByTreasure[lower];
