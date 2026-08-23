@@ -67,7 +67,7 @@ export function resolveGoldenTimeContinuation(randomSource, treasure) {
       treasure,
       continuationPercent: null,
       draw: null,
-      continued: false,
+      continued: null,
       evidenceStatus: ReuseEvidenceStatus.UNRESOLVED,
       sourceRelation: 'NO_PUBLISHED_CONTINUATION_RATE_FOR_EXACT_TREASURE'
     });
@@ -98,6 +98,7 @@ export const GOLDEN_TIME_PRODUCTION_POLICY = Object.freeze({
   continuationRateLookup: 'EXACT_PUBLISHED_TABLE_POINTS_ONLY',
   floorUnknownTreasureToPublishedStep: false,
   interpolateUnknownTreasure: false,
+  unsupportedTreasureOutcome: 'UNRESOLVED_NO_WIN_LOSS',
   pureIncreaseModel: '3_BET_5_PAY',
   initialLupinRushExactAwardTableKnown: false,
   initialTreasureFallback: 350000,
