@@ -94,6 +94,35 @@ test('Treasure Battle uses the existing BET START STOP loop for four physical sp
   expect(finalGame.snapshot.goldenTimeLastContinuation.continued).toBe(true);
 });
 
+test('real battle-ready event leaves MAX BET usable after the legacy render listener runs', async ({ page }) => {
+  await page.goto('/test_lupin_zero/');
+  await page.waitForLoadState('networkidle');
+
+  await page.evaluate(() => {
+    const core = window.__LUPIN_ZERO__.core;
+    core.kernelState = Object.freeze({
+      ...core.kernelState,
+      credit: 100,
+      bet: 0,
+      phase: 'IDLE',
+      stopped: Object.freeze([true, true, true]),
+      mode: 'GOLDEN_TIME',
+      modeGamesRemaining: 0,
+      modeResult: 'PENDING_GT_CONTINUATION',
+      modeResultEvidenceStatus: 'PUBLISHED_ANALYSIS',
+      goldenTimeTreasure: 350000,
+      goldenTimeSetNumber: 1,
+      goldenTimeStockCount: 0
+    });
+    core.emit('golden-time-battle-ready', { treasure: 350000 });
+  });
+
+  await expect(page.locator('#maxBetBtn')).toBeEnabled();
+  await expect(page.locator('#betBtn')).toBeEnabled();
+  await expect(page.locator('#startBtn')).toBeDisabled();
+  expect(await page.evaluate(() => window.__LUPIN_ZERO__.getTreasureBattleRuntimeState().active)).toBe(true);
+});
+
 test('GT stock priority bypasses Treasure Battle presentation and is consumed by the existing stock runtime', async ({ page }) => {
   await page.goto('/test_lupin_zero/');
   await page.waitForLoadState('networkidle');
