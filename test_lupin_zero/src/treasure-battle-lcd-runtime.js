@@ -30,35 +30,17 @@ function ensureOverlay() {
   const width = scene.scale.width;
   const bg = scene.add.graphics().setDepth(40).setVisible(false);
   const title = scene.add.text(width / 2, 92, 'TREASURE BATTLE', {
-    fontFamily: 'Arial Black, sans-serif',
-    fontSize: '19px',
-    color: '#ffe36f',
-    stroke: '#000000',
-    strokeThickness: 4
+    fontFamily: 'Arial Black, sans-serif', fontSize: '19px', color: '#ffe36f', stroke: '#000000', strokeThickness: 4
   }).setOrigin(.5).setDepth(41).setVisible(false);
   const opponent = scene.add.text(width / 2, 116, TREASURE_BATTLE_LCD_POLICY.unknownOpponentLabel, {
-    fontFamily: 'Arial Black, sans-serif',
-    fontSize: '12px',
-    color: '#ffffff',
-    stroke: '#000000',
-    strokeThickness: 3
+    fontFamily: 'Arial Black, sans-serif', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 3
   }).setOrigin(.5).setDepth(41).setVisible(false);
   const phase = scene.add.text(width / 2, 195, '', {
-    fontFamily: 'Arial Black, sans-serif',
-    fontSize: '15px',
-    color: '#ffffff',
-    stroke: '#000000',
-    strokeThickness: 4,
-    align: 'center'
+    fontFamily: 'Arial Black, sans-serif', fontSize: '15px', color: '#ffffff', stroke: '#000000', strokeThickness: 4, align: 'center'
   }).setOrigin(.5).setDepth(41).setVisible(false);
   const note = scene.add.text(width / 2, 219, '', {
-    fontFamily: 'sans-serif',
-    fontSize: '9px',
-    color: '#e8e0cf',
-    stroke: '#000000',
-    strokeThickness: 2,
-    align: 'center',
-    wordWrap: { width: Math.max(120, width - 34) }
+    fontFamily: 'sans-serif', fontSize: '9px', color: '#e8e0cf', stroke: '#000000', strokeThickness: 2,
+    align: 'center', wordWrap: { width: Math.max(120, width - 34) }
   }).setOrigin(.5, 0).setDepth(41).setVisible(false);
   overlay = { scene, bg, title, opponent, phase, note };
   return overlay;
@@ -107,23 +89,11 @@ function hideOverlay() {
 
 core.addEventListener('treasure-battle-enter', (event) => {
   const p = event.detail.presentation ?? {};
-  drawOverlay({
-    game: p.nextGame ?? 1,
-    phase: p.nextPhase ?? 'FIRST_ATTACK',
-    phaseNote: p.nextPhaseNote ?? '',
-    outcomeVisibility: 'HIDDEN',
-    revealedOutcome: null
-  });
+  drawOverlay({ game: p.nextGame ?? 1, phase: p.nextPhase ?? 'FIRST_ATTACK', phaseNote: p.nextPhaseNote ?? '', outcomeVisibility: 'HIDDEN', revealedOutcome: null });
 });
 
 core.addEventListener('treasure-battle-game-started', (event) => {
-  drawOverlay({
-    game: event.detail.game,
-    phase: event.detail.phase,
-    phaseNote: event.detail.phaseNote ?? '',
-    outcomeVisibility: 'HIDDEN',
-    revealedOutcome: null
-  });
+  drawOverlay({ game: event.detail.game, phase: event.detail.phase, phaseNote: event.detail.phaseNote ?? '', outcomeVisibility: 'HIDDEN', revealedOutcome: null });
 });
 
 core.addEventListener('treasure-battle-presentation', (event) => {
@@ -150,6 +120,7 @@ core.addEventListener('treasure-battle-presentation', (event) => {
 
 core.addEventListener('golden-time-continued', hideOverlay);
 core.addEventListener('golden-time-ended', hideOverlay);
+core.addEventListener('revenge-chance-enter', hideOverlay);
 
 app.getTreasureBattleLcdState = () => lastState ?? Object.freeze({ visible: false, selectedOpponent: null });
 app.treasureBattleLcdPolicy = TREASURE_BATTLE_LCD_POLICY;
