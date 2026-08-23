@@ -103,11 +103,12 @@ test('GOLDEN TIME stage scenarios stay exact across setting, initial stage and 1
   await page.goto('/test_lupin_zero/');
   await page.waitForLoadState('networkidle');
 
-  const scenario = await page.evaluate(async () => {
+  const result = await page.evaluate(async () => {
     const { GT_SYSTEM_SPEC } = await import('/test_lupin_zero/src/gt-system-spec.js');
-    return GT_SYSTEM_SPEC.stageScenario;
+    return { scenario: GT_SYSTEM_SPEC.stageScenario, evidence: GT_SYSTEM_SPEC.evidence };
   });
 
+  const scenario = result.scenario;
   expect(scenario.selectionBySetting[1]).toEqual({ A:71.9, B:23.4, C:3.1, D:1.6 });
   expect(scenario.selectionBySetting[6]).toEqual({ A:51.6, B:39.1, C:6.3, D:3.1 });
   expect(scenario.internalStages).toEqual([
@@ -119,5 +120,9 @@ test('GOLDEN TIME stage scenarios stay exact across setting, initial stage and 1
   expect(scenario.upgradeEveryGames).toBe(10);
   expect(scenario.upgradeStepByScenario.A).toEqual({ oneStep:75, twoSteps:25 });
   expect(scenario.upgradeStepByScenario.D).toEqual({ oneStep:25, twoSteps:75 });
-  expect(scenario.visibleStageMayLagInternalStage).toBe(true);
+  expect(scenario.stageResidenceWindowGames).toBe(30);
+  expect(scenario.stageResidenceWindowEvidenceStatus).toBe('INFERRED_HIGH_CONFIDENCE');
+  expect(scenario.visibleStageLagRuleRequired).toBe(false);
+  expect(result.evidence.stageResidenceWindow).toBe('INFERRED_HIGH_CONFIDENCE');
+  expect(result.evidence.visibleStageLagRule).toBe('NOT_REQUIRED_BY_PUBLISHED_RESIDENCE_RECONCILIATION');
 });
