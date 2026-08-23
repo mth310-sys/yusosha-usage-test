@@ -30,8 +30,13 @@ function requireRandomSource(randomSource) {
 }
 
 export function createGoldenTimeSetProfile() {
+  const games = VERIFIED_SPEC.modeProfiles.goldenTime.setGamesApprox;
   return Object.freeze({
-    games: VERIFIED_SPEC.modeProfiles.goldenTime.setGamesApprox,
+    games,
+    mainGames: 30,
+    continuationBattleGames: Math.max(0, games - 30),
+    setCompositionEvidenceStatus: ReuseEvidenceStatus.INFERRED_HIGH_CONFIDENCE,
+    setCompositionInference: 'Published approximately-40G set length, published stage-residence reconciliation over three 10G blocks, and published continuation-battle-after-regulation structure support separating a 30G main stage window from the remaining battle presentation window. Exact per-game battle mechanics remain unresolved.',
     pureIncreaseCoinsPerGame: VERIFIED_SPEC.modeProfiles.goldenTime.pureIncreaseCoinsPerGame,
     betCoinsPerGame: 3,
     payoutCoinsPerGame: 5,
@@ -71,6 +76,10 @@ export function resolveGoldenTimeContinuation(randomSource, treasure) {
 
 export const GOLDEN_TIME_PRODUCTION_POLICY = Object.freeze({
   setGamesApproxUsedAs40Games: true,
+  setComposition: '30G_MAIN_PLUS_REMAINING_CONTINUATION_BATTLE_WINDOW',
+  setCompositionEvidenceStatus: 'INFERRED_HIGH_CONFIDENCE',
+  continuationBattlePerGameMechanics: 'UNRESOLVED',
+  continuationBattleDoesNotCreateFourthNormalStageResidenceBlock: true,
   pureIncreaseModel: '3_BET_5_PAY',
   initialLupinRushExactAwardTableKnown: false,
   initialTreasureFallback: 350000,
