@@ -26,7 +26,7 @@ core.addEventListener('mode-enter', (event) => {
 });
 core.addEventListener('golden-time-stage-configured', () => draw(''));
 core.addEventListener('golden-time-stage-upgraded', (event) => draw(event.detail.stage === 'IKUKAN' ? '異空間' : ''));
-core.addEventListener('golden-time-continuation-battle-enter', () => draw('継続バトル'));
+core.addEventListener('golden-time-post-stage-window-enter', () => draw(''));
 core.addEventListener('golden-time-treasure-acquired', () => draw(view().gtMode?.text ?? ''));
 core.addEventListener('lupin-rush-enter', (event) => draw(`LUPIN RUSH ${String(event.detail.pattern ?? '').replaceAll('_',' ')}`));
 core.addEventListener('lupin-rush-ended', () => draw(''));
