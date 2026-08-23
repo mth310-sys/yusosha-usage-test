@@ -1,7 +1,6 @@
 import { GameMode } from './game-flow-spec.js';
 import { resolveNextInitialHit } from './next-initial-hit-resolver.js';
 import { createGoldenTimeSetProfile } from './golden-time-resolver.js';
-import { createLupinBonusProfile } from './lupin-bonus-resolver.js';
 import { SeededRandomSource } from './random-source.js';
 
 const app = window.__LUPIN_ZERO__;
@@ -15,6 +14,7 @@ let reserved = resolveNextInitialHit(random, setting, 'INITIAL_BOOT');
 function reserveNext(context = 'AFTER_BONUS_OR_ART') {
   reserved = resolveNextInitialHit(random, setting, context);
   app.nextInitialHitReservation = reserved;
+  core.emit('next-initial-hit-reserved', { reservation: reserved });
   return reserved;
 }
 
@@ -35,25 +35,19 @@ function enterReservedDestination(source = 'CHANCE_ZONE_SUCCESS') {
     return entered;
   }
 
-  const profile = createLupinBonusProfile();
-  core.kernelState = Object.freeze({
-    ...core.kernelState,
-    mode: GameMode.LUPIN_BONUS,
-    modeGamesRemaining: profile.totalGames,
-    modeEvidenceStatus: selected.evidenceStatus,
-    modeResult: null,
-    modeResultEvidenceStatus: null
-  });
-  core.emit('mode-enter', { mode: GameMode.LUPIN_BONUS, games: profile.totalGames, evidenceStatus: selected.evidenceStatus });
-  core.emit('next-initial-hit-consumed', { source, destination: GameMode.LUPIN_BONUS, reservation: selected });
-  return true;
+  if (typeof app.enterLupinBonus !== 'function') return false;
+  const entered = app.enterLupinBonus(source);
+  if (entered) core.emit('next-initial-hit-consumed', { source, destination: GameMode.LUPIN_BONUS, reservation: selected });
+  return entered;
 }
 
 core.addEventListener('chance-zone-success', () => {
-  if (enterReservedDestination('CHANCE_ZONE_SUCCESS')) reserveNext();
+  enterReservedDestination('CHANCE_ZONE_SUCCESS');
 });
 
-core.addEventListener('lupin-bonus-ended', () => reserveNext());
+// The next reservation is selected only after the resulting initial hit sequence finishes.
+// LB success flows into GT, so only a failed LB ends the sequence here; successful LB waits for GT end.
+core.addEventListener('lupin-bonus-failed', () => reserveNext());
 core.addEventListener('golden-time-ended', () => reserveNext());
 
 app.nextInitialHitRandom = random;
