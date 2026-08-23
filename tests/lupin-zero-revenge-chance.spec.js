@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { SequenceRandomSource } from '../test_lupin_zero/src/random-source.js';
+import { ART_RETURN_PROFILE as PREVIOUS_B4_ART_RETURN_PROFILE } from '../test_lupin_b4/js/art-return-profile.js';
 import {
   REVENGE_CHANCE_SPEC,
   getRevengePullbackPercent,
@@ -46,11 +47,19 @@ test('known Revenge success mechanisms resolve destinations without inventing th
   expect(unknown.destinationCandidates).toEqual(['LUPIN_BONUS', 'GOLDEN_TIME']);
 });
 
-test('only exact midpoint needed by current 50k production treasure model is inferred', () => {
-  const midpoint = getRevengePullbackPercent(400000);
-  expect(midpoint.percent).toBe(1.8);
-  expect(midpoint.evidenceStatus).toBe('INFERRED_HIGH_CONFIDENCE');
-  expect(midpoint.method).toBe('MIDPOINT_BETWEEN_ADJACENT_PUBLISHED_TREASURE_POINTS');
+test('Zero reuses prior B4 exact HAZUSE rows instead of midpoint inference', () => {
+  for (const [treasure, percent] of Object.entries(PREVIOUS_B4_ART_RETURN_PROFILE.rates)) {
+    const rate = getRevengePullbackPercent(Number(treasure));
+    expect(rate.percent).toBe(percent);
+    expect(rate.evidenceStatus).toBe('PUBLISHED_ANALYSIS');
+    expect(rate.method).toBe('DIRECT_PUBLISHED_TABLE');
+    expect(rate.source).toBe(PREVIOUS_B4_ART_RETURN_PROFILE.source);
+  }
+  expect(getRevengePullbackPercent(400000).percent).toBe(1.6);
+  expect(getRevengePullbackPercent(600000).percent).toBe(2.3);
+  expect(getRevengePullbackPercent(700000).percent).toBe(4.7);
+  expect(getRevengePullbackPercent(800000).percent).toBe(12.5);
+  expect(getRevengePullbackPercent(900000).percent).toBe(25.0);
   expect(getRevengePullbackPercent(425000)).toBeNull();
 });
 
