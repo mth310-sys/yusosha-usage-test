@@ -49,6 +49,57 @@ export function resolveGoldenTimeStageUpgrade(randomSource, scenario, currentSta
   return Object.freeze({ fromStageIndex: currentStageIndex, toStageIndex: nextStageIndex, stage: PROGRESSION_STAGES[nextStageIndex], steps, draw: selected.draw, evidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS });
 }
 
+export function resolveGoldenTimeStageCheckpoint(randomSource, scenario, currentStageIndex, gamesInSet) {
+  if (![10, 20, 30].includes(gamesInSet)) return null;
+  if (!Number.isInteger(currentStageIndex) || currentStageIndex < 0 || currentStageIndex >= PROGRESSION_STAGES.length) throw new RangeError('Unsupported stage index');
+
+  const currentStage = PROGRESSION_STAGES[currentStageIndex];
+  if (currentStage === 'IKUKAN') {
+    return Object.freeze({
+      gamesInSet,
+      applied: false,
+      reason: 'ALREADY_IKUKAN',
+      fromStageIndex: currentStageIndex,
+      toStageIndex: currentStageIndex,
+      stage: currentStage,
+      candidateStage: currentStage,
+      steps: 0,
+      draw: null,
+      evidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS
+    });
+  }
+
+  const upgrade = resolveGoldenTimeStageUpgrade(randomSource, scenario, currentStageIndex);
+  if (gamesInSet === 30 && upgrade.stage !== 'IKUKAN') {
+    return Object.freeze({
+      gamesInSet,
+      applied: false,
+      reason: '30G_CHECKPOINT_IKUKAN_ONLY',
+      fromStageIndex: currentStageIndex,
+      toStageIndex: currentStageIndex,
+      stage: currentStage,
+      candidateStage: upgrade.stage,
+      candidateStageIndex: upgrade.toStageIndex,
+      steps: upgrade.steps,
+      draw: upgrade.draw,
+      evidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS
+    });
+  }
+
+  return Object.freeze({
+    gamesInSet,
+    applied: true,
+    reason: gamesInSet === 30 ? '30G_IKUKAN_REACHED' : 'PUBLISHED_10G_STAGE_UPGRADE',
+    fromStageIndex: upgrade.fromStageIndex,
+    toStageIndex: upgrade.toStageIndex,
+    stage: upgrade.stage,
+    candidateStage: upgrade.stage,
+    steps: upgrade.steps,
+    draw: upgrade.draw,
+    evidenceStatus: upgrade.evidenceStatus
+  });
+}
+
 export function getGoldenTimeTreasureDenominatorForStage(stage) {
   const value = String(stage ?? '');
   const key = value.split('_')[0];
@@ -71,6 +122,10 @@ export const GOLDEN_TIME_STAGE_POLICY = Object.freeze({
   initialStageSelection: 'PUBLISHED_ANALYSIS',
   initialStageSelectionTiming: 'EACH_SET_START',
   upgradeEveryGames: GT_SYSTEM_SPEC.stageScenario.upgradeEveryGames,
+  normalStageUpgradeCheckpoints: Object.freeze([10, 20]),
+  finalStageCheckpointGame: 30,
+  finalStageCheckpointTransition: 'IKUKAN_ONLY_IF_REACHED',
+  finalStageCheckpointEvidenceStatus: 'PUBLISHED_ANALYSIS',
   upgradeStepSelection: 'PUBLISHED_ANALYSIS',
   internalABRanksShareVisibleStageTreasureRate: true,
   visibleStageLagRuleRequired: false,
