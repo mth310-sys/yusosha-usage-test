@@ -66,7 +66,10 @@ export function isIkukanStage(stage) {
 
 export const GOLDEN_TIME_STAGE_POLICY = Object.freeze({
   scenarioSelection: 'PUBLISHED_ANALYSIS',
+  scenarioSelectionTiming: 'ART_INITIAL_HIT',
+  scenarioLifetime: 'ART_INITIAL_HIT_TO_ART_END',
   initialStageSelection: 'PUBLISHED_ANALYSIS',
+  initialStageSelectionTiming: 'EACH_SET_START',
   upgradeEveryGames: GT_SYSTEM_SPEC.stageScenario.upgradeEveryGames,
   upgradeStepSelection: 'PUBLISHED_ANALYSIS',
   internalABRanksShareVisibleStageTreasureRate: true,
