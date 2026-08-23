@@ -2,6 +2,7 @@ import { MachineState } from './machine-core.js';
 import { GameMode } from './game-flow-spec.js';
 import { resolveGoldenTimeContinuationPriority } from './golden-time-stock-resolver.js';
 import { createTreasureBattlePresentationSession } from './treasure-battle-presentation-session.js';
+import { getReusableTreasureBattleOpponentCandidates } from './treasure-battle-reuse-adapter.js';
 
 const app = window.__LUPIN_ZERO__;
 if (!app?.core) throw new Error('LUPIN ZERO core is required');
@@ -11,6 +12,7 @@ const originalResolveGoldenTimeContinuation = core.resolveGoldenTimeContinuation
 const originalBetOne = core.betOne.bind(core);
 const originalMaxBetNow = core.maxBetNow.bind(core);
 const originalStart = core.start.bind(core);
+const opponentCandidates = getReusableTreasureBattleOpponentCandidates();
 
 let session = null;
 let pendingResolution = null;
@@ -28,6 +30,10 @@ export const TREASURE_BATTLE_RUNTIME_POLICY = Object.freeze({
   economyAccounting: 'SUSPENDED_UNTIL_BATTLE_ROLE_AND_PAYOUT_ARE_RESOLVED',
   battleBetChangesCredit: false,
   syntheticZeroPayoutForbidden: true,
+  opponentCandidatesSource: 'REUSED_B4_PROFILE_WITH_MULTI_SOURCE_LIST_MATCH',
+  selectedOpponent: null,
+  opponentDistribution: null,
+  opponentDistributionEvidenceStatus: 'UNRESOLVED',
   outcomeAppliedOnlyAfterFinalPresentationGame: true,
   automaticEntryGameNumber: null,
   automaticEntryGameNumberEvidenceStatus: 'UNRESOLVED'
@@ -126,6 +132,9 @@ function prepareSessionFromResolvedContinuation(resolution, profile) {
     treasure: prepared.treasure,
     presentation: session.snapshot(),
     outcomeVisibility: 'HIDDEN',
+    opponentCandidates,
+    selectedOpponent: null,
+    opponentDistribution: null,
     roleLottery: null,
     payoutCoins: null,
     economyAccounting: TREASURE_BATTLE_RUNTIME_POLICY.economyAccounting,
@@ -175,6 +184,8 @@ core.start = () => {
     game: session.snapshot().nextGame,
     phase: session.snapshot().nextPhase,
     phaseNote: session.snapshot().nextPhaseNote,
+    selectedOpponent: null,
+    opponentDistribution: null,
     roleLottery: null,
     payoutCoins: null,
     economyAccounting: TREASURE_BATTLE_RUNTIME_POLICY.economyAccounting,
@@ -204,6 +215,8 @@ core.addEventListener('spin-end', (event) => {
     completed: progressed.completed,
     outcomeVisibility: progressed.outcomeRevealedNow ? 'REVEALED' : 'HIDDEN',
     revealedOutcome: progressed.revealedOutcome,
+    selectedOpponent: null,
+    opponentDistribution: null,
     roleLottery: null,
     payoutCoins: null,
     economyAccounting: TREASURE_BATTLE_RUNTIME_POLICY.economyAccounting,
@@ -242,6 +255,9 @@ app.getTreasureBattleRuntimeState = () => Object.freeze({
   active: isBattlePending(),
   presentation: session?.snapshot() ?? null,
   hasPendingResolution: Boolean(pendingResolution),
+  opponentCandidates,
+  selectedOpponent: null,
+  opponentDistribution: null,
   battleRoleLottery: null,
   battlePayoutCoins: null,
   economyAccounting: TREASURE_BATTLE_RUNTIME_POLICY.economyAccounting,
