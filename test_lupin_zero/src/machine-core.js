@@ -1,4 +1,5 @@
 import { createMachineState, reduceMachine, KernelPhase } from './machine-kernel.js';
+import { GameMode } from './game-flow-spec.js';
 
 export const MachineState = KernelPhase;
 
@@ -35,7 +36,10 @@ export class MachineCore extends EventTarget {
       raiunModeLastResult: this.kernelState.raiunModeLastResult ? { ...this.kernelState.raiunModeLastResult } : null,
       goldenTimeTreasure: this.kernelState.goldenTimeTreasure,
       goldenTimeSetNumber: this.kernelState.goldenTimeSetNumber,
-      goldenTimeLastContinuation: this.kernelState.goldenTimeLastContinuation ? { ...this.kernelState.goldenTimeLastContinuation } : null
+      goldenTimeLastContinuation: this.kernelState.goldenTimeLastContinuation ? { ...this.kernelState.goldenTimeLastContinuation } : null,
+      goldenTimeStockCount: this.kernelState.goldenTimeStockCount ?? 0,
+      extraBonusAbsorbedGoldenTimeGames: this.kernelState.extraBonusAbsorbedGoldenTimeGames ?? 0,
+      extraBonusLastResult: this.kernelState.extraBonusLastResult ? { ...this.kernelState.extraBonusLastResult } : null
     });
   }
 
@@ -111,7 +115,7 @@ export class MachineCore extends EventTarget {
 
   addGoldenTimeTreasure(acquisition) {
     const snapshot = this.snapshot();
-    if (snapshot.mode !== 'GOLDEN_TIME' || snapshot.modeResult || !acquisition?.hit || !Number.isInteger(acquisition.treasure) || acquisition.treasure <= 0) return false;
+    if (snapshot.mode !== GameMode.GOLDEN_TIME || !acquisition?.hit || !Number.isInteger(acquisition.treasure) || acquisition.treasure <= 0) return false;
     const from = snapshot.goldenTimeTreasure;
     const to = Math.min(1000000, from + acquisition.treasure);
     this.kernelState = Object.freeze({ ...this.kernelState, goldenTimeTreasure: to });
@@ -123,6 +127,57 @@ export class MachineCore extends EventTarget {
       evidenceStatus: acquisition.evidenceStatus,
       inference: acquisition.inference ?? null
     });
+    return true;
+  }
+
+  enterExtraBonus(profile) {
+    const snapshot = this.snapshot();
+    if (snapshot.mode !== GameMode.GOLDEN_TIME || snapshot.goldenTimeTreasure < 1000000 || !profile || !Number.isInteger(profile.games) || profile.games <= 0) return false;
+    this.kernelState = Object.freeze({
+      ...this.kernelState,
+      mode: GameMode.EXTRA_BONUS,
+      modeGamesRemaining: profile.games,
+      modeEvidenceStatus: profile.evidenceStatus,
+      modeResult: null,
+      modeResultEvidenceStatus: null,
+      extraBonusAbsorbedGoldenTimeGames: profile.absorbedGoldenTimeGames,
+      extraBonusLastResult: null,
+      goldenTimeStockCount: this.kernelState.goldenTimeStockCount ?? 0
+    });
+    this.emit('extra-bonus-enter', { games: profile.games, absorbedGoldenTimeGames: profile.absorbedGoldenTimeGames, evidenceStatus: profile.evidenceStatus });
+    this.emit('mode-enter', { mode: GameMode.EXTRA_BONUS, games: profile.games, evidenceStatus: profile.evidenceStatus, treasure: 1000000 });
+    return true;
+  }
+
+  settleExtraBonusGame(resolution) {
+    const snapshot = this.snapshot();
+    if (snapshot.mode !== GameMode.EXTRA_BONUS || snapshot.modeGamesRemaining <= 0 || snapshot.modeResult || !resolution || !Number.isInteger(resolution.payoutCoins) || resolution.payoutCoins < 0) return false;
+    const remaining = snapshot.modeGamesRemaining - 1;
+    const stockAdded = resolution.oddAligned ? 1 : 0;
+    const stockCount = snapshot.goldenTimeStockCount + stockAdded;
+    const goldRushPending = resolution.goldRushHit === true;
+    this.kernelState = Object.freeze({
+      ...this.kernelState,
+      credit: snapshot.credit + resolution.payoutCoins,
+      lastSettledRole: 'EXTRA_BONUS_GAME',
+      lastPayout: resolution.payoutCoins,
+      modeGamesRemaining: goldRushPending ? 0 : remaining,
+      modeResult: goldRushPending ? 'PENDING_GOLD_RUSH' : null,
+      modeResultEvidenceStatus: goldRushPending ? resolution.evidenceStatus : null,
+      goldenTimeStockCount: stockCount,
+      extraBonusLastResult: Object.freeze({ ...resolution })
+    });
+    this.emit('extra-bonus-game-settled', { remaining: goldRushPending ? 0 : remaining, payoutCoins: resolution.payoutCoins, oddAligned: resolution.oddAligned, stockAdded, stockCount, goldRushHit: goldRushPending, evidenceStatus: resolution.evidenceStatus });
+    if (stockAdded) this.emit('golden-time-stock-added', { stockAdded, stockCount, source: 'EXTRA_BONUS_ODD_ALIGNMENT', evidenceStatus: resolution.evidenceStatus });
+    if (goldRushPending) {
+      this.emit('extra-bonus-gold-rush-hit', { destination: GameMode.GOLD_RUSH, evidenceStatus: resolution.evidenceStatus });
+      return true;
+    }
+    if (remaining === 0) {
+      this.kernelState = Object.freeze({ ...this.kernelState, mode: GameMode.GOLDEN_TIME, modeGamesRemaining: 0, modeResult: 'PENDING_GT_CONTINUATION', modeResultEvidenceStatus: 'PUBLISHED_ANALYSIS' });
+      this.emit('extra-bonus-ended', { stockCount, evidenceStatus: resolution.evidenceStatus });
+      this.emit('golden-time-battle-ready', { treasure: 1000000 });
+    }
     return true;
   }
 
