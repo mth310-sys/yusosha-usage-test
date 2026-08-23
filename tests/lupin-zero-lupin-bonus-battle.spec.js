@@ -7,6 +7,10 @@ assert.equal(LUPIN_BONUS_BATTLE_SPEC.opponent, 'ZENIGATA');
 assert.equal(LUPIN_BONUS_BATTLE_SPEC.overallArtExpectationPercent, 50);
 assert.equal(LUPIN_BONUS_BATTLE_SPEC.exactPerRoleLotteryKnown, false);
 assert.equal(LUPIN_BONUS_BATTLE_SPEC.exactPerGameWinRateKnown, false);
+assert.equal(LUPIN_BONUS_BATTLE_SPEC.verifiedBattleStructure, 'ZENIGATA_ATTACK_POINTS_AND_AVOIDANCE');
+assert.equal(LUPIN_BONUS_BATTLE_SPEC.exactAttackPatternSelectionKnown, false);
+assert.equal(LUPIN_BONUS_BATTLE_SPEC.exactAvoidanceRatePerPointKnown, false);
+assert.equal(LUPIN_BONUS_BATTLE_SPEC.intermediateAvoidanceDoesNotChangeHiddenOutcome, true);
 assert.equal(LUPIN_BONUS_BATTLE_SPEC.resultSource, 'PREDETERMINED_LUPIN_BONUS_OUTCOME');
 assert.equal(LUPIN_BONUS_SPEC.finalBattleGames, 5);
 assert.equal(LUPIN_BONUS_SPEC.artExpectationPercent, 50);
@@ -17,13 +21,23 @@ for (let step = 1; step <= 5; step++) {
   assert.equal(win.step, step);
   assert.equal(win.gamesRemaining, 5 - step);
   assert.equal(win.revealed, step === 5);
-  if (step < 5) assert.equal(win.result, null);
+  if (step < 5) {
+    assert.equal(win.phase, 'ZENIGATA_ATTACK_POINT');
+    assert.equal(win.presentationCue, 'ZENIGATA_ATTACK_AVOIDANCE_CHANCE');
+    assert.equal(win.avoidanceResolved, null);
+    assert.equal(win.result, null);
+  }
 }
+assert.equal(win.phase, 'FINAL_RESULT');
+assert.equal(win.presentationCue, 'ZENIGATA_BATTLE_WIN');
+assert.equal(win.avoidanceResolved, true);
 assert.equal(win.result, 'WIN');
 assert.equal(win.destination, 'GOLDEN_TIME');
 
 let lose = createLupinBonusBattleState({ artHit: false });
 for (let step = 1; step <= 5; step++) lose = advanceLupinBonusBattle(lose);
+assert.equal(lose.presentationCue, 'ZENIGATA_BATTLE_LOSE');
+assert.equal(lose.avoidanceResolved, false);
 assert.equal(lose.result, 'LOSE');
 assert.equal(lose.destination, null);
 
