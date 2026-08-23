@@ -29,17 +29,22 @@ test('Extra Bonus keeps 15G as a minimum and does not synthesize the unresolved 
   expect(verified.durationEvidenceStatus).toBe('VERIFIED');
 });
 
-test('published Extra Bonus odd and Gold Rush denominators are preserved', () => {
-  expect(EXTRA_BONUS_SPEC.oddAlignmentDenominator).toBe(202.6);
+test('Extra Bonus preserves the odd-alignment source conflict while keeping Gold Rush 1/4924.3 automatic', () => {
+  expect(EXTRA_BONUS_SPEC.oddAlignmentDenominator).toBeNull();
+  expect(EXTRA_BONUS_SPEC.oddAlignmentPreferredReferenceDenominator).toBe(202.6);
+  expect(EXTRA_BONUS_SPEC.oddAlignmentConflictingReferenceDenominator).toBe(4924.3);
+  expect(EXTRA_BONUS_SPEC.oddAlignmentRateStatus).toBe('CONFLICT');
+  expect(EXTRA_BONUS_SPEC.automaticOddAlignmentLotteryAllowed).toBe(false);
   expect(EXTRA_BONUS_SPEC.goldRushDenominator).toBe(4924.3);
 
-  const oddHit = resolveExtraBonusGame(new SequenceRandomSource([0, 0.999999]));
-  expect(oddHit.oddAligned).toBe(true);
-  expect(oddHit.goldRushHit).toBe(false);
-  expect(oddHit.oddAlignmentConsequence).toBe('GOLDEN_TIME_SET_STOCK_PLUS_1');
+  const noGold = resolveExtraBonusGame(new SequenceRandomSource([0.999999]));
+  expect(noGold.oddAligned).toBeNull();
+  expect(noGold.oddDraw).toBeNull();
+  expect(noGold.automaticOddAlignmentLotteryAllowed).toBe(false);
+  expect(noGold.goldRushHit).toBe(false);
 
-  const goldHit = resolveExtraBonusGame(new SequenceRandomSource([0.999999, 0]));
-  expect(goldHit.oddAligned).toBe(false);
+  const goldHit = resolveExtraBonusGame(new SequenceRandomSource([0]));
+  expect(goldHit.oddAligned).toBeNull();
   expect(goldHit.goldRushHit).toBe(true);
   expect(goldHit.goldRushDestination).toBe('GOLD_RUSH');
 });
@@ -94,9 +99,9 @@ test('production runtime holds at one million treasure until an Extra Bonus adde
   expect(state.entered.modeGamesRemaining).toBe(32);
 });
 
-test('Extra Bonus core still preserves verified stock and Gold Rush consequences once duration is explicitly supplied', () => {
+test('Extra Bonus core preserves Gold Rush routing and does not synthesize conflicted odd-alignment stock', () => {
   expect(coreSource).toContain("mode: GameMode.EXTRA_BONUS");
-  expect(coreSource).toContain("source: 'EXTRA_BONUS_ODD_ALIGNMENT'");
+  expect(coreSource).toContain("const stockAdded = resolution.oddAligned ? 1 : 0");
   expect(coreSource).toContain("modeResult: 'PENDING_GOLD_RUSH'");
   expect(coreSource).toContain("modeResult: 'PENDING_GT_CONTINUATION'");
   expect(coreSource).toContain("this.emit('golden-time-battle-ready', { treasure: 1000000 })");
