@@ -11,6 +11,7 @@ const message = document.querySelector('#message');
 const stateValue = document.querySelector('#stateValue');
 const phaseBadge = document.querySelector('#phaseBadge');
 let returnExtraBonusGames = 0;
+let extraBonusGamesAtSpinStart = null;
 
 function snapshot() { return core.snapshot(); }
 function renderGoldRush() {
@@ -23,8 +24,8 @@ function renderGoldRush() {
 function enterGoldRush() {
   const s = snapshot();
   if (s.mode !== GameMode.EXTRA_BONUS || s.modeResult !== 'PENDING_GOLD_RUSH') return false;
-  returnExtraBonusGames = Number.isInteger(s.extraBonusAbsorbedGoldenTimeGames)
-    ? Math.max(0, s.extraBonusAbsorbedGoldenTimeGames)
+  returnExtraBonusGames = Number.isInteger(extraBonusGamesAtSpinStart)
+    ? Math.max(0, extraBonusGamesAtSpinStart - 1)
     : 0;
   core.kernelState = Object.freeze({
     ...core.kernelState,
@@ -64,22 +65,39 @@ function settleGoldRushGame() {
     return true;
   }
 
+  if (returnExtraBonusGames > 0) {
+    core.kernelState = Object.freeze({
+      ...core.kernelState,
+      mode: GameMode.EXTRA_BONUS,
+      modeGamesRemaining: returnExtraBonusGames,
+      modeResult: null,
+      modeResultEvidenceStatus: null
+    });
+    core.emit('mode-enter', {
+      mode: GameMode.EXTRA_BONUS,
+      games: returnExtraBonusGames,
+      evidenceStatus: 'MULTI_SOURCE_MATCH'
+    });
+    if (message) message.textContent = 'GOLD RUSH END — EXTRA BONUS';
+    return true;
+  }
+
   core.kernelState = Object.freeze({
     ...core.kernelState,
-    mode: GameMode.EXTRA_BONUS,
-    modeGamesRemaining: Math.max(1, returnExtraBonusGames),
-    modeResult: null,
-    modeResultEvidenceStatus: null
+    mode: GameMode.GOLDEN_TIME,
+    modeGamesRemaining: 0,
+    modeResult: 'PENDING_GT_CONTINUATION',
+    modeResultEvidenceStatus: 'PUBLISHED_ANALYSIS'
   });
-  core.emit('mode-enter', {
-    mode: GameMode.EXTRA_BONUS,
-    games: Math.max(1, returnExtraBonusGames),
-    evidenceStatus: 'MULTI_SOURCE_MATCH'
-  });
-  if (message) message.textContent = 'GOLD RUSH END — EXTRA BONUS';
+  core.emit('golden-time-battle-ready', { treasure: 1000000 });
+  if (message) message.textContent = 'GOLD RUSH END — 継続バトル';
   return true;
 }
 
+core.addEventListener('spin-start', (event) => {
+  const s = event.detail.snapshot;
+  if (s.mode === GameMode.EXTRA_BONUS) extraBonusGamesAtSpinStart = s.modeGamesRemaining;
+});
 core.addEventListener('extra-bonus-gold-rush-hit', () => enterGoldRush());
 core.addEventListener('spin-end', (event) => {
   if (event.detail.snapshot.mode === GameMode.GOLD_RUSH) settleGoldRushGame();
