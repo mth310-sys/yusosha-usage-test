@@ -93,6 +93,9 @@ export const GT_SYSTEM_SPEC = Object.freeze({
       REVOLVER_VISION: 5.0,
       ATTACK_VISION: 1.0
     }),
+    patternSelectionRatesContext: 'UNRESOLVED_BETWEEN_INITIAL_AND_CONTINUATION_ENTRY',
+    patternSelectionRatesReferenceOnly: true,
+    automaticPatternSelectionAllowed: false,
     attackVisionPublishedEffect: '1000000_TREASURE_EXPECTED_OR_CONFIRMED_BY_PRESENTATION_GUIDE',
     perPatternAwardDistribution: null
   }),
@@ -178,7 +181,8 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     stageThirtyGameCheckpoint: 'PUBLISHED_ANALYSIS',
     lupinRushProfile: 'MULTI_SOURCE_MATCH',
     lupinRushPatternExpectationOrder: 'MULTI_SOURCE_MATCH',
-    lupinRushPatternSelectionRates: 'PUBLISHED_ANALYSIS',
+    lupinRushPatternSelectionRates: 'PUBLISHED_ANALYSIS_CONTEXT_UNRESOLVED',
+    lupinRushPatternSelectionContext: 'UNRESOLVED',
     lupinRushPerPatternAwardDistribution: 'UNRESOLVED',
     treasureHuntGuaranteedSuccessPresentations: 'PUBLISHED_ANALYSIS',
     treasureHuntOccurrenceTrigger: 'UNRESOLVED',
@@ -205,6 +209,7 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     inferTreasureRushEntryOnHuntSuccess: false,
     inferStageTransitionRates: false,
     inferRushPatternSelectionRates: false,
+    autoUseContextUnresolvedRushPatternRates: false,
     inferRushPerPatternAwardsFromOverallAverage: false,
     inferContinuationBattlePerGameFlow: false,
     inferContinuationBattleEntryGameNumber: false,
