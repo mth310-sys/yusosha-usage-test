@@ -20,11 +20,14 @@ export const LEGEND_GATE_SPEC = Object.freeze({
   }),
   story: Object.freeze({
     format: 'PACHISLOT_ORIGINAL_STORY',
+    consecutiveStoryCount: 3,
+    publishedOrder: Object.freeze(['次元', '五ェ門', 'ルパン']),
     successReward: 'SEVEN_MEDAL',
     exactSuccessMechanics: null
   }),
   sevenMedal: Object.freeze({
     maxPublishedCount: 3,
+    publishedNames: Object.freeze(['セブンサファイア', 'セブンエメラルド', 'セブンルビー']),
     minimumGoldenTimeStocksByCount: Object.freeze({
       1: 2,
       2: 5,
@@ -35,12 +38,17 @@ export const LEGEND_GATE_SPEC = Object.freeze({
       2: Object.freeze({ min: 15.3, max: 16.8 }),
       3: Object.freeze({ min: 16.7, max: 18.4 })
     }),
+    specialMovieGamesOnAllThree: 70,
     exactAdditionalStockDistribution: null,
     medalAcquisitionDistribution: null
   }),
   evidence: Object.freeze({
     coreRoleAndFreezeEntry: 'MULTI_SOURCE_MATCH',
+    threeConsecutiveStories: 'MULTI_SOURCE_MATCH',
+    publishedStoryOrder: 'COMMUNITY_MACHINE_REPORT_MATCH',
+    medalNames: 'PUBLISHED_MACHINE_GUIDE',
     minimumStocksByMedalCount: 'MULTI_SOURCE_MATCH',
+    specialMovieGamesOnAllThree: 'MULTI_SOURCE_MATCH',
     outsideShinRaiunEntryDenominators: 'PUBLISHED_ANALYSIS',
     shinRaiunEntryDenominator: 'PUBLISHED_ANALYSIS',
     shinRaiunRelationship: 'CONFLICT',
