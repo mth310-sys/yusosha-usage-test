@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {
+  TREASURE_BATTLE_PRESENTATION_CONTRACT,
   TREASURE_BATTLE_REUSE_EVALUATION,
   TREASURE_BATTLE_REUSE_POLICY,
   getReusableTreasureBattlePresentationProfile,
@@ -42,6 +43,18 @@ test('prior B4 Treasure Battle four-game presentation keeps provenance without b
   expect(getReusableTreasureBattlePhase(4)?.key).toBe('STAND_UP');
   expect(getReusableTreasureBattlePhase(5)).toBeNull();
   expect(TREASURE_BATTLE_REUSE_POLICY.autoDriveBattleFromPreviousFourGameProfile).toBe(false);
+});
+
+test('reused Treasure Battle presentation keeps outcome and unresolved lotteries outside presentation ownership', () => {
+  expect(TREASURE_BATTLE_PRESENTATION_CONTRACT.phaseCount).toBe(4);
+  expect(TREASURE_BATTLE_PRESENTATION_CONTRACT.phaseKeys).toEqual(['FIRST_ATTACK', 'CHANCE_DISPLAY', 'CUT_IN', 'STAND_UP']);
+  expect(TREASURE_BATTLE_PRESENTATION_CONTRACT.hiddenOutcomeUntilFinalPhase).toBe(true);
+  expect(TREASURE_BATTLE_PRESENTATION_CONTRACT.outcomeLotteryOwnedByPresentation).toBe(false);
+  expect(TREASURE_BATTLE_PRESENTATION_CONTRACT.opponentLotteryOwnedByPresentation).toBe(false);
+  expect(TREASURE_BATTLE_PRESENTATION_CONTRACT.chanceUpLotteryOwnedByPresentation).toBe(false);
+  expect(TREASURE_BATTLE_PRESENTATION_CONTRACT.winRoute).toBe('LUPIN_RUSH');
+  expect(TREASURE_BATTLE_PRESENTATION_CONTRACT.lossMayRouteToRevengeChance).toBe(true);
+  expect(TREASURE_BATTLE_PRESENTATION_CONTRACT.evidenceStatus).toBe('PRESENTATION_ONLY');
 });
 
 test('prior B4 Revenge Chance destination set is reused but unresolved split is not invented', () => {
