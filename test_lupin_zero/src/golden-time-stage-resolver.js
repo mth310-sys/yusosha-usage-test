@@ -73,5 +73,7 @@ export const GOLDEN_TIME_STAGE_POLICY = Object.freeze({
   ikukanEarliestNaturalEntryGame: 30,
   ikukanGamesWithinFortyGameSet: 10,
   visibleStageLagImplemented: false,
+  publishedVisibleResidenceValidationStatus: 'MISMATCH_EXPECTED_UNTIL_VISIBLE_STAGE_LAG_RULE_RECOVERED',
+  autoCalibrateInternalStageRatesToVisibleResidence: false,
   noSyntheticStageRates: true
 });
