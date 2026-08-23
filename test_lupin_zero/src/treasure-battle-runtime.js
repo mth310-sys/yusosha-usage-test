@@ -141,6 +141,9 @@ core.start = () => {
   return true;
 };
 
+core.addEventListener('golden-time-battle-ready', () => {
+  if (session?.accepted && session.snapshot().active) queueMicrotask(syncBattleControls);
+});
 core.addEventListener('change', () => {
   if (isBattlePending()) queueMicrotask(syncBattleControls);
 });
