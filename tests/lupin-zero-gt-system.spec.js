@@ -75,9 +75,18 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.spec.treasureRush.perGameAwardTable).toBeNull();
 
   expect(result.spec.extraBonus.triggerPoints).toBe(1000000);
-  expect(result.spec.extraBonus.gamesRule).toBe('15_PLUS_REMAINING_ART_GAMES');
-  expect(result.spec.extraBonus.oddSymbolSetStockDenominator).toBe(202.6);
+  expect(result.spec.extraBonus.minimumAddedGames).toBe(15);
+  expect(result.spec.extraBonus.averageAddedGames).toBe(18.2);
+  expect(result.spec.extraBonus.exactAddedGameDistribution).toBeNull();
+  expect(result.spec.extraBonus.automaticDurationRollAllowed).toBe(false);
+  expect(result.spec.extraBonus.gamesRule).toBe('GT_REMAINING_GAMES_PLUS_GOLD_CHANCE_ADDED_GAMES');
+  expect(result.spec.extraBonus.oddSymbolSetStockDenominator).toBeNull();
+  expect(result.spec.extraBonus.oddSymbolSetStockPreferredReferenceDenominator).toBe(202.6);
+  expect(result.spec.extraBonus.oddSymbolSetStockConflictingReferenceDenominator).toBe(4924.3);
+  expect(result.spec.extraBonus.oddSymbolSetStockRateStatus).toBe('CONFLICT');
+  expect(result.spec.extraBonus.automaticOddSymbolSetStockLotteryAllowed).toBe(false);
   expect(result.spec.extraBonus.goldRushDenominator).toBe(4924.3);
+  expect(result.spec.extraBonus.goldRushRateStatus).toBe('MULTI_SOURCE_MATCH');
 
   expect(result.spec.goldRush.baseGames).toBe(1);
   expect(result.spec.goldRush.continuationPercent).toBe(52.6);
@@ -110,6 +119,9 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.spec.evidence.treasureHuntOccurrenceTrigger).toBe('UNRESOLVED');
   expect(result.spec.evidence.treasureHuntSuccessProbability).toBe('UNRESOLVED');
   expect(result.spec.evidence.treasureHuntToTreasureRushRoute).toBe('CONFLICT');
+  expect(result.spec.evidence.extraBonusDurationDistribution).toBe('UNRESOLVED');
+  expect(result.spec.evidence.extraBonusOddSymbolStockRate).toBe('CONFLICT');
+  expect(result.spec.evidence.extraBonusGoldRushRate).toBe('MULTI_SOURCE_MATCH');
   expect(result.spec.evidence.continuationBattleSetEndTrigger).toBe('MULTI_SOURCE_MATCH');
   expect(result.spec.evidence.continuationBattleExactEntryGameNumber).toBe('UNRESOLVED');
   expect(result.spec.evidence.continuationBattleOpponentList).toBe('MULTI_SOURCE_MATCH');
@@ -124,6 +136,8 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.spec.policy.inferRushPatternSelectionRates).toBe(false);
   expect(result.spec.policy.autoUseContextUnresolvedRushPatternRates).toBe(false);
   expect(result.spec.policy.inferRushPerPatternAwardsFromOverallAverage).toBe(false);
+  expect(result.spec.policy.autoRollExtraBonusDurationFromAverageOrMinimum).toBe(false);
+  expect(result.spec.policy.autoUseConflictedExtraBonusOddSymbolStockRate).toBe(false);
   expect(result.spec.policy.inferContinuationBattlePerGameFlow).toBe(false);
   expect(result.spec.policy.inferContinuationBattleEntryGameNumber).toBe(false);
   expect(result.spec.policy.inferContinuationBattleOpponentDistribution).toBe(false);
