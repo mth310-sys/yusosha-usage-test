@@ -27,6 +27,10 @@ test('GT set phase stays main through 29 settled games and enters battle after 3
   expect(result.policy.continuationBattlePerGameMechanics).toBe('UNRESOLVED');
   expect(result.policy.normalStageResidenceDuringBattle).toBe(false);
   expect(result.policy.syntheticBattleLotteryImplemented).toBe(false);
+  expect(result.policy.continuationResolutionPipeline).toBe('REUSE_EXISTING_STOCK_TREASURE_BATTLE_REVENGE_PIPELINE');
+  expect(result.policy.stockPriorityResolverReused).toBe(true);
+  expect(result.policy.revengeChanceRuntimeReused).toBe(true);
+  expect(result.policy.duplicateContinuationResolverImplemented).toBe(false);
 });
 
 test('GT production profile separates 30G main from unresolved battle window without changing total length', async ({ page }) => {
@@ -60,5 +64,6 @@ test('GT set phase runtime is loaded by the production page before stage present
   expect(runtime.hasGetter).toBe(true);
   expect(runtime.policy.mainGames).toBe(30);
   expect(runtime.policy.continuationBattlePerGameMechanics).toBe('UNRESOLVED');
+  expect(runtime.policy.continuationResolutionPipeline).toBe('REUSE_EXISTING_STOCK_TREASURE_BATTLE_REVENGE_PIPELINE');
   expect(runtime.state.phase).toBe('MAIN');
 });
