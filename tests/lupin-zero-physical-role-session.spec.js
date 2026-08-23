@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { SequenceRandomSource } from '../test_lupin_zero/src/random-source.js';
-import { PhysicalRoleSession } from '../test_lupin_zero/src/physical-role-session.js';
+import { PhysicalRoleSession, getPhysicalStopPlan, PHYSICAL_ROLE_SESSION_POLICY } from '../test_lupin_zero/src/physical-role-session.js';
 import { adaptNormalRoleForProduction, NORMAL_ROLE_PRODUCTION_POLICY } from '../test_lupin_zero/src/normal-role-production-adapter.js';
 
 test('unresolved residual becomes replaceable high-confidence no-payout fallback', () => {
@@ -21,24 +21,55 @@ test('unresolved residual becomes replaceable high-confidence no-payout fallback
 });
 
 test('MB role exposes only the published middle-line 次元・五エ門・ルパン stop pattern', () => {
-  const session = new PhysicalRoleSession({ randomSource: new SequenceRandomSource([0.01]), setting: 1 });
-  const spin = session.start(7);
-
-  expect(spin.production.kind).toBe('KNOWN_ROLE');
-  expect(spin.production.role).toBe('MB');
-  expect(spin.stopPlan.middleLineSymbols).toEqual(['次元', '五エ門', 'ルパン']);
-  expect(session.stopSymbol(0)).toBe('次元');
-  expect(session.stopSymbol(1)).toBe('五エ門');
-  expect(session.stopSymbol(2)).toBe('ルパン');
-  expect(spin.stopPlan.exactFullReelPositionsKnown).toBe(false);
+  const plan = getPhysicalStopPlan({ role: 'MB' });
+  expect(plan.middleLineSymbols).toEqual(['次元', '五エ門', 'ルパン']);
+  expect(plan.reversePushCutIn).toBe(false);
+  expect(plan.exactFullReelPositionsKnown).toBe(false);
 });
 
-test('non-MB role does not invent a physical stop pattern', () => {
+test('RUPIN REPLAY A/B/C/D expose only verified reel-presence patterns', () => {
+  const a = getPhysicalStopPlan({ role: 'RUPIN_REPLAY_A' });
+  const b = getPhysicalStopPlan({ role: 'RUPIN_REPLAY_B' });
+  const c = getPhysicalStopPlan({ role: 'RUPIN_REPLAY_C' });
+  const d = getPhysicalStopPlan({ role: 'PREMIUM' });
+
+  expect(a.targetReelsWithLupinSymbol).toEqual([0]);
+  expect(b.targetReelsWithLupinSymbol).toEqual([1, 2]);
+  expect(c.targetReelsWithLupinSymbol).toEqual([0, 2]);
+  expect(d.targetReelsWithLupinSymbol).toEqual([0, 1, 2]);
+
+  for (const plan of [a, b, c, d]) {
+    expect(plan.reversePushCutIn).toBe(true);
+    expect(plan.middleLineSymbols).toBeNull();
+    expect(plan.exactLupinStopRowKnown).toBe(false);
+    expect(plan.exactFullReelPositionsKnown).toBe(false);
+  }
+  expect(a.longFreezeOnLupinAlignment).toBe(false);
+  expect(b.longFreezeOnLupinAlignment).toBe(false);
+  expect(c.longFreezeOnLupinAlignment).toBe(false);
+  expect(d.longFreezeOnLupinAlignment).toBe(true);
+});
+
+test('PhysicalRoleSession can report verified Lupin-symbol reel presence without inventing a stop row', () => {
   const session = new PhysicalRoleSession({ randomSource: new SequenceRandomSource([0]), setting: 1 });
   const spin = session.start(1);
-
   expect(spin.production.role).toBe('PREMIUM');
   expect(spin.stopPlan.middleLineSymbols).toBeNull();
-  expect(spin.stopPlan.status).toBe('UNRESOLVED');
+  expect(session.hasVerifiedLupinSymbolOnReel(0)).toBe(true);
+  expect(session.hasVerifiedLupinSymbolOnReel(1)).toBe(true);
+  expect(session.hasVerifiedLupinSymbolOnReel(2)).toBe(true);
   expect(session.stopSymbol(0)).toBeNull();
+});
+
+test('ordinary non-MB non-RUPIN role does not invent a physical stop pattern', () => {
+  const plan = getPhysicalStopPlan({ role: 'REPLAY' });
+  expect(plan.middleLineSymbols).toBeNull();
+  expect(plan.targetReelsWithLupinSymbol).toEqual([]);
+  expect(plan.status).toBe('UNRESOLVED');
+});
+
+test('policy explicitly preserves unresolved stop-row/full-strip boundaries', () => {
+  expect(PHYSICAL_ROLE_SESSION_POLICY.rupinReplayReelPresencePatternsConnected).toBe(true);
+  expect(PHYSICAL_ROLE_SESSION_POLICY.rupinReplayExactStopRowInvented).toBe(false);
+  expect(PHYSICAL_ROLE_SESSION_POLICY.completeReelStripsRequiredForExactStops).toBe(true);
 });
