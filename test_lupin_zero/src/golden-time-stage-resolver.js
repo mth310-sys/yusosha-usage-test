@@ -69,11 +69,12 @@ export const GOLDEN_TIME_STAGE_POLICY = Object.freeze({
   initialStageSelection: 'PUBLISHED_ANALYSIS',
   upgradeEveryGames: GT_SYSTEM_SPEC.stageScenario.upgradeEveryGames,
   upgradeStepSelection: 'PUBLISHED_ANALYSIS',
+  internalABRanksShareVisibleStageTreasureRate: true,
+  visibleStageLagRuleRequired: false,
+  publishedVisibleResidenceReconcilesWithThreeTenGameStageBlocks: true,
+  stageResidenceWindowGames: 30,
+  stageResidenceWindowEvidenceStatus: 'INFERRED_HIGH_CONFIDENCE',
+  runtimeGtSetLengthChangedByResidenceInference: false,
   ikukanProgressionRankImplemented: true,
-  ikukanEarliestNaturalEntryGame: 30,
-  ikukanGamesWithinFortyGameSet: 10,
-  visibleStageLagImplemented: false,
-  publishedVisibleResidenceValidationStatus: 'MISMATCH_EXPECTED_UNTIL_VISIBLE_STAGE_LAG_RULE_RECOVERED',
-  autoCalibrateInternalStageRatesToVisibleResidence: false,
   noSyntheticStageRates: true
 });
