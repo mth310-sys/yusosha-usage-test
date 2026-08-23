@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 import {
   TREASURE_BATTLE_REUSE_EVALUATION,
   TREASURE_BATTLE_REUSE_POLICY,
-  getReusableTreasureBattlePresentationProfile
+  getReusableTreasureBattlePresentationProfile,
+  getReusableTreasureBattlePhase
 } from '../test_lupin_zero/src/treasure-battle-reuse-adapter.js';
 import {
   REVENGE_CHANCE_REUSE_AUDIT,
@@ -26,6 +27,21 @@ test('prior B4 Treasure Battle presentation is reusable through the common reuse
   expect(TREASURE_BATTLE_REUSE_POLICY.autoDriveBattleFromPreviousFourGameProfile).toBe(false);
   expect(TREASURE_BATTLE_REUSE_POLICY.noSyntheticEntryGameNumber).toBe(true);
   expect(TREASURE_BATTLE_REUSE_POLICY.noSyntheticOpponentDistribution).toBe(true);
+});
+
+test('prior B4 Treasure Battle four-game presentation keeps provenance without becoming an automatic battle rule', () => {
+  expect(TREASURE_BATTLE_REUSE_POLICY.backupSourceModule).toBe('backup_lupin_b4_pre_cabinet/js/treasure-battle-profile.js');
+  expect(TREASURE_BATTLE_REUSE_POLICY.originCommit).toBe('e89d51896bddbbb31261bc7084eeed5bc1e1743c');
+  expect(TREASURE_BATTLE_REUSE_POLICY.priorProfilePreservedInBackup).toBe(true);
+  expect(TREASURE_BATTLE_REUSE_POLICY.subsequentPriorImplementationCommits).toHaveLength(4);
+  expect(TREASURE_BATTLE_REUSE_POLICY.presentationStructureStatus).toBe('PRIOR_B4_VERIFIED_PRESENTATION_STRUCTURE_EXTERNAL_RECONFIRMATION_PENDING');
+  expect(TREASURE_BATTLE_REUSE_POLICY.presentationStructureProductionUse).toBe('PRESENTATION_ONLY_WHEN_BATTLE_ENTRY_IS_ALREADY_RESOLVED');
+  expect(getReusableTreasureBattlePhase(1)?.key).toBe('FIRST_ATTACK');
+  expect(getReusableTreasureBattlePhase(2)?.key).toBe('CHANCE_DISPLAY');
+  expect(getReusableTreasureBattlePhase(3)?.key).toBe('CUT_IN');
+  expect(getReusableTreasureBattlePhase(4)?.key).toBe('STAND_UP');
+  expect(getReusableTreasureBattlePhase(5)).toBeNull();
+  expect(TREASURE_BATTLE_REUSE_POLICY.autoDriveBattleFromPreviousFourGameProfile).toBe(false);
 });
 
 test('prior B4 Revenge Chance destination set is reused but unresolved split is not invented', () => {
