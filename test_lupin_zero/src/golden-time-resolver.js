@@ -39,7 +39,7 @@ export function createGoldenTimeSetProfile() {
     setCompositionEvidenceStatus: ReuseEvidenceStatus.UNRESOLVED,
     setCompositionNote: 'The 30G value is a stage-residence validation window, not a confirmed continuation-battle entry point. Published sources confirm an approximately 40G set and battle after regulation games; exact battle entry timing remains unresolved.',
     previousB4BattlePresentationGamesCandidate: 4,
-    previousB4BattlePresentationEvidenceStatus: 'REUSED_PREVIOUS_VERIFIED_PARTIAL_REQUIRES_ZERO_RECONFIRMATION',
+    previousB4BattlePresentationEvidenceStatus: 'PRIOR_B4_VERIFIED_PRESENTATION_STRUCTURE_EXTERNAL_RECONFIRMATION_PENDING',
     pureIncreaseCoinsPerGame: VERIFIED_SPEC.modeProfiles.goldenTime.pureIncreaseCoinsPerGame,
     betCoinsPerGame: 3,
     payoutCoinsPerGame: 5,
@@ -55,19 +55,27 @@ export function createGoldenTimeSetProfile() {
 
 export function getGoldenTimeContinuationPercent(treasure) {
   if (!Number.isInteger(treasure) || treasure < 0) return null;
-  if (treasure >= 1000000) return 100.0;
-  const capped = Math.max(100000, Math.min(950000, treasure));
-  const step = Math.floor(capped / 50000) * 50000;
-  return GT_CONTINUATION_BY_TREASURE[step] ?? null;
+  return GT_CONTINUATION_BY_TREASURE[treasure] ?? null;
 }
 
 export function resolveGoldenTimeContinuation(randomSource, treasure) {
   requireRandomSource(randomSource);
   const continuationPercent = getGoldenTimeContinuationPercent(treasure);
-  if (continuationPercent == null) throw new RangeError('Unsupported treasure value');
+  if (continuationPercent == null) {
+    return Object.freeze({
+      eligible: false,
+      treasure,
+      continuationPercent: null,
+      draw: null,
+      continued: false,
+      evidenceStatus: ReuseEvidenceStatus.UNRESOLVED,
+      sourceRelation: 'NO_PUBLISHED_CONTINUATION_RATE_FOR_EXACT_TREASURE'
+    });
+  }
   const draw = randomSource.nextFloat();
   const continued = continuationPercent >= 100 || draw < continuationPercent / 100;
   return Object.freeze({
+    eligible: true,
     treasure,
     continuationPercent,
     draw,
@@ -85,8 +93,11 @@ export const GOLDEN_TIME_PRODUCTION_POLICY = Object.freeze({
   continuationBattleExactPresentationGames: null,
   continuationBattleTimingEvidenceStatus: 'UNRESOLVED',
   previousB4BattlePresentationGamesCandidate: 4,
-  previousB4BattlePresentationEvidenceStatus: 'REUSED_PREVIOUS_VERIFIED_PARTIAL_REQUIRES_ZERO_RECONFIRMATION',
+  previousB4BattlePresentationEvidenceStatus: 'PRIOR_B4_VERIFIED_PRESENTATION_STRUCTURE_EXTERNAL_RECONFIRMATION_PENDING',
   continuationBattlePerGameMechanics: 'UNRESOLVED',
+  continuationRateLookup: 'EXACT_PUBLISHED_TABLE_POINTS_ONLY',
+  floorUnknownTreasureToPublishedStep: false,
+  interpolateUnknownTreasure: false,
   pureIncreaseModel: '3_BET_5_PAY',
   initialLupinRushExactAwardTableKnown: false,
   initialTreasureFallback: 350000,
