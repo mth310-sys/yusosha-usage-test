@@ -8,6 +8,8 @@ if (!app?.core) throw new Error('LUPIN ZERO core is required');
 
 const core = app.core;
 const originalResolveGoldenTimeContinuation = core.resolveGoldenTimeContinuation.bind(core);
+const originalBetOne = core.betOne.bind(core);
+const originalMaxBetNow = core.maxBetNow.bind(core);
 const originalStart = core.start.bind(core);
 
 let session = null;
@@ -23,6 +25,9 @@ export const TREASURE_BATTLE_RUNTIME_POLICY = Object.freeze({
   battleRoleLottery: null,
   battlePayoutCoins: null,
   battleRoleAndPayoutEvidenceStatus: 'UNRESOLVED',
+  economyAccounting: 'SUSPENDED_UNTIL_BATTLE_ROLE_AND_PAYOUT_ARE_RESOLVED',
+  battleBetChangesCredit: false,
+  syntheticZeroPayoutForbidden: true,
   outcomeAppliedOnlyAfterFinalPresentationGame: true,
   automaticEntryGameNumber: null,
   automaticEntryGameNumberEvidenceStatus: 'UNRESOLVED'
@@ -57,14 +62,37 @@ function syncBattleControls() {
   const busy = [MachineState.SPINNING, MachineState.STOPPING].includes(snapshot.state);
   const maxBet = core.kernelState.maxBet ?? 3;
 
-  if (elements.bet) elements.bet.disabled = busy || snapshot.credit <= 0 || snapshot.bet >= maxBet;
-  if (elements.maxBet) elements.maxBet.disabled = busy || snapshot.credit <= 0 || snapshot.bet >= maxBet;
+  if (elements.bet) elements.bet.disabled = busy || snapshot.bet >= maxBet;
+  if (elements.maxBet) elements.maxBet.disabled = busy || snapshot.bet >= maxBet;
   if (elements.start) elements.start.disabled = snapshot.state !== MachineState.READY || snapshot.bet !== maxBet;
   elements.stops.forEach((button, index) => {
     button.disabled = !busy || snapshot.stopped[index];
   });
   if (elements.message && !busy) elements.message.textContent = phaseLabel();
   app.refreshGoldenTimeLcd?.(phaseLabel());
+  return true;
+}
+
+function armBattleBet(targetBet) {
+  if (!isBattlePending()) return false;
+  const snapshot = core.snapshot();
+  const maxBet = core.kernelState.maxBet ?? 3;
+  const nextBet = Math.max(0, Math.min(maxBet, Number(targetBet) || 0));
+  if ([MachineState.SPINNING, MachineState.STOPPING].includes(snapshot.state) || nextBet <= snapshot.bet) return false;
+
+  core.kernelState = Object.freeze({
+    ...core.kernelState,
+    bet: nextBet,
+    phase: MachineState.READY
+  });
+  core.emit('change', { reason: 'treasure-battle-bet-arm-no-economy' });
+  core.emit('treasure-battle-bet-armed', {
+    bet: nextBet,
+    creditChanged: false,
+    economyAccounting: TREASURE_BATTLE_RUNTIME_POLICY.economyAccounting,
+    evidenceStatus: TREASURE_BATTLE_RUNTIME_POLICY.battleRoleAndPayoutEvidenceStatus
+  });
+  syncBattleControls();
   return true;
 }
 
@@ -100,6 +128,7 @@ function prepareSessionFromResolvedContinuation(resolution, profile) {
     outcomeVisibility: 'HIDDEN',
     roleLottery: null,
     payoutCoins: null,
+    economyAccounting: TREASURE_BATTLE_RUNTIME_POLICY.economyAccounting,
     roleAndPayoutEvidenceStatus: TREASURE_BATTLE_RUNTIME_POLICY.battleRoleAndPayoutEvidenceStatus
   });
   syncBattleControls();
@@ -116,6 +145,16 @@ core.resolveGoldenTimeContinuation = (resolution, profile) => {
   if (priority.route === 'STOCK') return originalResolveGoldenTimeContinuation(resolution, profile);
   if (session?.accepted && session.snapshot().active) return false;
   return prepareSessionFromResolvedContinuation(resolution, profile);
+};
+
+core.betOne = () => {
+  if (!isBattlePending()) return originalBetOne();
+  return armBattleBet(core.snapshot().bet + 1);
+};
+
+core.maxBetNow = () => {
+  if (!isBattlePending()) return originalMaxBetNow();
+  return armBattleBet(core.kernelState.maxBet ?? 3);
 };
 
 core.start = () => {
@@ -135,6 +174,10 @@ core.start = () => {
   core.emit('treasure-battle-game-started', {
     game: session.snapshot().nextGame,
     phase: session.snapshot().nextPhase,
+    phaseNote: session.snapshot().nextPhaseNote,
+    roleLottery: null,
+    payoutCoins: null,
+    economyAccounting: TREASURE_BATTLE_RUNTIME_POLICY.economyAccounting,
     evidenceStatus: session.snapshot().evidenceStatus
   });
   syncBattleControls();
@@ -157,11 +200,13 @@ core.addEventListener('spin-end', (event) => {
   core.emit('treasure-battle-presentation', {
     game: progressed.justCompletedGame,
     phase: progressed.justCompletedPhase,
+    phaseNote: progressed.justCompletedPhaseNote,
     completed: progressed.completed,
     outcomeVisibility: progressed.outcomeRevealedNow ? 'REVEALED' : 'HIDDEN',
     revealedOutcome: progressed.revealedOutcome,
     roleLottery: null,
     payoutCoins: null,
+    economyAccounting: TREASURE_BATTLE_RUNTIME_POLICY.economyAccounting,
     roleAndPayoutEvidenceStatus: TREASURE_BATTLE_RUNTIME_POLICY.battleRoleAndPayoutEvidenceStatus
   });
 
@@ -199,6 +244,7 @@ app.getTreasureBattleRuntimeState = () => Object.freeze({
   hasPendingResolution: Boolean(pendingResolution),
   battleRoleLottery: null,
   battlePayoutCoins: null,
+  economyAccounting: TREASURE_BATTLE_RUNTIME_POLICY.economyAccounting,
   roleAndPayoutEvidenceStatus: TREASURE_BATTLE_RUNTIME_POLICY.battleRoleAndPayoutEvidenceStatus
 });
 app.treasureBattleRuntimePolicy = TREASURE_BATTLE_RUNTIME_POLICY;
