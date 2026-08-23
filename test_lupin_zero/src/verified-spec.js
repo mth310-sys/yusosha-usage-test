@@ -10,8 +10,13 @@ export const VERIFIED_SPEC = Object.freeze({
     mb: 27.31,
     nineCoinBySetting: Object.freeze({ 1:25.28,2:25.46,3:25.62,4:25.78,5:25.94,6:26.11 }),
     tenCoinBySetting: Object.freeze({ 1:26.27,2:25.18,3:24.28,4:23.45,5:22.67,6:21.94 }),
-    premiumBySetting: Object.freeze({ 1:65536,2:65536,3:65536,4:65536,5:32768,6:21845.33 }),
-    legendBySetting: Object.freeze({ 1:65536,2:65536,3:65536,4:65536,5:32768,6:32768 })
+    rupinReplayA: 1400,
+    rupinReplayB: 8000,
+    rupinReplayC: 8000,
+    rupinReplayDBySetting: Object.freeze({ 1:65536,2:65536,3:65536,4:65536,5:32768,6:32768 }),
+    legendReplayBySetting: Object.freeze({ 1:65536,2:65536,3:65536,4:65536,5:32768,6:21845.3 }),
+    premiumBySetting: Object.freeze({ 1:65536,2:65536,3:65536,4:65536,5:32768,6:32768 }),
+    legendBySetting: Object.freeze({ 1:65536,2:65536,3:65536,4:65536,5:32768,6:21845.3 })
   }),
   play: Object.freeze({
     normalFreeStopAllowed: true,
@@ -44,12 +49,7 @@ export const VERIFIED_SPEC = Object.freeze({
   chanceZones: Object.freeze({
     entryLotteryTrigger:'CHANCE_EYE',
     durationBySetting:Object.freeze({
-      1:Object.freeze({ tenGames:62.5,twentyGames:37.5 }),
-      2:Object.freeze({ tenGames:62.5,twentyGames:37.5 }),
-      3:Object.freeze({ tenGames:60.9,twentyGames:39.1 }),
-      4:Object.freeze({ tenGames:50.0,twentyGames:50.0 }),
-      5:Object.freeze({ tenGames:50.0,twentyGames:50.0 }),
-      6:Object.freeze({ tenGames:47.7,twentyGames:52.3 })
+      1:Object.freeze({ tenGames:62.5,twentyGames:37.5 }),2:Object.freeze({ tenGames:62.5,twentyGames:37.5 }),3:Object.freeze({ tenGames:60.9,twentyGames:39.1 }),4:Object.freeze({ tenGames:50.0,twentyGames:50.0 }),5:Object.freeze({ tenGames:50.0,twentyGames:50.0 }),6:Object.freeze({ tenGames:47.7,twentyGames:52.3 })
     }),
     odoroboZone:Object.freeze({ category:'SELF_CLEAR_CZ',games:Object.freeze([10,20]),expectedRatePercent:Object.freeze({min:39.6,max:43.2}),successCondition:'ODD_SYMBOL_ALIGNED',successDestination:'LUPIN_BONUS_OR_GOLDEN_TIME',canUpgradeTo:'FUJIKO_ZONE' }),
     fujikoZone:Object.freeze({ category:'SELF_CLEAR_CZ',games:Object.freeze([10,20]),expectedRatePercent:Object.freeze({min:58.8,max:63.2}),successCondition:'ODD_SYMBOL_ALIGNED',successDestination:'LUPIN_BONUS_OR_GOLDEN_TIME' }),
@@ -63,16 +63,8 @@ export const VERIFIED_SPEC = Object.freeze({
       strong:Object.freeze({ label:'金チャンス目',visualRule:'GOLD_7_PRESENT',normalDenominator:3857,wantedChanceDenominator:45.7 })
     }),
     outcomeLottery: Object.freeze({
-      normal: Object.freeze({
-        weak:Object.freeze({ totalHitPercent:3.6,onHit:Object.freeze({ bonusOrArt:68.4,fujikoZone:14.0,odoroboZone:17.4 }) }),
-        middle:Object.freeze({ totalHitPercent:10.8,onHit:Object.freeze({ bonusOrArt:82.1,fujikoZone:10.2,odoroboZone:7.8 }) }),
-        strong:Object.freeze({ totalHitPercent:51.1,onHit:Object.freeze({ bonusOrArt:85.1,fujikoZone:7.9,odoroboZone:7.0 }) })
-      }),
-      wantedChance: Object.freeze({
-        weak:Object.freeze({ totalHitPercent:5.1,onHit:Object.freeze({ bonusOrArt:54.1,fujikoZone:24.3,odoroboZone:21.6 }) }),
-        middle:Object.freeze({ totalHitPercent:13.9,onHit:Object.freeze({ bonusOrArt:76.6,fujikoZone:11.1,odoroboZone:12.4 }) }),
-        strong:Object.freeze({ totalHitPercent:46.1,onHit:Object.freeze({ bonusOrArt:89.0,fujikoZone:6.4,odoroboZone:4.5 }) })
-      })
+      normal: Object.freeze({ weak:Object.freeze({ totalHitPercent:3.6,onHit:Object.freeze({ bonusOrArt:68.4,fujikoZone:14.0,odoroboZone:17.4 }) }),middle:Object.freeze({ totalHitPercent:10.8,onHit:Object.freeze({ bonusOrArt:82.1,fujikoZone:10.2,odoroboZone:7.8 }) }),strong:Object.freeze({ totalHitPercent:51.1,onHit:Object.freeze({ bonusOrArt:85.1,fujikoZone:7.9,odoroboZone:7.0 }) }) }),
+      wantedChance: Object.freeze({ weak:Object.freeze({ totalHitPercent:5.1,onHit:Object.freeze({ bonusOrArt:54.1,fujikoZone:24.3,odoroboZone:21.6 }) }),middle:Object.freeze({ totalHitPercent:13.9,onHit:Object.freeze({ bonusOrArt:76.6,fujikoZone:11.1,odoroboZone:12.4 }) }),strong:Object.freeze({ totalHitPercent:46.1,onHit:Object.freeze({ bonusOrArt:89.0,fujikoZone:6.4,odoroboZone:4.5 }) }) })
     }),
     alignedEffects:Object.freeze({ redSymbol:'LUPIN_BONUS',blueSymbol:'RAIUN_MODE',sevenSymbol:'GOLDEN_TIME' })
   }),
@@ -83,18 +75,24 @@ export const VERIFIED_SPEC = Object.freeze({
     fullStrips:null,stripLength:null,symbolOrder:null,
     note:'Only directly published/observable physical-reel facts are stored. Complete reel strips remain unresolved.'
   }),
+  rupinReplay:Object.freeze({
+    reversePushCutIn:true,
+    A:Object.freeze({ denominator:1400, stopPattern:'ONE_LUPIN_SYMBOL', longFreeze:false }),
+    B:Object.freeze({ denominator:8000, stopPattern:'CENTER_AND_RIGHT_LUPIN_SYMBOLS', longFreeze:false }),
+    C:Object.freeze({ denominator:8000, stopPattern:'LEFT_AND_RIGHT_LUPIN_SYMBOLS', longFreeze:false }),
+    D:Object.freeze({ denominatorBySetting:Object.freeze({1:65536,2:65536,3:65536,4:65536,5:32768,6:32768}), stopPattern:'LUPIN_SYMBOLS_ALIGNED', longFreeze:true }),
+    legendReplay:Object.freeze({ denominatorBySetting:Object.freeze({1:65536,2:65536,3:65536,4:65536,5:32768,6:21845.3}) })
+  }),
   mb:Object.freeze({ stopLine:'MIDDLE',stopSymbols:Object.freeze(['次元','五エ門','ルパン']),followupGames:2,payoutEachGame:10 }),
   evidence:Object.freeze({
-    normalRoleDenominators:'MULTI_SOURCE_MATCH',premiumLegendDenominators:'MULTI_SOURCE_MATCH',normalPlayRules:'PUBLISHED_ANALYSIS',rareRoleFamilies:'PUBLISHED_ANALYSIS',
+    normalRoleDenominators:'MULTI_SOURCE_MATCH',premiumLegendDenominators:'MULTI_SOURCE_MATCH',rupinReplayDenominators:'PUBLISHED_MACHINE_GUIDE',rupinReplayStopPatterns:'PUBLISHED_MACHINE_GUIDE',normalPlayRules:'PUBLISHED_ANALYSIS',rareRoleFamilies:'PUBLISHED_ANALYSIS',
     wantedChanceProfile:'MULTI_SOURCE_MATCH',wantedChanceCycleDistribution:'MULTI_SOURCE_MATCH',chanceZoneDurationBySetting:'MULTI_SOURCE_MATCH',raiunHighProfile:'PUBLISHED_ANALYSIS',raiunModeProfile:'MULTI_SOURCE_MATCH',lupinBonusProfile:'MULTI_SOURCE_MATCH',goldenTimeProfile:'MULTI_SOURCE_MATCH',
     chanceZoneTypes:'MULTI_SOURCE_MATCH',chanceZoneEntryTrigger:'PUBLISHED_ANALYSIS',odoroboZoneProfile:'MULTI_SOURCE_MATCH',fujikoZoneProfile:'MULTI_SOURCE_MATCH',rizeZoneProfile:'MULTI_SOURCE_MATCH',sevenZoneProfile:'MULTI_SOURCE_MATCH',
     liquidReelChanceEyeRules:'MULTI_SOURCE_MATCH',liquidReelChanceEyeRates:'MULTI_SOURCE_MATCH',liquidReelOutcomeLottery:'MULTI_SOURCE_MATCH',liquidReelAlignedEffects:'MULTI_SOURCE_MATCH',
     physicalMainReelCharacterSymbols:'PUBLISHED_ANALYSIS_AND_MACHINE_VISUALS',mainReelTargetPrompt:'PUBLISHED_MACHINE_GUIDE',mainReelSpecialSymbolArtwork:'UNRESOLVED',mainReelSpecialSymbolStopPattern:'UNRESOLVED',mbStopPattern:'MULTI_SOURCE_MATCH',
     fullPhysicalReelStrips:'UNRESOLVED',physicalReelStripLength:'UNRESOLVED',physicalReelSymbolOrder:'UNRESOLVED',rareRolePhysicalStopPatterns:'UNRESOLVED'
   }),
-  policy:Object.freeze({
-    fullPhysicalReelStrips:'DO_NOT_INVENT',physicalReelStripLength:'DO_NOT_INVENT',physicalReelSymbolOrder:'DO_NOT_INVENT',mainReelSpecialSymbolArtwork:'DO_NOT_INVENT',mainReelSpecialSymbolStopPattern:'DO_NOT_INVENT',rareRolePhysicalStopPatterns:'DO_NOT_INVENT',unlistedProbabilities:'DO_NOT_INTERPOLATE',unresolvedChanceZoneEntryRates:'DO_NOT_INVENT'
-  })
+  policy:Object.freeze({ fullPhysicalReelStrips:'DO_NOT_INVENT',physicalReelStripLength:'DO_NOT_INVENT',physicalReelSymbolOrder:'DO_NOT_INVENT',mainReelSpecialSymbolArtwork:'DO_NOT_INVENT',mainReelSpecialSymbolStopPattern:'DO_NOT_INVENT',rareRolePhysicalStopPatterns:'DO_NOT_INVENT',unlistedProbabilities:'DO_NOT_INTERPOLATE',unresolvedChanceZoneEntryRates:'DO_NOT_INVENT' })
 });
 
 export function getNormalRoleDenominator(role, setting=1) {
@@ -104,7 +102,10 @@ export function getNormalRoleDenominator(role, setting=1) {
   if (role==='MB') return VERIFIED_SPEC.normalRoleDenominators.mb;
   if (role==='NINE_COIN') return VERIFIED_SPEC.normalRoleDenominators.nineCoinBySetting[setting]??null;
   if (role==='TEN_COIN') return VERIFIED_SPEC.normalRoleDenominators.tenCoinBySetting[setting]??null;
-  if (role==='PREMIUM') return VERIFIED_SPEC.normalRoleDenominators.premiumBySetting[setting]??null;
-  if (role==='LEGEND') return VERIFIED_SPEC.normalRoleDenominators.legendBySetting[setting]??null;
+  if (role==='RUPIN_REPLAY_A') return VERIFIED_SPEC.normalRoleDenominators.rupinReplayA;
+  if (role==='RUPIN_REPLAY_B') return VERIFIED_SPEC.normalRoleDenominators.rupinReplayB;
+  if (role==='RUPIN_REPLAY_C') return VERIFIED_SPEC.normalRoleDenominators.rupinReplayC;
+  if (role==='PREMIUM') return VERIFIED_SPEC.normalRoleDenominators.rupinReplayDBySetting[setting]??null;
+  if (role==='LEGEND') return VERIFIED_SPEC.normalRoleDenominators.legendReplayBySetting[setting]??null;
   return null;
 }
