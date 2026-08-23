@@ -42,8 +42,23 @@ test('published treasure continuation table is preserved', () => {
   expect(getGoldenTimeContinuationPercent(1000000)).toBe(100);
 });
 
+test('unpublished treasure values stay unresolved with no floor or interpolation', () => {
+  expect(getGoldenTimeContinuationPercent(425000)).toBeNull();
+  expect(getGoldenTimeContinuationPercent(999999)).toBeNull();
+  const unresolved = resolveGoldenTimeContinuation(new SequenceRandomSource([0]), 425000);
+  expect(unresolved.eligible).toBe(false);
+  expect(unresolved.continuationPercent).toBeNull();
+  expect(unresolved.continued).toBeNull();
+  expect(unresolved.draw).toBeNull();
+  expect(unresolved.evidenceStatus).toBe('UNRESOLVED');
+  expect(GOLDEN_TIME_PRODUCTION_POLICY.continuationRateLookup).toBe('EXACT_PUBLISHED_TABLE_POINTS_ONLY');
+  expect(GOLDEN_TIME_PRODUCTION_POLICY.floorUnknownTreasureToPublishedStep).toBe(false);
+  expect(GOLDEN_TIME_PRODUCTION_POLICY.interpolateUnknownTreasure).toBe(false);
+});
+
 test('one million treasure guarantees continuation', () => {
   const resolved = resolveGoldenTimeContinuation(new SequenceRandomSource([0.999999]), 1000000);
+  expect(resolved.eligible).toBe(true);
   expect(resolved.continued).toBe(true);
   expect(resolved.continuationPercent).toBe(100);
 });
