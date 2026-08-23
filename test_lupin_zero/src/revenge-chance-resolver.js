@@ -9,6 +9,12 @@ export const REVENGE_CHANCE_SPEC = Object.freeze({
   successDestinations: Object.freeze(['LUPIN_BONUS', 'GOLDEN_TIME']),
   successDestinationSplit: null,
   automaticSuccessDestination: null,
+  characterCollectionDestination: 'LUPIN_BONUS',
+  characterCollectionDestinationEvidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS,
+  directGoldenTimeRouteExists: true,
+  directGoldenTimeRouteTrigger: null,
+  directGoldenTimeRoutePercent: null,
+  directGoldenTimeRouteEvidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS,
   bonusEndEntryDenominator: 25,
   bonusEndHitExpectationPercent: 39,
   publishedRatesByTreasure: Object.freeze({
@@ -25,6 +31,32 @@ export const REVENGE_CHANCE_SPEC = Object.freeze({
   }),
   evidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS
 });
+
+export function resolveKnownRevengeDestination(mechanism) {
+  if (mechanism === 'COLLECT_FOUR_CHARACTERS') {
+    return Object.freeze({
+      resolved: true,
+      destination: REVENGE_CHANCE_SPEC.characterCollectionDestination,
+      mechanism,
+      evidenceStatus: REVENGE_CHANCE_SPEC.characterCollectionDestinationEvidenceStatus
+    });
+  }
+  if (mechanism === 'DIRECT_GOLDEN_TIME') {
+    return Object.freeze({
+      resolved: true,
+      destination: 'GOLDEN_TIME',
+      mechanism,
+      evidenceStatus: REVENGE_CHANCE_SPEC.directGoldenTimeRouteEvidenceStatus
+    });
+  }
+  return Object.freeze({
+    resolved: false,
+    destination: null,
+    mechanism: mechanism ?? null,
+    destinationCandidates: REVENGE_CHANCE_SPEC.successDestinations,
+    evidenceStatus: ReuseEvidenceStatus.UNRESOLVED
+  });
+}
 
 function requireRandomSource(randomSource) {
   if (!randomSource || typeof randomSource.nextFloat !== 'function') {
