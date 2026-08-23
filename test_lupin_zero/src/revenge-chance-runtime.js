@@ -5,6 +5,10 @@ import {
   resolveBonusEndRevengeEntry,
   resolveBonusEndRevengeOutcome
 } from './revenge-chance-resolver.js';
+import {
+  REVENGE_SUCCESS_MECHANISM_SPEC,
+  resolveRevengeSuccessMechanism
+} from './revenge-success-mechanism-spec.js';
 import { PhysicalRoleSession } from './physical-role-session.js';
 import { getNormalRoleSettlement } from './normal-role-settlement.js';
 import { SeededRandomSource } from './random-source.js';
@@ -32,7 +36,7 @@ function renderRevenge() {
   if (s.mode !== GameMode.REVENGE_CHANCE) return;
   if (phaseBadge) phaseBadge.textContent = 'REVENGE CHANCE';
   if (stateValue) {
-    stateValue.textContent = s.modeResult === 'PENDING_REVENGE_DESTINATION'
+    stateValue.textContent = s.modeResult === REVENGE_SUCCESS_MECHANISM_SPEC.pendingState
       ? 'REVENGE SUCCESS'
       : `REVENGE CHANCE ${s.modeGamesRemaining ?? 0}G`;
   }
@@ -85,6 +89,53 @@ function tryEnterBonusEndRevengeChance() {
   return Object.freeze({ entered: true, entry, outcome });
 }
 
+function applyRevengeSuccessMechanism(mechanism) {
+  const before = core.snapshot();
+  if (before.mode !== GameMode.REVENGE_CHANCE || before.modeResult !== REVENGE_SUCCESS_MECHANISM_SPEC.pendingState) {
+    return Object.freeze({ applied: false, reason: 'NOT_PENDING_REVENGE_SUCCESS_MECHANISM' });
+  }
+
+  const resolution = resolveRevengeSuccessMechanism(mechanism);
+  if (!resolution.resolved) {
+    core.emit('revenge-chance-success-mechanism-pending', {
+      mechanism: resolution.mechanism,
+      destination: null,
+      destinationCandidates: [...resolution.destinationCandidates],
+      evidenceStatus: resolution.evidenceStatus
+    });
+    return Object.freeze({ applied: false, reason: 'UNRESOLVED_SUCCESS_MECHANISM', resolution });
+  }
+
+  core.emit('revenge-chance-success-mechanism-resolved', {
+    mechanism: resolution.mechanism,
+    destination: resolution.destination,
+    evidenceStatus: resolution.evidenceStatus
+  });
+  core.emit('mode-exit', { from: GameMode.REVENGE_CHANCE, to: resolution.destination });
+
+  if (resolution.destination === GameMode.LUPIN_BONUS) {
+    core.kernelState = Object.freeze({
+      ...core.kernelState,
+      modeResult: 'PENDING_LUPIN_BONUS',
+      modeResultEvidenceStatus: resolution.evidenceStatus
+    });
+    const entered = typeof app.enterLupinBonus === 'function' && app.enterLupinBonus('REVENGE_CHANCE');
+    return Object.freeze({ applied: Boolean(entered), resolution });
+  }
+
+  if (resolution.destination === GameMode.GOLDEN_TIME) {
+    core.kernelState = Object.freeze({
+      ...core.kernelState,
+      modeResult: 'PENDING_GOLDEN_TIME',
+      modeResultEvidenceStatus: resolution.evidenceStatus
+    });
+    const entered = typeof app.enterGoldenTime === 'function' && Boolean(app.enterGoldenTime());
+    return Object.freeze({ applied: entered, resolution });
+  }
+
+  return Object.freeze({ applied: false, reason: 'UNSUPPORTED_REVENGE_DESTINATION', resolution });
+}
+
 core.resolveGoldenTimeContinuation = (resolution, profile) => {
   const before = core.snapshot();
   if (
@@ -128,10 +179,11 @@ core.addEventListener('spin-end', (event) => {
     if (successful) {
       core.kernelState = Object.freeze({
         ...core.kernelState,
-        modeResult: 'PENDING_REVENGE_DESTINATION',
+        modeResult: REVENGE_SUCCESS_MECHANISM_SPEC.pendingState,
         modeResultEvidenceStatus: 'UNRESOLVED'
       });
       core.emit('revenge-chance-success', {
+        mechanism: null,
         destination: null,
         destinationCandidates: [...REVENGE_CHANCE_SPEC.successDestinations],
         destinationSplit: REVENGE_CHANCE_SPEC.successDestinationSplit,
@@ -139,7 +191,13 @@ core.addEventListener('spin-end', (event) => {
         outcome,
         evidenceStatus: 'UNRESOLVED'
       });
-      if (message) message.textContent = 'REVENGE SUCCESS — 行先解析待ち';
+      core.emit('revenge-chance-success-mechanism-pending', {
+        mechanism: null,
+        destination: null,
+        destinationCandidates: [...REVENGE_CHANCE_SPEC.successDestinations],
+        evidenceStatus: 'UNRESOLVED'
+      });
+      if (message) message.textContent = 'REVENGE SUCCESS — 復活機構解析待ち';
     } else {
       core.kernelState = Object.freeze({
         ...core.kernelState,
@@ -176,3 +234,5 @@ app.bonusEndRevengeEntryRandom = bonusEndEntryRandom;
 app.bonusEndRevengeOutcomeRandom = bonusEndOutcomeRandom;
 app.resolveRevengePullback = resolveRevengePullback;
 app.tryEnterBonusEndRevengeChance = tryEnterBonusEndRevengeChance;
+app.applyRevengeSuccessMechanism = applyRevengeSuccessMechanism;
+app.revengeSuccessMechanismSpec = REVENGE_SUCCESS_MECHANISM_SPEC;
