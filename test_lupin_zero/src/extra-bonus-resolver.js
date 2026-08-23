@@ -7,8 +7,13 @@ export const EXTRA_BONUS_SPEC = Object.freeze({
   addedGameDistribution: null,
   addedGameDistributionStatus: 'UNRESOLVED_DO_NOT_SYNTHESIZE_FROM_AVERAGE',
   automaticDurationRollAllowed: false,
-  oddAlignmentDenominator: 202.6,
+  oddAlignmentDenominator: null,
+  oddAlignmentPreferredReferenceDenominator: 202.6,
+  oddAlignmentConflictingReferenceDenominator: 4924.3,
+  oddAlignmentRateStatus: 'CONFLICT',
+  automaticOddAlignmentLotteryAllowed: false,
   goldRushDenominator: 4924.3,
+  goldRushRateStatus: 'PUBLISHED_ANALYSIS_MULTI_SOURCE_MATCH',
   pureIncreaseModel: 'FOLLOW_ART_3_BET_5_PAY',
   entryTrigger: 'TREASURE_REACHES_1000000',
   evidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS
@@ -44,21 +49,22 @@ export function createExtraBonusProfile(goldenTimeGamesRemaining, verifiedAddedG
 
 export function resolveExtraBonusGame(randomSource) {
   requireRandomSource(randomSource);
-  const oddDraw = randomSource.nextFloat();
   const goldRushDraw = randomSource.nextFloat();
-  const oddAligned = oddDraw < 1 / EXTRA_BONUS_SPEC.oddAlignmentDenominator;
   const goldRushHit = goldRushDraw < 1 / EXTRA_BONUS_SPEC.goldRushDenominator;
 
   return Object.freeze({
     payoutCoins: 5,
-    oddAligned,
+    oddAligned: null,
+    oddDraw: null,
+    oddAlignmentDenominator: null,
+    oddAlignmentRateStatus: EXTRA_BONUS_SPEC.oddAlignmentRateStatus,
+    automaticOddAlignmentLotteryAllowed: false,
     goldRushHit,
-    oddDraw,
     goldRushDraw,
-    oddAlignmentDenominator: EXTRA_BONUS_SPEC.oddAlignmentDenominator,
     goldRushDenominator: EXTRA_BONUS_SPEC.goldRushDenominator,
-    oddAlignmentConsequence: 'GOLDEN_TIME_SET_STOCK_PLUS_1',
+    goldRushRateStatus: EXTRA_BONUS_SPEC.goldRushRateStatus,
+    oddAlignmentConsequence: 'GOLDEN_TIME_SET_STOCK_PLUS_1_IF_ODD_ALIGNMENT_OCCURS',
     goldRushDestination: 'GOLD_RUSH',
-    evidenceStatus: EXTRA_BONUS_SPEC.evidenceStatus
+    evidenceStatus: goldRushHit ? ReuseEvidenceStatus.PUBLISHED_ANALYSIS : ReuseEvidenceStatus.MULTI_SOURCE_MATCH
   });
 }
