@@ -1,5 +1,6 @@
 import { GameMode } from './game-flow-spec.js';
 import {
+  REVENGE_CHANCE_SPEC,
   resolveRevengePullback,
   resolveBonusEndRevengeEntry,
   resolveBonusEndRevengeOutcome
@@ -31,8 +32,8 @@ function renderRevenge() {
   if (s.mode !== GameMode.REVENGE_CHANCE) return;
   if (phaseBadge) phaseBadge.textContent = 'REVENGE CHANCE';
   if (stateValue) {
-    stateValue.textContent = s.modeResult === 'PENDING_LUPIN_BONUS'
-      ? 'LUPIN BONUS'
+    stateValue.textContent = s.modeResult === 'PENDING_REVENGE_DESTINATION'
+      ? 'REVENGE SUCCESS'
       : `REVENGE CHANCE ${s.modeGamesRemaining ?? 0}G`;
   }
 }
@@ -127,16 +128,18 @@ core.addEventListener('spin-end', (event) => {
     if (successful) {
       core.kernelState = Object.freeze({
         ...core.kernelState,
-        modeResult: 'PENDING_LUPIN_BONUS',
-        modeResultEvidenceStatus: 'PUBLISHED_ANALYSIS'
+        modeResult: 'PENDING_REVENGE_DESTINATION',
+        modeResultEvidenceStatus: 'UNRESOLVED'
       });
       core.emit('revenge-chance-success', {
-        destination: GameMode.LUPIN_BONUS,
+        destination: null,
+        destinationCandidates: [...REVENGE_CHANCE_SPEC.successDestinations],
+        destinationSplit: REVENGE_CHANCE_SPEC.successDestinationSplit,
         source: revengeSource,
         outcome,
-        evidenceStatus: 'PUBLISHED_ANALYSIS'
+        evidenceStatus: 'UNRESOLVED'
       });
-      if (message) message.textContent = 'LUPIN BONUS';
+      if (message) message.textContent = 'REVENGE SUCCESS — 行先解析待ち';
     } else {
       core.kernelState = Object.freeze({
         ...core.kernelState,
