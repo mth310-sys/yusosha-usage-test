@@ -46,3 +46,19 @@ test('GT production profile separates 30G main from unresolved battle window wit
   expect(result.policy.continuationBattlePerGameMechanics).toBe('UNRESOLVED');
   expect(result.policy.continuationBattleDoesNotCreateFourthNormalStageResidenceBlock).toBe(true);
 });
+
+test('GT set phase runtime is loaded by the production page before stage presentation', async ({ page }) => {
+  await page.goto('/test_lupin_zero/');
+  await page.waitForLoadState('networkidle');
+
+  const runtime = await page.evaluate(() => ({
+    hasGetter: typeof window.__LUPIN_ZERO__?.getGoldenTimeSetPhaseState === 'function',
+    policy: window.__LUPIN_ZERO__?.goldenTimeSetPhasePolicy ?? null,
+    state: window.__LUPIN_ZERO__?.getGoldenTimeSetPhaseState?.() ?? null
+  }));
+
+  expect(runtime.hasGetter).toBe(true);
+  expect(runtime.policy.mainGames).toBe(30);
+  expect(runtime.policy.continuationBattlePerGameMechanics).toBe('UNRESOLVED');
+  expect(runtime.state.phase).toBe('MAIN');
+});
