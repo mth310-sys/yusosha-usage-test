@@ -1,5 +1,6 @@
 import { GameMode } from './game-flow-spec.js';
 import { resolveGoldRushGame } from './gold-rush-resolver.js';
+import { resolveBreakthroughGuarantee } from './breakthrough-guarantee-resolver.js';
 import { SeededRandomSource } from './random-source.js';
 
 const app = window.__LUPIN_ZERO__;
@@ -12,6 +13,7 @@ const stateValue = document.querySelector('#stateValue');
 const phaseBadge = document.querySelector('#phaseBadge');
 let returnExtraBonusGames = 0;
 let extraBonusGamesAtSpinStart = null;
+let pendingBreakthroughType = null;
 
 function snapshot() { return core.snapshot(); }
 function renderGoldRush() {
@@ -19,6 +21,17 @@ function renderGoldRush() {
   if (s.mode !== GameMode.GOLD_RUSH) return;
   if (stateValue) stateValue.textContent = `GOLD RUSH / STOCK ${s.goldenTimeStockCount ?? 0}`;
   if (phaseBadge) phaseBadge.textContent = 'GOLD RUSH';
+}
+
+function setNextGoldRushBreakthrough(type) {
+  if (type == null) {
+    pendingBreakthroughType = null;
+    return true;
+  }
+  const resolution = resolveBreakthroughGuarantee(type);
+  if (!resolution) return false;
+  pendingBreakthroughType = type;
+  return true;
 }
 
 function enterGoldRush() {
@@ -44,7 +57,9 @@ function settleGoldRushGame() {
   const s = snapshot();
   if (s.mode !== GameMode.GOLD_RUSH || s.state !== 'IDLE') return false;
   const resolution = resolveGoldRushGame(random);
-  const stockAdded = 1;
+  const breakthrough = pendingBreakthroughType ? resolveBreakthroughGuarantee(pendingBreakthroughType) : null;
+  pendingBreakthroughType = null;
+  const stockAdded = Math.max(1, breakthrough?.minimumGtStockAward ?? 1);
   const stockCount = (s.goldenTimeStockCount ?? 0) + stockAdded;
 
   core.kernelState = Object.freeze({
@@ -55,12 +70,16 @@ function settleGoldRushGame() {
   core.emit('golden-time-stock-added', {
     stockAdded,
     stockCount,
-    source: 'GOLD_RUSH_ODD_ALIGNMENT',
-    evidenceStatus: resolution.evidenceStatus
+    source: breakthrough ? 'GOLD_RUSH_BREAKTHROUGH' : 'GOLD_RUSH_ODD_ALIGNMENT',
+    breakthroughType: breakthrough?.type ?? null,
+    breakthroughLabel: breakthrough?.label ?? null,
+    evidenceStatus: breakthrough?.evidenceStatus ?? resolution.evidenceStatus
   });
 
   if (resolution.continued) {
-    if (message) message.textContent = `奇数揃い — STOCK ${stockCount}`;
+    if (message) message.textContent = breakthrough
+      ? `${breakthrough.label} — STOCK +${stockAdded} / 計${stockCount}`
+      : `奇数揃い — STOCK ${stockCount}`;
     renderGoldRush();
     return true;
   }
@@ -78,7 +97,9 @@ function settleGoldRushGame() {
       games: returnExtraBonusGames,
       evidenceStatus: 'MULTI_SOURCE_MATCH'
     });
-    if (message) message.textContent = 'GOLD RUSH END — EXTRA BONUS';
+    if (message) message.textContent = breakthrough
+      ? `${breakthrough.label} — STOCK +${stockAdded} / GOLD RUSH END — EXTRA BONUS`
+      : 'GOLD RUSH END — EXTRA BONUS';
     return true;
   }
 
@@ -90,7 +111,9 @@ function settleGoldRushGame() {
     modeResultEvidenceStatus: 'PUBLISHED_ANALYSIS'
   });
   core.emit('golden-time-battle-ready', { treasure: 1000000 });
-  if (message) message.textContent = 'GOLD RUSH END — 継続バトル';
+  if (message) message.textContent = breakthrough
+    ? `${breakthrough.label} — STOCK +${stockAdded} / GOLD RUSH END — 継続バトル`
+    : 'GOLD RUSH END — 継続バトル';
   return true;
 }
 
@@ -108,3 +131,4 @@ core.addEventListener('mode-enter', (event) => {
 
 window.__LUPIN_ZERO__.goldRushRandom = random;
 window.__LUPIN_ZERO__.enterGoldRush = enterGoldRush;
+window.__LUPIN_ZERO__.setNextGoldRushBreakthrough = setNextGoldRushBreakthrough;
