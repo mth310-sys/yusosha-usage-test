@@ -35,11 +35,17 @@ function snapshotState() {
   });
 }
 
-function configureSet(snapshot = core.snapshot()) {
+function configureSet(snapshot = core.snapshot(), { preserveScenario = false } = {}) {
   if (snapshot.mode !== GameMode.GOLDEN_TIME) return null;
-  const scenarioResolution = resolveGoldenTimeScenario(random, app.machineSetting ?? 1);
-  const stageResolution = resolveGoldenTimeInitialStage(random, scenarioResolution.scenario);
-  scenario = scenarioResolution.scenario;
+
+  let scenarioEvidenceStatus = 'PUBLISHED_ANALYSIS';
+  if (!preserveScenario || scenario == null) {
+    const scenarioResolution = resolveGoldenTimeScenario(random, app.machineSetting ?? 1);
+    scenario = scenarioResolution.scenario;
+    scenarioEvidenceStatus = scenarioResolution.evidenceStatus;
+  }
+
+  const stageResolution = resolveGoldenTimeInitialStage(random, scenario);
   stage = stageResolution.stage;
   stageIndex = stageResolution.stageIndex;
   setNumber = snapshot.goldenTimeSetNumber ?? 1;
@@ -50,6 +56,8 @@ function configureSet(snapshot = core.snapshot()) {
     stageIndex,
     setNumber,
     denominator: getGoldenTimeTreasureDenominatorForStage(stage),
+    scenarioPreservedFromArtInitialHit: preserveScenario,
+    scenarioEvidenceStatus,
     evidenceStatus: stageResolution.evidenceStatus
   });
   return snapshotState();
@@ -57,13 +65,15 @@ function configureSet(snapshot = core.snapshot()) {
 
 core.addEventListener('mode-enter', (event) => {
   if (event.detail.mode !== GameMode.GOLDEN_TIME) return;
-  configureSet(event.detail.snapshot);
+  configureSet(event.detail.snapshot, { preserveScenario: false });
 });
 
 core.addEventListener('golden-time-game-settled', (event) => {
   const snapshot = event.detail.snapshot;
   if (snapshot.mode !== GameMode.GOLDEN_TIME || snapshot.modeResult) return;
-  if (setNumber !== (snapshot.goldenTimeSetNumber ?? 1) || stage == null) configureSet(snapshot);
+  if (setNumber !== (snapshot.goldenTimeSetNumber ?? 1) || stage == null) {
+    configureSet(snapshot, { preserveScenario: scenario != null });
+  }
   gamesInSet += 1;
   if (gamesInSet > 0 && gamesInSet % GOLDEN_TIME_STAGE_POLICY.upgradeEveryGames === 0 && stageIndex != null) {
     const upgrade = resolveGoldenTimeStageUpgrade(random, scenario, stageIndex);
@@ -83,7 +93,7 @@ core.addEventListener('golden-time-game-settled', (event) => {
 });
 
 core.addEventListener('golden-time-continued', (event) => {
-  configureSet(event.detail.snapshot);
+  configureSet(event.detail.snapshot, { preserveScenario: true });
 });
 
 core.addEventListener('golden-time-ended', () => {
@@ -99,4 +109,4 @@ app.getGoldenTimeTreasureDenominator = () => getGoldenTimeTreasureDenominatorFor
 app.goldenTimeStagePolicy = GOLDEN_TIME_STAGE_POLICY;
 
 const initial = core.snapshot();
-if (initial.mode === GameMode.GOLDEN_TIME) configureSet(initial);
+if (initial.mode === GameMode.GOLDEN_TIME) configureSet(initial, { preserveScenario: false });
