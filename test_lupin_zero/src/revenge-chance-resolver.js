@@ -3,7 +3,9 @@ import { ReuseEvidenceStatus } from './reuse-registry.js';
 export const REVENGE_CHANCE_SPEC = Object.freeze({
   games: 10,
   averagePullbackPercent: 5.6,
-  destination: 'LUPIN_BONUS',
+  successDestinations: Object.freeze(['LUPIN_BONUS', 'GOLDEN_TIME']),
+  successDestinationSplit: null,
+  automaticSuccessDestination: null,
   bonusEndEntryDenominator: 25,
   bonusEndHitExpectationPercent: 39,
   publishedRatesByTreasure: Object.freeze({
@@ -49,9 +51,11 @@ export function resolveBonusEndRevengeOutcome(randomSource) {
     hit,
     draw,
     percent: REVENGE_CHANCE_SPEC.bonusEndHitExpectationPercent,
-    destination: hit ? REVENGE_CHANCE_SPEC.destination : null,
+    destination: null,
+    destinationCandidates: hit ? REVENGE_CHANCE_SPEC.successDestinations : Object.freeze([]),
+    destinationSplit: REVENGE_CHANCE_SPEC.successDestinationSplit,
     source: 'LUPIN_BONUS_END',
-    evidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS
+    evidenceStatus: hit ? ReuseEvidenceStatus.UNRESOLVED : ReuseEvidenceStatus.PUBLISHED_ANALYSIS
   });
 }
 
@@ -90,21 +94,25 @@ export function resolveRevengePullback(randomSource, treasure) {
       treasure,
       percent: null,
       destination: null,
+      destinationCandidates: Object.freeze([]),
       games: REVENGE_CHANCE_SPEC.games,
       evidenceStatus: ReuseEvidenceStatus.UNRESOLVED,
       method: 'NO_SUPPORTED_RATE_FOR_TREASURE'
     });
   }
   const draw = randomSource.nextFloat();
+  const hit = draw < rate.percent / 100;
   return Object.freeze({
     eligible: true,
-    hit: draw < rate.percent / 100,
+    hit,
     draw,
     treasure,
     percent: rate.percent,
-    destination: rate.percent > 0 ? REVENGE_CHANCE_SPEC.destination : null,
+    destination: null,
+    destinationCandidates: hit ? REVENGE_CHANCE_SPEC.successDestinations : Object.freeze([]),
+    destinationSplit: REVENGE_CHANCE_SPEC.successDestinationSplit,
     games: REVENGE_CHANCE_SPEC.games,
-    evidenceStatus: rate.evidenceStatus,
+    evidenceStatus: hit ? ReuseEvidenceStatus.UNRESOLVED : rate.evidenceStatus,
     method: rate.method
   });
 }
