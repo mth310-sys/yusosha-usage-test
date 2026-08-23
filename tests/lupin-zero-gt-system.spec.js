@@ -80,11 +80,23 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.spec.goldRush.continuationPercent).toBe(52.6);
   expect(result.spec.goldRush.averageGames).toBe(2.1);
 
-  expect(result.spec.continuationBattle.trigger).toBe('SET_GAMES_EXHAUSTED_WITHOUT_STOCK');
-  expect(result.spec.continuationBattle.publishedSetComposition).toBe('30G_MAIN_PLUS_10G_CONTINUATION_BATTLE');
-  expect(result.spec.continuationBattle.mainGames).toBe(30);
-  expect(result.spec.continuationBattle.presentationGames).toBe(10);
-  expect(result.spec.continuationBattle.compositionEvidenceStatus).toBe('PUBLISHED_ANALYSIS');
+  expect(result.spec.continuationBattle.trigger).toBe('SET_END_WITHOUT_STOCK');
+  expect(result.spec.continuationBattle.triggerEvidenceStatus).toBe('MULTI_SOURCE_MATCH');
+  expect(result.spec.continuationBattle.exactEntryGameNumber).toBeNull();
+  expect(result.spec.continuationBattle.exactEntryGameNumberStatus).toBe('UNRESOLVED');
+  expect(result.spec.continuationBattle.successEffect).toBe('NEXT_SET_AND_LUPIN_RUSH');
+  expect(result.spec.continuationBattle.opponents).toEqual([
+    'ZENIGATA',
+    'ZENIGATA_ROBO',
+    'LUPIN_GANG_ROBO',
+    'MASS_PRODUCED_ZENIGATA_ROBO',
+    'FUJIKO'
+  ]);
+  expect(result.spec.continuationBattle.opponentExpectationOrder).toEqual(result.spec.continuationBattle.opponents);
+  expect(result.spec.continuationBattle.opponentListEvidenceStatus).toBe('MULTI_SOURCE_MATCH');
+  expect(result.spec.continuationBattle.opponentDistribution).toBeNull();
+  expect(result.spec.continuationBattle.previousB4PresentationGamesCandidate).toBe(4);
+  expect(result.spec.continuationBattle.previousB4PresentationStructureStatus).toBe('REUSED_PREVIOUS_VERIFIED_PARTIAL_REQUIRES_ZERO_RECONFIRMATION');
   expect(result.spec.continuationBattle.exactPerGameBattleFlow).toBeNull();
   expect(result.spec.evidence.exactTreasureAwardTable).toBe('UNRESOLVED');
   expect(result.spec.evidence.lupinRushPatternExpectationOrder).toBe('MULTI_SOURCE_MATCH');
@@ -94,7 +106,11 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.spec.evidence.treasureHuntOccurrenceTrigger).toBe('UNRESOLVED');
   expect(result.spec.evidence.treasureHuntSuccessProbability).toBe('UNRESOLVED');
   expect(result.spec.evidence.treasureHuntToTreasureRushRoute).toBe('CONFLICT');
-  expect(result.spec.evidence.continuationBattleSetComposition).toBe('PUBLISHED_ANALYSIS');
+  expect(result.spec.evidence.continuationBattleSetEndTrigger).toBe('MULTI_SOURCE_MATCH');
+  expect(result.spec.evidence.continuationBattleExactEntryGameNumber).toBe('UNRESOLVED');
+  expect(result.spec.evidence.continuationBattleOpponentList).toBe('MULTI_SOURCE_MATCH');
+  expect(result.spec.evidence.continuationBattleOpponentDistribution).toBe('UNRESOLVED');
+  expect(result.spec.evidence.continuationBattlePreviousB4FourGamePresentation).toBe('REUSED_PREVIOUS_VERIFIED_PARTIAL_REQUIRES_ZERO_RECONFIRMATION');
   expect(result.spec.evidence.continuationBattlePerGameFlow).toBe('UNRESOLVED');
   expect(result.spec.policy.inferTreasurePointAwardAmounts).toBe(false);
   expect(result.spec.policy.inferTreasureHuntOccurrenceTrigger).toBe(false);
@@ -104,6 +120,8 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.spec.policy.inferRushPatternSelectionRates).toBe(false);
   expect(result.spec.policy.inferRushPerPatternAwardsFromOverallAverage).toBe(false);
   expect(result.spec.policy.inferContinuationBattlePerGameFlow).toBe(false);
+  expect(result.spec.policy.inferContinuationBattleEntryGameNumber).toBe(false);
+  expect(result.spec.policy.inferContinuationBattleOpponentDistribution).toBe(false);
   expect(result.spec.policy.interpolateUnlistedContinuationPoints).toBe(false);
 });
 
