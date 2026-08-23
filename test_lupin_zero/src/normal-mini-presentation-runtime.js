@@ -10,9 +10,11 @@ export const NORMAL_MINI_PRESENTATION_POLICY = Object.freeze({
   evidenceStatus: 'PRESENTATION_ONLY',
   affectsGameLogic: false,
   selectionSource: 'SPIN_ID_ONLY',
+  resultSource: 'RESOLVED_EVENT_ONLY',
   exactRealMachineOccurrenceRatesVerified: false,
   exactRealMachineTimingVerified: false,
-  patterns: Object.freeze(['LUPIN_ESCAPE', 'JIGEN_SHOT', 'GOEMON_SLASH', 'ZENIGATA_APPROACH'])
+  patterns: Object.freeze(['LUPIN_ESCAPE', 'JIGEN_SHOT', 'GOEMON_SLASH', 'ZENIGATA_APPROACH']),
+  resultClasses: Object.freeze(['NORMAL', 'PAY', 'RARE', 'CHANCE'])
 });
 
 const PATTERNS = NORMAL_MINI_PRESENTATION_POLICY.patterns;
@@ -21,6 +23,7 @@ let stoppedCount = 0;
 let overlay = null;
 let streak = null;
 let label = null;
+let clearTimer = null;
 
 function ensure() {
   const s = scene();
@@ -36,11 +39,17 @@ function ensure() {
   return true;
 }
 
+function cancelClearTimer() {
+  if (clearTimer?.remove) clearTimer.remove(false);
+  clearTimer = null;
+}
+
 function clearMini() {
   if (!ensure()) return false;
-  overlay.clear().setVisible(false);
-  streak.clear().setVisible(false);
-  label.setText('').setVisible(false);
+  cancelClearTimer();
+  overlay.clear().setVisible(false).setAlpha(1);
+  streak.clear().setVisible(false).setAlpha(1);
+  label.setText('').setVisible(false).setAlpha(1).setScale(1);
   active = null;
   stoppedCount = 0;
   return true;
@@ -56,10 +65,11 @@ function begin(pattern) {
   if (!ensure() || !pattern) return false;
   const s = scene();
   const { width, height } = s.scale;
+  cancelClearTimer();
   active = pattern;
   stoppedCount = 0;
-  overlay.clear().setVisible(true);
-  streak.clear().setVisible(true);
+  overlay.clear().setVisible(true).setAlpha(1);
+  streak.clear().setVisible(true).setAlpha(1);
 
   if (pattern === 'LUPIN_ESCAPE') {
     overlay.fillStyle(0xb21722, .12); overlay.fillTriangle(0, height, width * .55, 76, width, height);
@@ -79,7 +89,7 @@ function begin(pattern) {
     label.setText('ZENIGATA').setColor('#ffd28b');
   }
 
-  label.setVisible(true).setAlpha(.15);
+  label.setVisible(true).setAlpha(.15).setScale(1);
   s.tweens.add({ targets: label, alpha: .72, duration: 110, yoyo: true, repeat: 1 });
   return true;
 }
@@ -107,10 +117,63 @@ function onStop(reelIndex, complete) {
     streak.strokeRoundedRect(inset, 84 + stoppedCount * 4, width - inset * 2, height - 138 - stoppedCount * 8, 10);
   }
 
-  if (complete) {
-    label.setAlpha(1);
-    s.tweens.add({ targets: [overlay, streak, label], alpha: 0, duration: 180, delay: 90, onComplete: clearMini });
+  if (complete) label.setAlpha(1);
+  return true;
+}
+
+function classifyNormalRole(role, creditDelta = 0) {
+  if (role === 'PREMIUM' || role === 'LEGEND' || role === 'MB') return 'RARE';
+  if (role === 'REPLAY') return 'NORMAL';
+  if (Number(creditDelta) > 0) return 'PAY';
+  return 'NORMAL';
+}
+
+function finish(resultClass = 'NORMAL', detail = {}) {
+  if (!active || !ensure()) return false;
+  const s = scene();
+  const { width, height } = s.scale;
+  const pattern = active;
+  cancelClearTimer();
+  overlay.clear().setVisible(true).setAlpha(1);
+  streak.clear().setVisible(true).setAlpha(1);
+
+  const strong = resultClass === 'RARE' || resultClass === 'CHANCE';
+  const pay = resultClass === 'PAY';
+  const roleLabel = detail.role === 'REPLAY' ? 'REPLAY' : detail.role === 'MB' ? 'MB' : pay ? `${detail.creditDelta ?? 0} PAY` : '';
+
+  if (pattern === 'JIGEN_SHOT') {
+    const tone = strong ? 0xffe68c : pay ? 0xffd46a : 0xd9dde0;
+    streak.lineStyle(strong ? 5 : 3, tone, strong ? .95 : .68);
+    streak.lineBetween(22, height * .61, width - 24, height * .42);
+    streak.fillStyle(tone, strong ? .9 : .5); streak.fillCircle(width - 30, height * .42, strong ? 9 : 5);
+    label.setText(strong ? 'HIT!' : roleLabel || 'SHOT').setColor(strong ? '#fff1a6' : '#e9edf0');
+  } else if (pattern === 'GOEMON_SLASH') {
+    const tone = strong ? 0xfff5a6 : 0xf7f3dc;
+    streak.lineStyle(strong ? 6 : 3, tone, strong ? .95 : .64);
+    streak.lineBetween(22, height - 38, width - 26, 72);
+    if (strong) { streak.lineStyle(2, 0xffffff, .82); streak.lineBetween(54, height - 30, width - 58, 82); }
+    label.setText(strong ? '一閃' : roleLabel || 'SLASH').setColor(strong ? '#fff7bd' : '#f5f2df');
+  } else if (pattern === 'LUPIN_ESCAPE') {
+    overlay.fillStyle(strong ? 0xd52029 : 0x9f1720, strong ? .24 : .12); overlay.fillTriangle(0, height, width * .62, 70, width, height);
+    streak.lineStyle(strong ? 5 : 2, strong ? 0xffe878 : 0xffc95a, strong ? .9 : .5);
+    streak.lineBetween(0, height * .70, width, height * .42);
+    label.setText(strong ? 'CHANCE!' : roleLabel || 'ESCAPE').setColor(strong ? '#fff0a5' : '#ffe18a');
+    if (strong) app.pulseCharacterPresentation?.('CHANCE');
+  } else {
+    const escaped = strong || pay || detail.role === 'REPLAY';
+    const inset = escaped ? 44 : 58;
+    streak.lineStyle(strong ? 4 : 2, escaped ? 0xffd66f : 0xe05a44, strong ? .9 : .56);
+    streak.strokeRoundedRect(inset, 94, width - inset * 2, height - 166, 10);
+    label.setText(strong ? '突破!' : escaped ? (roleLabel || 'ESCAPE') : '追跡継続').setColor(strong ? '#fff0a0' : '#ffd28b');
   }
+
+  label.setVisible(true).setAlpha(1).setScale(strong ? 1.08 : 1);
+  if (strong) {
+    s.cameras.main.flash(90, 255, 222, 112, false);
+    s.cameras.main.shake(80, .0028);
+  }
+  s.tweens.add({ targets: [overlay, streak, label], alpha: 0, duration: 220, delay: strong ? 250 : 150, onComplete: clearMini });
+  core.emit('normal-mini-presentation-finished', { pattern, resultClass, role: detail.role ?? null, evidenceStatus: NORMAL_MINI_PRESENTATION_POLICY.evidenceStatus });
   return true;
 }
 
@@ -122,12 +185,21 @@ core.addEventListener('spin-start', (event) => {
 });
 
 core.addEventListener('reel-stop', (event) => onStop(event.detail.reelIndex, event.detail.complete === true));
-core.addEventListener('mode-enter', () => clearMini());
+core.addEventListener('normal-role-settled', (event) => finish(classifyNormalRole(event.detail.role, event.detail.creditDelta), event.detail));
+core.addEventListener('mode-enter', (event) => {
+  const entered = event.detail.mode;
+  if (active && [GameMode.ODOROBO_ZONE, GameMode.FUJIKO_ZONE].includes(entered)) return finish('CHANCE', { role: 'CHANCE_EYE' });
+  clearMini();
+});
 core.addEventListener('raiun-high-enter', () => clearMini());
 core.addEventListener('spin-end', () => {
-  if (stoppedCount >= 3) return;
-  clearMini();
+  if (!active) return;
+  if (stoppedCount < 3) return clearMini();
+  const s = scene();
+  cancelClearTimer();
+  clearTimer = s.time.delayedCall(420, () => { if (active) finish('NORMAL', {}); });
 });
 
 app.normalMiniPresentationPolicy = NORMAL_MINI_PRESENTATION_POLICY;
 app.clearNormalMiniPresentation = clearMini;
+app.finishNormalMiniPresentation = finish;
