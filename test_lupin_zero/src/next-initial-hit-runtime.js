@@ -41,6 +41,18 @@ function enterReservedDestination(source = 'CHANCE_ZONE_SUCCESS') {
   return entered;
 }
 
+function consumeConfirmedPresentation(source = 'CONFIRMED_PRESENTATION') {
+  const s = core.snapshot();
+  if (s.mode !== GameMode.NORMAL || s.modeResult) return false;
+  core.kernelState = Object.freeze({
+    ...core.kernelState,
+    modeResult: 'PENDING_BONUS_OR_ART',
+    modeResultEvidenceStatus: 'PUBLISHED_ANALYSIS'
+  });
+  core.emit('confirmed-initial-hit-ready', { source, reservation: reserved, evidenceStatus: 'PUBLISHED_ANALYSIS' });
+  return enterReservedDestination(source);
+}
+
 core.addEventListener('chance-zone-success', () => {
   enterReservedDestination('CHANCE_ZONE_SUCCESS');
 });
@@ -54,3 +66,4 @@ app.nextInitialHitRandom = random;
 app.nextInitialHitReservation = reserved;
 app.reserveNextInitialHit = reserveNext;
 app.enterReservedInitialHit = enterReservedDestination;
+app.consumeConfirmedPresentation = consumeConfirmedPresentation;
