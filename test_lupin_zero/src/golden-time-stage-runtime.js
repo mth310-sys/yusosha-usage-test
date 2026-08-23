@@ -14,7 +14,6 @@ if (!app?.core) throw new Error('LUPIN ZERO core is required');
 const core = app.core;
 const random = new SeededRandomSource(0x20160813);
 const message = document.querySelector('#message');
-const stateValue = document.querySelector('#stateValue');
 let scenario = null;
 let stage = null;
 let stageIndex = null;
@@ -25,9 +24,20 @@ function stageLabel(value) {
   return String(value ?? '').replace('_A', '').replace('_B', '').replaceAll('_', ' ');
 }
 
+function snapshotState() {
+  return Object.freeze({
+    scenario,
+    stage,
+    stageIndex,
+    setNumber,
+    gamesInSet,
+    denominator: getGoldenTimeTreasureDenominatorForStage(stage)
+  });
+}
+
 function configureSet(snapshot = core.snapshot()) {
   if (snapshot.mode !== GameMode.GOLDEN_TIME) return null;
-  const scenarioResolution = resolveGoldenTimeScenario(random, 1);
+  const scenarioResolution = resolveGoldenTimeScenario(random, app.machineSetting ?? 1);
   const stageResolution = resolveGoldenTimeInitialStage(random, scenarioResolution.scenario);
   scenario = scenarioResolution.scenario;
   stage = stageResolution.stage;
@@ -45,16 +55,10 @@ function configureSet(snapshot = core.snapshot()) {
   return snapshotState();
 }
 
-function snapshotState() {
-  return Object.freeze({
-    scenario,
-    stage,
-    stageIndex,
-    setNumber,
-    gamesInSet,
-    denominator: getGoldenTimeTreasureDenominatorForStage(stage)
-  });
-}
+core.addEventListener('mode-enter', (event) => {
+  if (event.detail.mode !== GameMode.GOLDEN_TIME) return;
+  configureSet(event.detail.snapshot);
+});
 
 core.addEventListener('golden-time-game-settled', (event) => {
   const snapshot = event.detail.snapshot;
@@ -82,8 +86,16 @@ core.addEventListener('golden-time-continued', (event) => {
   configureSet(event.detail.snapshot);
 });
 
+core.addEventListener('golden-time-ended', () => {
+  scenario = null;
+  stage = null;
+  stageIndex = null;
+  setNumber = null;
+  gamesInSet = 0;
+});
+
 app.getGoldenTimeStageState = snapshotState;
-app.getGoldenTimeTreasureDenominator = () => getGoldenTimeTreasureDenominatorForStage(stage) ?? 10;
+app.getGoldenTimeTreasureDenominator = () => getGoldenTimeTreasureDenominatorForStage(stage) ?? null;
 app.goldenTimeStagePolicy = GOLDEN_TIME_STAGE_POLICY;
 
 const initial = core.snapshot();
