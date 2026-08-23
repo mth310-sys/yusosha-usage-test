@@ -136,15 +136,32 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     continuationEffect: 'ART_SET_STOCK'
   }),
   continuationBattle: Object.freeze({
-    trigger: 'SET_GAMES_EXHAUSTED_WITHOUT_STOCK',
+    trigger: 'SET_END_WITHOUT_STOCK',
+    triggerEvidenceStatus: 'MULTI_SOURCE_MATCH',
+    exactEntryGameNumber: null,
+    exactEntryGameNumberStatus: 'UNRESOLVED',
     lotteryBasis: 'HELD_TREASURE_POINTS',
-    successEffect: 'NEXT_SET',
-    publishedSetComposition: '30G_MAIN_PLUS_10G_CONTINUATION_BATTLE',
-    mainGames: 30,
-    presentationGames: 10,
-    compositionEvidenceStatus: 'PUBLISHED_ANALYSIS',
+    successEffect: 'NEXT_SET_AND_LUPIN_RUSH',
+    opponents: Object.freeze([
+      'ZENIGATA',
+      'ZENIGATA_ROBO',
+      'LUPIN_GANG_ROBO',
+      'MASS_PRODUCED_ZENIGATA_ROBO',
+      'FUJIKO'
+    ]),
+    opponentExpectationOrder: Object.freeze([
+      'ZENIGATA',
+      'ZENIGATA_ROBO',
+      'LUPIN_GANG_ROBO',
+      'MASS_PRODUCED_ZENIGATA_ROBO',
+      'FUJIKO'
+    ]),
+    opponentListEvidenceStatus: 'MULTI_SOURCE_MATCH',
+    opponentDistribution: null,
+    previousB4PresentationGamesCandidate: 4,
+    previousB4PresentationStructureStatus: 'REUSED_PREVIOUS_VERIFIED_PARTIAL_REQUIRES_ZERO_RECONFIRMATION',
     exactPerGameBattleFlow: null,
-    note: 'Treasure points are not a direct percentage conversion; published continuation expectations are used. The exact 10G battle presentation sequence remains unresolved.'
+    note: 'Published analyses verify battle after set end when no stock remains, treasure-based continuation, the five-opponent expectation order, and LUPIN RUSH after victory. The exact entry game number, opponent distribution, and per-game battle sequence remain unresolved. The prior B4 4G presentation profile is retained as a same-machine reuse candidate only.'
   }),
   evidence: Object.freeze({
     treasureMaxAndExtraBonusRoute: 'MULTI_SOURCE_MATCH',
@@ -174,7 +191,11 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     goldRushCoreRoute: 'MULTI_SOURCE_MATCH',
     goldRushExactContinuation: 'PUBLISHED_ANALYSIS',
     continuationBattleCore: 'MULTI_SOURCE_MATCH',
-    continuationBattleSetComposition: 'PUBLISHED_ANALYSIS',
+    continuationBattleSetEndTrigger: 'MULTI_SOURCE_MATCH',
+    continuationBattleExactEntryGameNumber: 'UNRESOLVED',
+    continuationBattleOpponentList: 'MULTI_SOURCE_MATCH',
+    continuationBattleOpponentDistribution: 'UNRESOLVED',
+    continuationBattlePreviousB4FourGamePresentation: 'REUSED_PREVIOUS_VERIFIED_PARTIAL_REQUIRES_ZERO_RECONFIRMATION',
     continuationBattlePerGameFlow: 'UNRESOLVED'
   }),
   policy: Object.freeze({
@@ -186,6 +207,8 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     inferRushPatternSelectionRates: false,
     inferRushPerPatternAwardsFromOverallAverage: false,
     inferContinuationBattlePerGameFlow: false,
+    inferContinuationBattleEntryGameNumber: false,
+    inferContinuationBattleOpponentDistribution: false,
     interpolateUnlistedContinuationPoints: false
   })
 });
