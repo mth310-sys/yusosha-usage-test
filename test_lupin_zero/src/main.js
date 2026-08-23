@@ -15,6 +15,7 @@ import { resolveInitialRaiunPoints, resolveRaiunPointAcquisition } from './raiun
 import { resolveRaiunHighGame } from './raiun-high-resolver.js';
 import { resolveRaiunModeGame } from './raiun-mode-resolver.js';
 import { createGoldenTimeSetProfile, resolveGoldenTimeContinuation } from './golden-time-resolver.js';
+import { resolveGoldenTimeTreasureAcquisition } from './golden-time-treasure-resolver.js';
 import { GameMode } from './game-flow-spec.js';
 import { SeededRandomSource } from './random-source.js';
 
@@ -31,6 +32,7 @@ const raiunPointRandom = new SeededRandomSource(0x20160806);
 const raiunHighRandom = new SeededRandomSource(0x20160807);
 const raiunModeRandom = new SeededRandomSource(0x20160808);
 const goldenTimeContinuationRandom = new SeededRandomSource(0x20160809);
+const goldenTimeTreasureRandom = new SeededRandomSource(0x2016080a);
 const physicalRoleSession = new PhysicalRoleSession({ randomSource: physicalRoleRandom, setting: MACHINE_SETTING });
 const machineRoot = document.querySelector('.machine');
 const lcdShell = document.querySelector('.lcd-shell');
@@ -163,9 +165,11 @@ function enterGoldenTime() {
 function settleCurrentGoldenTimeGame() {
   const snapshot = core.snapshot();
   if (snapshot.mode !== GameMode.GOLDEN_TIME || snapshot.modeGamesRemaining <= 0 || snapshot.modeResult) return null;
+  const acquisition = resolveGoldenTimeTreasureAcquisition(goldenTimeTreasureRandom);
+  if (acquisition.hit) core.addGoldenTimeTreasure(acquisition);
   const profile = createGoldenTimeSetProfile();
   core.settleGoldenTimeGame(profile.payoutCoinsPerGame, profile.initialTreasureEvidenceStatus);
-  return profile;
+  return Object.freeze({ profile, acquisition });
 }
 
 function resolveCurrentGoldenTimeBattle() {
@@ -259,9 +263,16 @@ core.addEventListener('raiun-mode-art-success', (event) => {
   render();
 });
 
+core.addEventListener('golden-time-treasure-acquired', (event) => {
+  render(event.detail.snapshot);
+  ui.message.textContent = event.detail.extraBonusReached
+    ? '100万T — EXTRA BONUS'
+    : `+${Math.round(event.detail.added / 10000)}万T`;
+});
+
 core.addEventListener('golden-time-game-settled', (event) => {
   render(event.detail.snapshot);
-  if (event.detail.remaining > 0) ui.message.textContent = `GOLDEN TIME ${event.detail.remaining}G`;
+  if (event.detail.remaining > 0 && !String(ui.message.textContent).startsWith('+')) ui.message.textContent = `GOLDEN TIME ${event.detail.remaining}G`;
 });
 
 core.addEventListener('golden-time-battle-ready', () => {
@@ -417,6 +428,7 @@ window.__LUPIN_ZERO__ = {
   raiunHighRandom,
   raiunModeRandom,
   goldenTimeContinuationRandom,
+  goldenTimeTreasureRandom,
   physicalRoleSession,
   machineSetting: MACHINE_SETTING
 };
