@@ -58,7 +58,9 @@ test('production profile keeps unresolved initial Rush awards replaceable', () =
   expect(profile.initialTreasure).toBe(350000);
   expect(profile.initialTreasureEvidenceStatus).toBe('INFERRED_HIGH_CONFIDENCE');
   expect(profile.exactTreasureAcquisitionDuringSetImplemented).toBe(false);
-  expect(GOLDEN_TIME_PRODUCTION_POLICY.extraBonusAtOneMillionImplemented).toBe(false);
+  expect(GOLDEN_TIME_PRODUCTION_POLICY.extraBonusAtOneMillionImplemented).toBe(true);
+  expect(GOLDEN_TIME_PRODUCTION_POLICY.goldRushRuntimeImplemented).toBe(false);
+  expect(GOLDEN_TIME_PRODUCTION_POLICY.treasureRushAutomaticEntryImplemented).toBe(false);
 });
 
 test('forty Golden Time games net plus eighty coins and reach continuation battle', () => {
