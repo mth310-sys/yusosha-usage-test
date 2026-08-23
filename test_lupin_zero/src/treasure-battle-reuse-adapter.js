@@ -20,12 +20,15 @@ export const TREASURE_BATTLE_REUSE_POLICY = Object.freeze({
   reuseMode: 'DIRECT_IMPORT_NO_DUPLICATION',
   reuseRegistryApproved: TREASURE_BATTLE_REUSE_EVALUATION.reusable,
   reuseRegistryMode: TREASURE_BATTLE_REUSE_EVALUATION.mode,
+  setEndWithoutStockTriggerStatus: 'MULTI_SOURCE_MATCH',
+  exactBattleEntryGameNumberStatus: 'UNRESOLVED',
   presentationStructureStatus: 'REUSED_PREVIOUS_VERIFIED_PARTIAL_REQUIRES_ZERO_RECONFIRMATION',
-  opponentListStatus: 'REUSED_PREVIOUS_VERIFIED_PARTIAL_REQUIRES_ZERO_RECONFIRMATION',
+  opponentListStatus: 'MULTI_SOURCE_MATCH',
+  opponentExpectationOrderStatus: 'MULTI_SOURCE_MATCH',
   opponentDistributionStatus: 'UNRESOLVED',
   chanceUpDistributionStatus: 'UNRESOLVED',
-  exactBattleEntryTimingStatus: 'UNRESOLVED',
   autoDriveBattleFromPreviousFourGameProfile: false,
+  noSyntheticEntryGameNumber: true,
   noSyntheticOpponentDistribution: true,
   noSyntheticChanceUpDistribution: true
 });
