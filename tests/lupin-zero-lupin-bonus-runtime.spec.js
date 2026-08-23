@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { SequenceRandomSource } from '../test_lupin_zero/src/random-source.js';
 import { LUPIN_BONUS_SPEC, createLupinBonusProfile, resolveLupinBonusOutcome } from '../test_lupin_zero/src/lupin-bonus-resolver.js';
+import { REVENGE_CHANCE_SPEC, resolveBonusEndRevengeEntry, resolveBonusEndRevengeOutcome } from '../test_lupin_zero/src/revenge-chance-resolver.js';
 
 test('Lupin Bonus structure is preserved', () => {
   const profile = createLupinBonusProfile();
@@ -33,7 +34,18 @@ test('thirty-five game credit model adds seventy net credits', () => {
   expect(returned - consumed).toBe(70);
 });
 
-test('post-failure Revenge Chance route stays unresolved', () => {
+test('post-failure Revenge Chance uses published 1 in 25 entry and 39 percent hit expectation', () => {
   expect(LUPIN_BONUS_SPEC.failureMayRouteToRevengeChance).toBe(true);
-  expect(LUPIN_BONUS_SPEC.failureRevengeEntryRate).toBeNull();
+  expect(LUPIN_BONUS_SPEC.failureRevengeEntryDenominator).toBe(25);
+  expect(LUPIN_BONUS_SPEC.failureRevengeEntryRatePercent).toBe(4);
+  expect(LUPIN_BONUS_SPEC.failureRevengeHitExpectationPercent).toBe(39);
+  expect(REVENGE_CHANCE_SPEC.bonusEndEntryDenominator).toBe(25);
+  expect(REVENGE_CHANCE_SPEC.bonusEndHitExpectationPercent).toBe(39);
+});
+
+test('bonus-end Revenge Chance boundaries are deterministic', () => {
+  expect(resolveBonusEndRevengeEntry(new SequenceRandomSource([0.039999])).hit).toBe(true);
+  expect(resolveBonusEndRevengeEntry(new SequenceRandomSource([0.04])).hit).toBe(false);
+  expect(resolveBonusEndRevengeOutcome(new SequenceRandomSource([0.389999])).hit).toBe(true);
+  expect(resolveBonusEndRevengeOutcome(new SequenceRandomSource([0.39])).hit).toBe(false);
 });
