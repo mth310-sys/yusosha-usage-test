@@ -24,7 +24,6 @@ function renderLupinBonus() {
 }
 
 function enterLupinBonus(source = 'UNKNOWN') {
-  const s = core.snapshot();
   const profile = createLupinBonusProfile();
   hiddenOutcome = resolveLupinBonusOutcome(random);
   core.kernelState = Object.freeze({
@@ -61,17 +60,29 @@ function finishLupinBonus() {
     return true;
   }
 
+  const revenge = typeof app.tryEnterBonusEndRevengeChance === 'function'
+    ? app.tryEnterBonusEndRevengeChance()
+    : Object.freeze({ entered: false, entry: null, outcome: null });
+
+  core.emit('lupin-bonus-failed', {
+    outcome,
+    revengeChanceEntered: revenge.entered,
+    revengeChanceEntryDenominator: profile.failureRevengeEntryDenominator,
+    revengeChanceHitExpectationPercent: profile.failureRevengeHitExpectationPercent,
+    evidenceStatus: outcome.evidenceStatus
+  });
+
+  if (revenge.entered) {
+    if (message) message.textContent = 'REVENGE CHANCE';
+    return true;
+  }
+
   core.kernelState = Object.freeze({
     ...core.kernelState,
     mode: GameMode.NORMAL,
     modeGamesRemaining: null,
     modeResult: null,
     modeResultEvidenceStatus: null
-  });
-  core.emit('lupin-bonus-failed', {
-    outcome,
-    revengeChanceEntryRateStatus: profile.failureRevengeEntryRate === null ? 'UNRESOLVED' : 'KNOWN',
-    evidenceStatus: outcome.evidenceStatus
   });
   core.emit('mode-exit', { from: GameMode.LUPIN_BONUS, to: GameMode.NORMAL });
   if (message) message.textContent = 'LUPIN BONUS END';
