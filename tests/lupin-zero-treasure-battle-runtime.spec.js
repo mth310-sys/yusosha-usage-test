@@ -77,6 +77,17 @@ test('Treasure Battle uses the existing BET START STOP loop for four physical sp
   expect(seeded.policy.battleBetChangesCredit).toBe(false);
   expect(seeded.policy.syntheticZeroPayoutForbidden).toBe(true);
 
+  expect(seeded.runtime.opponentCandidates.map((x) => x.key)).toEqual([
+    'ZENIGATA',
+    'ZENIGATA_ROBO',
+    'LUPIN_GANG_ROBO',
+    'MASS_PRODUCED',
+    'FUJIKO'
+  ]);
+  expect(seeded.runtime.selectedOpponent).toBeNull();
+  expect(seeded.runtime.opponentDistribution).toBeNull();
+  expect(seeded.policy.opponentDistributionEvidenceStatus).toBe('UNRESOLVED');
+
   for (let game = 1; game <= 3; game++) {
     const played = await playOneBattleGame(page);
     expect(played.maxBetAccepted).toBe(true);
@@ -87,6 +98,7 @@ test('Treasure Battle uses the existing BET START STOP loop for four physical sp
     expect(played.runtime.presentation.completedGames).toBe(game);
     expect(played.runtime.presentation.hiddenOutcome).toBe('HIDDEN');
     expect(played.runtime.presentation.revealedOutcome).toBeNull();
+    expect(played.runtime.selectedOpponent).toBeNull();
     expect(played.snapshot.credit).toBe(100);
     expect(played.snapshot.modeResult).toBe('PENDING_GT_CONTINUATION');
   }
