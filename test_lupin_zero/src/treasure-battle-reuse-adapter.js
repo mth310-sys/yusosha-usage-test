@@ -2,8 +2,11 @@ import {
   TREASURE_BATTLE_PROFILE as PREVIOUS_B4_TREASURE_BATTLE_PROFILE,
   getBattlePhase as getPreviousB4BattlePhase
 } from '../../test_lupin_b4/js/treasure-battle-profile.js';
+import { TREASURE_BATTLE_PROFILE as BACKUP_B4_TREASURE_BATTLE_PROFILE } from '../../backup_lupin_b4_pre_cabinet/js/treasure-battle-profile.js';
 import { evaluateReuseCandidate, ReuseEvidenceStatus } from './reuse-registry.js';
 import { LUPIN_ZERO_TARGET } from './target-lock.js';
+
+const priorProfileMatchesBackup = JSON.stringify(PREVIOUS_B4_TREASURE_BATTLE_PROFILE) === JSON.stringify(BACKUP_B4_TREASURE_BATTLE_PROFILE);
 
 export const TREASURE_BATTLE_REUSE_EVALUATION = evaluateReuseCandidate({
   sourcePath: 'test_lupin_b4/js/treasure-battle-profile.js',
@@ -13,6 +16,18 @@ export const TREASURE_BATTLE_REUSE_EVALUATION = evaluateReuseCandidate({
   productionBehavior: false,
   zeroYen: true,
   adaptationCost: 'LOW'
+});
+
+export const TREASURE_BATTLE_PRESENTATION_CONTRACT = Object.freeze({
+  phaseCount: PREVIOUS_B4_TREASURE_BATTLE_PROFILE.totalGames,
+  phaseKeys: Object.freeze([1, 2, 3, 4].map((game) => getPreviousB4BattlePhase(game)?.key ?? null)),
+  hiddenOutcomeUntilFinalPhase: true,
+  outcomeLotteryOwnedByPresentation: false,
+  opponentLotteryOwnedByPresentation: false,
+  chanceUpLotteryOwnedByPresentation: false,
+  winRoute: 'LUPIN_RUSH',
+  lossMayRouteToRevengeChance: true,
+  evidenceStatus: 'PRESENTATION_ONLY'
 });
 
 export const TREASURE_BATTLE_REUSE_POLICY = Object.freeze({
@@ -26,7 +41,7 @@ export const TREASURE_BATTLE_REUSE_POLICY = Object.freeze({
     'ea963bd717c60b4e448ccf076280d06b0e355e1d',
     'a865c731e38e6e588fedd7c41a256711bc1c0c4f'
   ]),
-  priorProfilePreservedInBackup: true,
+  priorProfilePreservedInBackup: priorProfileMatchesBackup,
   reuseMode: 'DIRECT_IMPORT_NO_DUPLICATION',
   reuseRegistryApproved: TREASURE_BATTLE_REUSE_EVALUATION.reusable,
   reuseRegistryMode: TREASURE_BATTLE_REUSE_EVALUATION.mode,
