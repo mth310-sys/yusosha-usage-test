@@ -81,6 +81,11 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.spec.goldRush.averageGames).toBe(2.1);
 
   expect(result.spec.continuationBattle.trigger).toBe('SET_GAMES_EXHAUSTED_WITHOUT_STOCK');
+  expect(result.spec.continuationBattle.publishedSetComposition).toBe('30G_MAIN_PLUS_10G_CONTINUATION_BATTLE');
+  expect(result.spec.continuationBattle.mainGames).toBe(30);
+  expect(result.spec.continuationBattle.presentationGames).toBe(10);
+  expect(result.spec.continuationBattle.compositionEvidenceStatus).toBe('PUBLISHED_ANALYSIS');
+  expect(result.spec.continuationBattle.exactPerGameBattleFlow).toBeNull();
   expect(result.spec.evidence.exactTreasureAwardTable).toBe('UNRESOLVED');
   expect(result.spec.evidence.lupinRushPatternExpectationOrder).toBe('MULTI_SOURCE_MATCH');
   expect(result.spec.evidence.lupinRushPatternSelectionRates).toBe('PUBLISHED_ANALYSIS');
@@ -89,6 +94,8 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.spec.evidence.treasureHuntOccurrenceTrigger).toBe('UNRESOLVED');
   expect(result.spec.evidence.treasureHuntSuccessProbability).toBe('UNRESOLVED');
   expect(result.spec.evidence.treasureHuntToTreasureRushRoute).toBe('CONFLICT');
+  expect(result.spec.evidence.continuationBattleSetComposition).toBe('PUBLISHED_ANALYSIS');
+  expect(result.spec.evidence.continuationBattlePerGameFlow).toBe('UNRESOLVED');
   expect(result.spec.policy.inferTreasurePointAwardAmounts).toBe(false);
   expect(result.spec.policy.inferTreasureHuntOccurrenceTrigger).toBe(false);
   expect(result.spec.policy.inferTreasureHuntSuccessProbability).toBe(false);
@@ -96,6 +103,7 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.spec.policy.inferStageTransitionRates).toBe(false);
   expect(result.spec.policy.inferRushPatternSelectionRates).toBe(false);
   expect(result.spec.policy.inferRushPerPatternAwardsFromOverallAverage).toBe(false);
+  expect(result.spec.policy.inferContinuationBattlePerGameFlow).toBe(false);
   expect(result.spec.policy.interpolateUnlistedContinuationPoints).toBe(false);
 });
 
@@ -122,7 +130,12 @@ test('GOLDEN TIME stage scenarios stay exact across setting, initial stage and 1
   expect(scenario.upgradeStepByScenario.D).toEqual({ oneStep:25, twoSteps:75 });
   expect(scenario.stageResidenceWindowGames).toBe(30);
   expect(scenario.stageResidenceWindowEvidenceStatus).toBe('INFERRED_HIGH_CONFIDENCE');
+  expect(scenario.normalStageUpgradeCheckpoints).toEqual([10, 20]);
+  expect(scenario.finalStageCheckpointGame).toBe(30);
+  expect(scenario.finalStageCheckpointTransition).toBe('IKUKAN_ONLY_IF_REACHED');
+  expect(scenario.finalStageCheckpointEvidenceStatus).toBe('PUBLISHED_ANALYSIS');
   expect(scenario.visibleStageLagRuleRequired).toBe(false);
   expect(result.evidence.stageResidenceWindow).toBe('INFERRED_HIGH_CONFIDENCE');
   expect(result.evidence.visibleStageLagRule).toBe('NOT_REQUIRED_BY_PUBLISHED_RESIDENCE_RECONCILIATION');
+  expect(result.evidence.stageThirtyGameCheckpoint).toBe('PUBLISHED_ANALYSIS');
 });
