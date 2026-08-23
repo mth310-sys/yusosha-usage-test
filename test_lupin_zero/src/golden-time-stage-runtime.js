@@ -3,7 +3,7 @@ import { SeededRandomSource } from './random-source.js';
 import {
   resolveGoldenTimeScenario,
   resolveGoldenTimeInitialStage,
-  resolveGoldenTimeStageUpgrade,
+  resolveGoldenTimeStageCheckpoint,
   getGoldenTimeTreasureDenominatorForStage,
   GOLDEN_TIME_STAGE_POLICY
 } from './golden-time-stage-resolver.js';
@@ -75,21 +75,37 @@ core.addEventListener('golden-time-game-settled', (event) => {
     configureSet(snapshot, { preserveScenario: scenario != null });
   }
   gamesInSet += 1;
-  if (gamesInSet > 0 && gamesInSet % GOLDEN_TIME_STAGE_POLICY.upgradeEveryGames === 0 && stageIndex != null) {
-    const upgrade = resolveGoldenTimeStageUpgrade(random, scenario, stageIndex);
-    stage = upgrade.stage;
-    stageIndex = upgrade.toStageIndex;
-    core.emit('golden-time-stage-upgraded', {
-      scenario,
-      stage,
-      stageIndex,
-      steps: upgrade.steps,
-      gamesInSet,
-      denominator: getGoldenTimeTreasureDenominatorForStage(stage),
-      evidenceStatus: upgrade.evidenceStatus
-    });
-    if (message) message.textContent = `GT STAGE — ${stageLabel(stage)}`;
-  }
+
+  const checkpoint = stageIndex == null
+    ? null
+    : resolveGoldenTimeStageCheckpoint(random, scenario, stageIndex, gamesInSet);
+  if (!checkpoint) return;
+
+  core.emit('golden-time-stage-checkpoint', {
+    scenario,
+    gamesInSet,
+    applied: checkpoint.applied,
+    reason: checkpoint.reason,
+    stage,
+    stageIndex,
+    candidateStage: checkpoint.candidateStage,
+    candidateStageIndex: checkpoint.candidateStageIndex ?? checkpoint.toStageIndex,
+    evidenceStatus: checkpoint.evidenceStatus
+  });
+
+  if (!checkpoint.applied) return;
+  stage = checkpoint.stage;
+  stageIndex = checkpoint.toStageIndex;
+  core.emit('golden-time-stage-upgraded', {
+    scenario,
+    stage,
+    stageIndex,
+    steps: checkpoint.steps,
+    gamesInSet,
+    denominator: getGoldenTimeTreasureDenominatorForStage(stage),
+    evidenceStatus: checkpoint.evidenceStatus
+  });
+  if (message) message.textContent = `GT STAGE — ${stageLabel(stage)}`;
 });
 
 core.addEventListener('golden-time-continued', (event) => {
