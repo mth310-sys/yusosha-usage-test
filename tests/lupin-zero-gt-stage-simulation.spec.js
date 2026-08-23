@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('GT stage simulation detects visible-residence mismatch without recalibrating internal published tables', async ({ page }) => {
+test('GT stage simulation reconciles published residence ratios over the recovered 30G stage window', async ({ page }) => {
   await page.goto('/test_lupin_zero/');
   await page.waitForLoadState('networkidle');
 
@@ -15,23 +15,31 @@ test('GT stage simulation detects visible-residence mismatch without recalibrati
   });
 
   expect(results.diagnosticPolicy.publishedReferenceIsVisibleStageResidence).toBe(true);
-  expect(results.diagnosticPolicy.currentModelTracksInternalStageDirectly).toBe(true);
-  expect(results.diagnosticPolicy.visibleStageLagRuleRecovered).toBe(false);
+  expect(results.diagnosticPolicy.blocksPerStageResidenceWindow).toBe(3);
+  expect(results.diagnosticPolicy.stageResidenceWindowGames).toBe(30);
+  expect(results.diagnosticPolicy.stageResidenceWindowEvidenceStatus).toBe('INFERRED_HIGH_CONFIDENCE');
+  expect(results.diagnosticPolicy.internalABRanksMapDirectlyToSameVisibleStage).toBe(true);
+  expect(results.diagnosticPolicy.visibleStageLagRequiredByPublishedSources).toBe(false);
   expect(results.diagnosticPolicy.autoCalibrateInternalRatesToVisibleReference).toBe(false);
-  expect(results.stagePolicy.visibleStageLagImplemented).toBe(false);
-  expect(results.stagePolicy.autoCalibrateInternalStageRatesToVisibleResidence).toBe(false);
-  expect(results.stagePolicy.publishedVisibleResidenceValidationStatus).toBe('MISMATCH_EXPECTED_UNTIL_VISIBLE_STAGE_LAG_RULE_RECOVERED');
+  expect(results.diagnosticPolicy.runtimeGtSetLengthChangedByThisDiagnostic).toBe(false);
+
+  expect(results.stagePolicy.visibleStageLagRuleRequired).toBe(false);
+  expect(results.stagePolicy.publishedVisibleResidenceReconcilesWithThreeTenGameStageBlocks).toBe(true);
+  expect(results.stagePolicy.stageResidenceWindowGames).toBe(30);
+  expect(results.stagePolicy.runtimeGtSetLengthChangedByResidenceInference).toBe(false);
 
   for (const run of results.runs) {
     expect(run.iterations).toBe(20000);
-    expect(run.diagnosis).toBe('VISIBLE_STAGE_MAPPING_MISMATCH_REQUIRES_LAG_RULE_RECOVERY');
-    expect(run.maxAbsoluteErrorPct).toBeGreaterThan(5);
+    expect(run.diagnosis).toBe('PUBLISHED_TABLES_RECONCILED_OVER_30G_STAGE_WINDOW');
+    expect(run.maxAbsoluteErrorPct).toBeLessThanOrEqual(2);
     expect(run.ikukanPctOfAllGames).toBeGreaterThan(0);
     expect(run.publishedReference).not.toBeNull();
   }
 
   const setting1 = results.runs[0];
   expect(setting1.publishedReference).toEqual({ JAPAN:38.9, SWITZERLAND:40.1, CARIBBEAN:14.8, UNDERGROUND_CITY:6.1 });
-  expect(setting1.simulatedNormalResidencePct.JAPAN).toBeLessThan(33);
-  expect(setting1.simulatedNormalResidencePct.CARIBBEAN).toBeGreaterThan(20);
+  expect(setting1.simulatedNormalResidencePct.JAPAN).toBeGreaterThan(36);
+  expect(setting1.simulatedNormalResidencePct.JAPAN).toBeLessThan(41);
+  expect(setting1.simulatedNormalResidencePct.CARIBBEAN).toBeGreaterThan(13);
+  expect(setting1.simulatedNormalResidencePct.CARIBBEAN).toBeLessThan(17);
 });
