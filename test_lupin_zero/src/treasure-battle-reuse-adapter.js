@@ -51,6 +51,7 @@ export const TREASURE_BATTLE_REUSE_POLICY = Object.freeze({
   presentationStructureProductionUse: 'PRESENTATION_ONLY_WHEN_BATTLE_ENTRY_IS_ALREADY_RESOLVED',
   opponentListStatus: 'MULTI_SOURCE_MATCH',
   opponentExpectationOrderStatus: 'MULTI_SOURCE_MATCH',
+  opponentExactExpectationPercentProductionUse: 'WITHHELD_PENDING_ZERO_INDEPENDENT_RECONFIRMATION',
   opponentDistributionStatus: 'UNRESOLVED',
   chanceUpDistributionStatus: 'UNRESOLVED',
   autoDriveBattleFromPreviousFourGameProfile: false,
@@ -65,4 +66,12 @@ export function getReusableTreasureBattlePresentationProfile() {
 
 export function getReusableTreasureBattlePhase(game) {
   return getPreviousB4BattlePhase(game);
+}
+
+export function getReusableTreasureBattleOpponentCandidates() {
+  return Object.freeze(PREVIOUS_B4_TREASURE_BATTLE_PROFILE.opponents.map((opponent) => Object.freeze({
+    key: opponent.key,
+    label: opponent.label,
+    premium: opponent.premium === true
+  })));
 }
