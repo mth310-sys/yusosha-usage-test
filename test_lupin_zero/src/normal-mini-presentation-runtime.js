@@ -13,8 +13,11 @@ export const NORMAL_MINI_PRESENTATION_POLICY = Object.freeze({
   resultSource: 'RESOLVED_EVENT_ONLY',
   exactRealMachineOccurrenceRatesVerified: false,
   exactRealMachineTimingVerified: false,
+  exactRealMachineExpectationValuesInvented: false,
   patterns: Object.freeze(['LUPIN_ESCAPE', 'JIGEN_SHOT', 'GOEMON_SLASH', 'ZENIGATA_APPROACH']),
-  resultClasses: Object.freeze(['NORMAL', 'PAY', 'RARE', 'CHANCE'])
+  resultClasses: Object.freeze(['NORMAL', 'PAY', 'RARE', 'CHANCE']),
+  presentationLevels: Object.freeze(['QUIET', 'MEDIUM', 'STRONG', 'CONTRADICTION']),
+  contradictionRule: 'A weak-looking Lupin escape that resolves to RARE is treated as a presentation-only contradiction reveal.'
 });
 
 const PATTERNS = NORMAL_MINI_PRESENTATION_POLICY.patterns;
@@ -29,7 +32,7 @@ function ensure() {
   const s = scene();
   if (!s?.add) return false;
   if (overlay) return true;
-  const { width, height } = s.scale;
+  const { width } = s.scale;
   overlay = s.add.graphics().setDepth(1.65).setVisible(false);
   streak = s.add.graphics().setDepth(1.7).setVisible(false);
   label = s.add.text(width / 2, 88, '', {
@@ -61,6 +64,13 @@ function choosePattern(spinId, mode) {
   return PATTERNS[Math.abs(Number(spinId) || 0) % PATTERNS.length];
 }
 
+function resolvePresentationLevel(pattern, resultClass) {
+  if (pattern === 'LUPIN_ESCAPE' && resultClass === 'RARE') return 'CONTRADICTION';
+  if (resultClass === 'RARE' || resultClass === 'CHANCE') return 'STRONG';
+  if (resultClass === 'PAY') return 'MEDIUM';
+  return 'QUIET';
+}
+
 function begin(pattern) {
   if (!ensure() || !pattern) return false;
   const s = scene();
@@ -72,7 +82,7 @@ function begin(pattern) {
   streak.clear().setVisible(true).setAlpha(1);
 
   if (pattern === 'LUPIN_ESCAPE') {
-    overlay.fillStyle(0xb21722, .12); overlay.fillTriangle(0, height, width * .55, 76, width, height);
+    overlay.fillStyle(0xb21722, .08); overlay.fillTriangle(0, height, width * .55, 76, width, height);
     label.setText('ESCAPE').setColor('#ffe18a');
     app.pulseCharacterPresentation?.('LUPIN');
   } else if (pattern === 'JIGEN_SHOT') {
@@ -102,7 +112,7 @@ function onStop(reelIndex, complete) {
   streak.clear().setVisible(true);
 
   if (active === 'LUPIN_ESCAPE') {
-    streak.lineStyle(2, 0xffd65c, .45 + stoppedCount * .1);
+    streak.lineStyle(2, 0xffd65c, .35 + stoppedCount * .08);
     streak.lineBetween(8, 105 + stoppedCount * 19, width - 14, 88 + stoppedCount * 11);
   } else if (active === 'JIGEN_SHOT') {
     const y = 92 + stoppedCount * 27;
@@ -133,12 +143,14 @@ function finish(resultClass = 'NORMAL', detail = {}) {
   const s = scene();
   const { width, height } = s.scale;
   const pattern = active;
+  const level = resolvePresentationLevel(pattern, resultClass);
   cancelClearTimer();
   overlay.clear().setVisible(true).setAlpha(1);
   streak.clear().setVisible(true).setAlpha(1);
 
-  const strong = resultClass === 'RARE' || resultClass === 'CHANCE';
-  const pay = resultClass === 'PAY';
+  const strong = level === 'STRONG' || level === 'CONTRADICTION';
+  const contradiction = level === 'CONTRADICTION';
+  const pay = level === 'MEDIUM';
   const roleLabel = detail.role === 'REPLAY' ? 'REPLAY' : detail.role === 'MB' ? 'MB' : pay ? `${detail.creditDelta ?? 0} PAY` : '';
 
   if (pattern === 'JIGEN_SHOT') {
@@ -154,11 +166,19 @@ function finish(resultClass = 'NORMAL', detail = {}) {
     if (strong) { streak.lineStyle(2, 0xffffff, .82); streak.lineBetween(54, height - 30, width - 58, 82); }
     label.setText(strong ? '一閃' : roleLabel || 'SLASH').setColor(strong ? '#fff7bd' : '#f5f2df');
   } else if (pattern === 'LUPIN_ESCAPE') {
-    overlay.fillStyle(strong ? 0xd52029 : 0x9f1720, strong ? .24 : .12); overlay.fillTriangle(0, height, width * .62, 70, width, height);
-    streak.lineStyle(strong ? 5 : 2, strong ? 0xffe878 : 0xffc95a, strong ? .9 : .5);
-    streak.lineBetween(0, height * .70, width, height * .42);
-    label.setText(strong ? 'CHANCE!' : roleLabel || 'ESCAPE').setColor(strong ? '#fff0a5' : '#ffe18a');
-    if (strong) app.pulseCharacterPresentation?.('CHANCE');
+    if (contradiction) {
+      overlay.fillStyle(0x070707, .82); overlay.fillRect(0, 72, width, height - 72);
+      streak.lineStyle(6, 0xfff1a0, .98); streak.lineBetween(0, height * .72, width, height * .35);
+      streak.lineStyle(2, 0xffffff, .85); streak.lineBetween(0, height * .35, width, height * .72);
+      label.setText('違和感 → CHANCE!').setColor('#fff7bf');
+      app.pulseCharacterPresentation?.('CHANCE');
+    } else {
+      overlay.fillStyle(strong ? 0xd52029 : 0x9f1720, strong ? .24 : .10); overlay.fillTriangle(0, height, width * .62, 70, width, height);
+      streak.lineStyle(strong ? 5 : 2, strong ? 0xffe878 : 0xffc95a, strong ? .9 : .45);
+      streak.lineBetween(0, height * .70, width, height * .42);
+      label.setText(strong ? 'CHANCE!' : roleLabel || 'ESCAPE').setColor(strong ? '#fff0a5' : '#ffe18a');
+      if (strong) app.pulseCharacterPresentation?.('CHANCE');
+    }
   } else {
     const escaped = strong || pay || detail.role === 'REPLAY';
     const inset = escaped ? 44 : 58;
@@ -167,13 +187,13 @@ function finish(resultClass = 'NORMAL', detail = {}) {
     label.setText(strong ? '突破!' : escaped ? (roleLabel || 'ESCAPE') : '追跡継続').setColor(strong ? '#fff0a0' : '#ffd28b');
   }
 
-  label.setVisible(true).setAlpha(1).setScale(strong ? 1.08 : 1);
+  label.setVisible(true).setAlpha(1).setScale(contradiction ? 1.16 : strong ? 1.08 : 1);
   if (strong) {
-    s.cameras.main.flash(90, 255, 222, 112, false);
-    s.cameras.main.shake(80, .0028);
+    s.cameras.main.flash(contradiction ? 150 : 90, 255, 222, 112, false);
+    s.cameras.main.shake(contradiction ? 130 : 80, contradiction ? .0042 : .0028);
   }
-  s.tweens.add({ targets: [overlay, streak, label], alpha: 0, duration: 220, delay: strong ? 250 : 150, onComplete: clearMini });
-  core.emit('normal-mini-presentation-finished', { pattern, resultClass, role: detail.role ?? null, evidenceStatus: NORMAL_MINI_PRESENTATION_POLICY.evidenceStatus });
+  s.tweens.add({ targets: [overlay, streak, label], alpha: 0, duration: 220, delay: contradiction ? 420 : strong ? 250 : 150, onComplete: clearMini });
+  core.emit('normal-mini-presentation-finished', { pattern, resultClass, presentationLevel: level, role: detail.role ?? null, evidenceStatus: NORMAL_MINI_PRESENTATION_POLICY.evidenceStatus });
   return true;
 }
 
@@ -201,5 +221,6 @@ core.addEventListener('spin-end', () => {
 });
 
 app.normalMiniPresentationPolicy = NORMAL_MINI_PRESENTATION_POLICY;
+app.resolveNormalMiniPresentationLevel = resolvePresentationLevel;
 app.clearNormalMiniPresentation = clearMini;
 app.finishNormalMiniPresentation = finish;
