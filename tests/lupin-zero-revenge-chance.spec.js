@@ -8,9 +8,12 @@ import {
 import { GameMode, getVerifiedFlowLinks } from '../test_lupin_zero/src/game-flow-spec.js';
 
 
-test('published Revenge Chance pullback table is preserved', () => {
+test('published Revenge Chance pullback table and timing semantics are preserved', () => {
   expect(REVENGE_CHANCE_SPEC.games).toBe(10);
   expect(REVENGE_CHANCE_SPEC.averagePullbackPercent).toBe(5.6);
+  expect(REVENGE_CHANCE_SPEC.gtBattlePullbackLotteryTiming).toBe('TREASURE_BATTLE_LOSS');
+  expect(REVENGE_CHANCE_SPEC.gtBattleRevengeChanceRole).toBe('PULLBACK_WIN_PRESENTATION_AFTER_LOTTERY_HIT');
+  expect(REVENGE_CHANCE_SPEC.rerollGtBattlePullbackInsideRevengeChance).toBe(false);
   expect(REVENGE_CHANCE_SPEC.successDestinations).toEqual(['LUPIN_BONUS', 'GOLDEN_TIME']);
   expect(REVENGE_CHANCE_SPEC.successDestinationSplit).toBeNull();
   expect(REVENGE_CHANCE_SPEC.automaticSuccessDestination).toBeNull();
