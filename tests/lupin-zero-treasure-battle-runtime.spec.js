@@ -41,10 +41,14 @@ async function playOneBattleGame(page) {
   return page.evaluate(() => {
     const app = window.__LUPIN_ZERO__;
     const core = app.core;
+    const creditBefore = core.snapshot().credit;
     const maxBetAccepted = core.maxBetNow();
+    const creditAfterBet = core.snapshot().credit;
     const startAccepted = core.start();
     const stops = [core.stop(0), core.stop(1), core.stop(2)];
     return {
+      creditBefore,
+      creditAfterBet,
       maxBetAccepted,
       startAccepted,
       stops,
@@ -69,24 +73,31 @@ test('Treasure Battle uses the existing BET START STOP loop for four physical sp
   expect(seeded.policy.battleRoleLottery).toBeNull();
   expect(seeded.policy.battlePayoutCoins).toBeNull();
   expect(seeded.policy.battleRoleAndPayoutEvidenceStatus).toBe('UNRESOLVED');
+  expect(seeded.policy.economyAccounting).toBe('SUSPENDED_UNTIL_BATTLE_ROLE_AND_PAYOUT_ARE_RESOLVED');
+  expect(seeded.policy.battleBetChangesCredit).toBe(false);
+  expect(seeded.policy.syntheticZeroPayoutForbidden).toBe(true);
 
   for (let game = 1; game <= 3; game++) {
     const played = await playOneBattleGame(page);
     expect(played.maxBetAccepted).toBe(true);
+    expect(played.creditAfterBet).toBe(played.creditBefore);
     expect(played.startAccepted).toBe(true);
     expect(played.stops).toEqual([true, true, true]);
     expect(played.runtime.active).toBe(true);
     expect(played.runtime.presentation.completedGames).toBe(game);
     expect(played.runtime.presentation.hiddenOutcome).toBe('HIDDEN');
     expect(played.runtime.presentation.revealedOutcome).toBeNull();
+    expect(played.snapshot.credit).toBe(100);
     expect(played.snapshot.modeResult).toBe('PENDING_GT_CONTINUATION');
   }
 
   const finalGame = await playOneBattleGame(page);
   expect(finalGame.maxBetAccepted).toBe(true);
+  expect(finalGame.creditAfterBet).toBe(finalGame.creditBefore);
   expect(finalGame.startAccepted).toBe(true);
   expect(finalGame.stops).toEqual([true, true, true]);
   expect(finalGame.runtime.active).toBe(false);
+  expect(finalGame.snapshot.credit).toBe(100);
   expect(finalGame.snapshot.mode).toBe('GOLDEN_TIME');
   expect(finalGame.snapshot.modeResult).toBeNull();
   expect(finalGame.snapshot.modeGamesRemaining).toBe(40);
