@@ -7,18 +7,7 @@ export const FlowEvidence = Object.freeze({
 });
 
 export const GameMode = Object.freeze({
-  NORMAL: 'NORMAL',
-  WANTED_CHANCE: 'WANTED_CHANCE',
-  ODOROBO_ZONE: 'ODOROBO_ZONE',
-  FUJIKO_ZONE: 'FUJIKO_ZONE',
-  RAIUN_MODE: 'RAIUN_MODE',
-  LUPIN_BONUS: 'LUPIN_BONUS',
-  GOLDEN_TIME: 'GOLDEN_TIME',
-  TREASURE_RUSH: 'TREASURE_RUSH',
-  EXTRA_BONUS: 'EXTRA_BONUS',
-  GOLD_RUSH: 'GOLD_RUSH',
-  REVENGE_CHANCE: 'REVENGE_CHANCE',
-  LEGEND_GATE: 'LEGEND_GATE'
+  NORMAL: 'NORMAL', WANTED_CHANCE: 'WANTED_CHANCE', ODOROBO_ZONE: 'ODOROBO_ZONE', FUJIKO_ZONE: 'FUJIKO_ZONE', RAIUN_MODE: 'RAIUN_MODE', LUPIN_BONUS: 'LUPIN_BONUS', GOLDEN_TIME: 'GOLDEN_TIME', TREASURE_RUSH: 'TREASURE_RUSH', EXTRA_BONUS: 'EXTRA_BONUS', GOLD_RUSH: 'GOLD_RUSH', REVENGE_CHANCE: 'REVENGE_CHANCE', LEGEND_GATE: 'LEGEND_GATE'
 });
 
 export const GAME_FLOW_SPEC = Object.freeze({
@@ -41,7 +30,21 @@ export const GAME_FLOW_SPEC = Object.freeze({
     Object.freeze({ mode: GameMode.WANTED_CHANCE, fact: 'LIQUID_REEL_CHANCE_EYE_RATES_KNOWN', evidence: 'MULTI_SOURCE_MATCH', automaticEntryRoute: null, automaticEntryProbability: null }),
     Object.freeze({ mode: GameMode.ODOROBO_ZONE, fact: 'SUCCESS_DESTINATION_IS_LUPIN_BONUS_OR_GOLDEN_TIME', evidence: 'MULTI_SOURCE_MATCH', exactBonusVsArtSplit: null }),
     Object.freeze({ mode: GameMode.FUJIKO_ZONE, fact: 'SUCCESS_DESTINATION_IS_LUPIN_BONUS_OR_GOLDEN_TIME', evidence: 'MULTI_SOURCE_MATCH', exactBonusVsArtSplit: null }),
-    Object.freeze({ mode: GameMode.TREASURE_RUSH, fact: 'ENTRY_ON_TREASURE_HUNT_SUCCESS', evidence: 'MULTI_SOURCE_MATCH', automaticTreasureHuntOccurrenceRate: null, treasureHuntSuccessRate: null }),
+    Object.freeze({
+      mode: GameMode.TREASURE_RUSH,
+      fact: 'ENTRY_ON_TREASURE_HUNT_SUCCESS',
+      evidence: 'MULTI_SOURCE_MATCH',
+      automaticTreasureHuntOccurrenceRate: null,
+      treasureHuntSuccessRate: null,
+      exactRoleByRoleLottery: null,
+      productionCalibration: Object.freeze({
+        denominator: 175,
+        source: 'SETTING6_SHOWROOM_1750_ART_GAMES_EXCLUDING_SPECIAL_ZONES_10_TREASURE_RUSHES',
+        triggerObservation: 'MOST_RECORDED_ENTRIES_GREEN_CHANCE_EYE',
+        evidence: 'INFERRED_HIGH_CONFIDENCE',
+        replaceable: true
+      })
+    }),
     Object.freeze({ mode: GameMode.REVENGE_CHANCE, fact: 'TEN_GAME_PULLBACK_ANNOUNCEMENT_AFTER_TREASURE_BATTLE_LOSS', evidence: 'PUBLISHED_ANALYSIS', perGameSuccessRate: null }),
     Object.freeze({ mode: GameMode.LUPIN_BONUS, fact: 'FAILURE_MAY_ROUTE_TO_REVENGE_CHANCE', evidence: 'MULTI_SOURCE_MATCH', revengeEntryRate: null }),
     Object.freeze({ mode: GameMode.LUPIN_BONUS, fact: 'ART_EXPECTATION_ABOUT_50_PERCENT_BUT_EXACT_PER_ROLE_LOTTERY_UNRESOLVED', evidence: 'PUBLISHED_ANALYSIS', exactPerRoleLottery: null })
@@ -49,14 +52,13 @@ export const GAME_FLOW_SPEC = Object.freeze({
   policy: Object.freeze({
     inferMissingLinks: false,
     inferAutomaticEntryProbability: false,
+    allowDocumentedHighConfidenceProductionCalibration: true,
+    requireCalibrationReplaceable: true,
     interpolateUnknownTransitionRates: false
   })
 });
 
-export function getVerifiedFlowLinks(fromMode) {
-  return GAME_FLOW_SPEC.links.filter((link) => link.from === fromMode);
-}
-
+export function getVerifiedFlowLinks(fromMode) { return GAME_FLOW_SPEC.links.filter((link) => link.from === fromMode); }
 export function getChanceEyeDenominator(level, mode = GameMode.NORMAL) {
   const eye = VERIFIED_SPEC.liquidReel.chanceEyes[level];
   if (!eye) return null;
