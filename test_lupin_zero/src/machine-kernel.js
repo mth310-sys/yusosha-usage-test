@@ -10,7 +10,8 @@ export const KernelPhase = Object.freeze({
 export const ModeResult = Object.freeze({
   NONE: null,
   PENDING_BONUS_OR_ART: 'PENDING_BONUS_OR_ART',
-  PENDING_GOLDEN_TIME: 'PENDING_GOLDEN_TIME'
+  PENDING_GOLDEN_TIME: 'PENDING_GOLDEN_TIME',
+  PENDING_GT_CONTINUATION: 'PENDING_GT_CONTINUATION'
 });
 
 function isPostGamePhase(phase) {
@@ -42,7 +43,10 @@ export function createMachineState({ credit = 50, maxBet = 3 } = {}) {
     raiunHighGamesRemaining: 0,
     raiunHighRank: 'LOW',
     raiunHighLastResult: null,
-    raiunModeLastResult: null
+    raiunModeLastResult: null,
+    goldenTimeTreasure: 0,
+    goldenTimeSetNumber: 0,
+    goldenTimeLastContinuation: null
   });
 }
 
@@ -52,7 +56,8 @@ function freezeState(state) {
     stopped: Object.freeze([...state.stopped]),
     wantedWindow: state.wantedWindow ? Object.freeze({ ...state.wantedWindow }) : null,
     raiunHighLastResult: state.raiunHighLastResult ? Object.freeze({ ...state.raiunHighLastResult }) : null,
-    raiunModeLastResult: state.raiunModeLastResult ? Object.freeze({ ...state.raiunModeLastResult }) : null
+    raiunModeLastResult: state.raiunModeLastResult ? Object.freeze({ ...state.raiunModeLastResult }) : null,
+    goldenTimeLastContinuation: state.goldenTimeLastContinuation ? Object.freeze({ ...state.goldenTimeLastContinuation }) : null
   });
 }
 
@@ -174,7 +179,6 @@ export function reduceMachine(state, command = {}) {
     if (!isPostGamePhase(state.phase) || state.mode !== GameMode.NORMAL || state.raiunHighGamesRemaining <= 0) return result(state, [], false);
     const resolution = command.resolution;
     if (!resolution || resolution.rank !== state.raiunHighRank || typeof resolution.hit !== 'boolean') return result(state, [], false);
-
     if (resolution.hit) {
       const next = { ...state, mode: GameMode.RAIUN_MODE, modeGamesRemaining: 20, modeEvidenceStatus: resolution.evidenceStatus ?? 'MULTI_SOURCE_MATCH', raiunHighGamesRemaining: 0, raiunHighLastResult: { ...resolution }, raiunModeLastResult: null };
       return result(next, [
@@ -182,7 +186,6 @@ export function reduceMachine(state, command = {}) {
         { type: 'MODE_ENTER', mode: GameMode.RAIUN_MODE, games: 20, evidenceStatus: resolution.evidenceStatus ?? 'MULTI_SOURCE_MATCH' }
       ]);
     }
-
     const remaining = state.raiunHighGamesRemaining - 1;
     const next = { ...state, raiunHighGamesRemaining: remaining, raiunHighLastResult: { ...resolution } };
     const events = [{ type: 'RAIUN_HIGH_GAME_RESOLVED', rank: state.raiunHighRank, hit: false, remaining, resolution }];
@@ -210,14 +213,7 @@ export function reduceMachine(state, command = {}) {
     const resolution = command.resolution;
     if (!resolution || typeof resolution.artHit !== 'boolean' || !Number.isInteger(resolution.payoutCoins) || resolution.payoutCoins < 0) return result(state, [], false);
     const remaining = state.modeGamesRemaining - 1;
-    const base = {
-      ...state,
-      credit: state.credit + resolution.payoutCoins,
-      lastSettledRole: 'RAIUN_MODE_GAME',
-      lastPayout: resolution.payoutCoins,
-      raiunModeLastResult: { ...resolution }
-    };
-
+    const base = { ...state, credit: state.credit + resolution.payoutCoins, lastSettledRole: 'RAIUN_MODE_GAME', lastPayout: resolution.payoutCoins, raiunModeLastResult: { ...resolution } };
     if (resolution.artHit) {
       const next = { ...base, modeGamesRemaining: 0, modeResult: ModeResult.PENDING_GOLDEN_TIME, modeResultEvidenceStatus: resolution.destinationEvidenceStatus ?? 'MULTI_SOURCE_MATCH' };
       return result(next, [
@@ -225,11 +221,78 @@ export function reduceMachine(state, command = {}) {
         { type: 'RAIUN_MODE_ART_SUCCESS', successPresentation: resolution.successPresentation, destination: GameMode.GOLDEN_TIME, evidenceStatus: resolution.destinationEvidenceStatus ?? 'MULTI_SOURCE_MATCH' }
       ]);
     }
-
     const next = { ...base, modeGamesRemaining: remaining };
     const events = [{ type: 'RAIUN_MODE_GAME_SETTLED', payoutCoins: resolution.payoutCoins, remaining, artHit: false, evidenceStatus: resolution.evidenceStatus }];
     if (remaining === 0) events.push({ type: 'MODE_WINDOW_EXHAUSTED', mode: GameMode.RAIUN_MODE });
     return result(next, events);
+  }
+
+  if (type === 'ENTER_GOLDEN_TIME') {
+    if (!isPostGamePhase(state.phase) || state.modeResult !== ModeResult.PENDING_GOLDEN_TIME) return result(state, [], false);
+    const profile = command.profile;
+    if (!profile || !Number.isInteger(profile.games) || profile.games <= 0 || !Number.isInteger(profile.initialTreasure) || profile.initialTreasure < 0) return result(state, [], false);
+    const next = {
+      ...state,
+      mode: GameMode.GOLDEN_TIME,
+      modeGamesRemaining: profile.games,
+      modeEvidenceStatus: profile.evidenceStatus ?? 'PUBLISHED_ANALYSIS',
+      modeResult: ModeResult.NONE,
+      modeResultEvidenceStatus: null,
+      goldenTimeTreasure: profile.initialTreasure,
+      goldenTimeSetNumber: state.goldenTimeSetNumber + 1,
+      goldenTimeLastContinuation: null
+    };
+    return result(next, [{ type: 'MODE_ENTER', mode: GameMode.GOLDEN_TIME, games: profile.games, evidenceStatus: profile.evidenceStatus ?? 'PUBLISHED_ANALYSIS', treasure: profile.initialTreasure }]);
+  }
+
+  if (type === 'SETTLE_GOLDEN_TIME_GAME') {
+    if (!isPostGamePhase(state.phase) || state.mode !== GameMode.GOLDEN_TIME || !Number.isInteger(state.modeGamesRemaining) || state.modeGamesRemaining <= 0 || state.modeResult) return result(state, [], false);
+    const payoutCoins = command.payoutCoins;
+    const evidenceStatus = command.evidenceStatus ?? 'INFERRED_HIGH_CONFIDENCE';
+    if (!Number.isInteger(payoutCoins) || payoutCoins < 0) return result(state, [], false);
+    const remaining = state.modeGamesRemaining - 1;
+    const next = {
+      ...state,
+      credit: state.credit + payoutCoins,
+      lastSettledRole: 'GOLDEN_TIME_GAME',
+      lastPayout: payoutCoins,
+      modeGamesRemaining: remaining,
+      modeResult: remaining === 0 ? ModeResult.PENDING_GT_CONTINUATION : state.modeResult,
+      modeResultEvidenceStatus: remaining === 0 ? 'PUBLISHED_ANALYSIS' : state.modeResultEvidenceStatus
+    };
+    const events = [{ type: 'GOLDEN_TIME_GAME_SETTLED', payoutCoins, remaining, treasure: state.goldenTimeTreasure, evidenceStatus }];
+    if (remaining === 0) events.push({ type: 'GOLDEN_TIME_BATTLE_READY', treasure: state.goldenTimeTreasure });
+    return result(next, events);
+  }
+
+  if (type === 'RESOLVE_GOLDEN_TIME_CONTINUATION') {
+    if (!isPostGamePhase(state.phase) || state.mode !== GameMode.GOLDEN_TIME || state.modeResult !== ModeResult.PENDING_GT_CONTINUATION) return result(state, [], false);
+    const resolution = command.resolution;
+    const profile = command.profile;
+    if (!resolution || typeof resolution.continued !== 'boolean' || !profile || !Number.isInteger(profile.games) || profile.games <= 0) return result(state, [], false);
+    if (resolution.continued) {
+      const next = {
+        ...state,
+        modeGamesRemaining: profile.games,
+        modeResult: ModeResult.NONE,
+        modeResultEvidenceStatus: null,
+        goldenTimeTreasure: profile.initialTreasure,
+        goldenTimeSetNumber: state.goldenTimeSetNumber + 1,
+        goldenTimeLastContinuation: { ...resolution }
+      };
+      return result(next, [{ type: 'GOLDEN_TIME_CONTINUED', treasure: resolution.treasure, continuationPercent: resolution.continuationPercent, setNumber: next.goldenTimeSetNumber, evidenceStatus: resolution.evidenceStatus }]);
+    }
+    const next = {
+      ...state,
+      mode: GameMode.NORMAL,
+      modeGamesRemaining: null,
+      modeEvidenceStatus: 'VERIFIED_LINK',
+      modeResult: ModeResult.NONE,
+      modeResultEvidenceStatus: null,
+      goldenTimeTreasure: 0,
+      goldenTimeLastContinuation: { ...resolution }
+    };
+    return result(next, [{ type: 'GOLDEN_TIME_ENDED', treasure: resolution.treasure, continuationPercent: resolution.continuationPercent, setNumber: state.goldenTimeSetNumber, evidenceStatus: resolution.evidenceStatus }]);
   }
 
   if (type === 'EXIT_RAIUN_MODE') {
