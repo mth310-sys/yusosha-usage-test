@@ -20,8 +20,9 @@ function snapshotState() {
     phase,
     gamesSettled,
     setNumber,
-    mainGames: GOLDEN_TIME_SET_PHASE_POLICY.mainGames,
-    evidenceStatus: GOLDEN_TIME_SET_PHASE_POLICY.evidenceStatus,
+    stageResidenceWindowGames: GOLDEN_TIME_SET_PHASE_POLICY.stageResidenceWindowGames,
+    stageResidenceWindowEvidenceStatus: GOLDEN_TIME_SET_PHASE_POLICY.stageResidenceWindowEvidenceStatus,
+    continuationBattleExactEntryGame: GOLDEN_TIME_SET_PHASE_POLICY.continuationBattleExactEntryGame,
     continuationBattlePerGameMechanics: GOLDEN_TIME_SET_PHASE_POLICY.continuationBattlePerGameMechanics
   });
 }
@@ -48,15 +49,17 @@ core.addEventListener('golden-time-game-settled', (event) => {
       to: phase,
       gamesSettled,
       setNumber,
-      evidenceStatus: GOLDEN_TIME_SET_PHASE_POLICY.evidenceStatus
+      evidenceStatus: phase === 'POST_STAGE_WINDOW_UNRESOLVED'
+        ? GOLDEN_TIME_SET_PHASE_POLICY.stageResidenceWindowEvidenceStatus
+        : GOLDEN_TIME_SET_PHASE_POLICY.totalApproxGamesEvidenceStatus
     });
-    if (phase === 'CONTINUATION_BATTLE') {
-      core.emit('golden-time-continuation-battle-enter', {
+    if (phase === 'POST_STAGE_WINDOW_UNRESOLVED') {
+      core.emit('golden-time-post-stage-window-enter', {
         gamesSettled,
         remainingApproxGames: snapshot.modeGamesRemaining,
         setNumber,
-        perGameMechanics: 'UNRESOLVED',
-        evidenceStatus: GOLDEN_TIME_SET_PHASE_POLICY.evidenceStatus
+        battleEntryGame: null,
+        battleEntryGameEvidenceStatus: GOLDEN_TIME_SET_PHASE_POLICY.continuationBattleExactEntryGameEvidenceStatus
       });
     }
   }
