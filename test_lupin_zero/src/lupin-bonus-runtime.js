@@ -120,20 +120,28 @@ core.addEventListener('spin-end', (event) => {
 
   if (remaining === profile.finalBattleGames && !battleState) {
     battleState = createLupinBonusBattleState(hiddenOutcome);
-    core.emit('lupin-bonus-battle-enter', { games: battleState.totalGames, opponent: 'ZENIGATA', evidenceStatus: battleState.evidenceStatus });
-    if (message) message.textContent = '銭形バトル';
+    core.emit('lupin-bonus-battle-enter', {
+      games: battleState.totalGames,
+      opponent: 'ZENIGATA',
+      structure: 'ZENIGATA_ATTACK_POINTS_AND_AVOIDANCE',
+      evidenceStatus: battleState.evidenceStatus
+    });
+    if (message) message.textContent = '銭形バトル — 攻撃を回避せよ';
   } else if (beforeRemaining <= profile.finalBattleGames && battleState) {
     battleState = advanceLupinBonusBattle(battleState);
     core.emit('lupin-bonus-battle-step', {
       step: battleState.step,
       remaining: battleState.gamesRemaining,
+      phase: battleState.phase,
+      presentationCue: battleState.presentationCue,
+      avoidanceResolved: battleState.avoidanceResolved,
       revealed: battleState.revealed,
       result: battleState.result,
       destination: battleState.destination,
       evidenceStatus: battleState.evidenceStatus
     });
-    if (message && !battleState.revealed) message.textContent = `銭形バトル STEP ${battleState.step}`;
-    if (message && battleState.revealed) message.textContent = battleState.result === 'WIN' ? '銭形撃破!' : '銭形バトル 敗北';
+    if (message && !battleState.revealed) message.textContent = `銭形の攻撃 — 回避せよ ${battleState.step}/5`;
+    if (message && battleState.revealed) message.textContent = battleState.result === 'WIN' ? '攻撃回避 — 銭形撃破!' : '回避失敗 — 銭形バトル敗北';
   } else if (remaining > 0 && message) {
     message.textContent = `LUPIN BONUS ${remaining}G`;
   }
