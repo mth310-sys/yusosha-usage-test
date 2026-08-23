@@ -75,6 +75,10 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     }),
     stageResidenceWindowGames: 30,
     stageResidenceWindowEvidenceStatus: 'INFERRED_HIGH_CONFIDENCE',
+    normalStageUpgradeCheckpoints: Object.freeze([10, 20]),
+    finalStageCheckpointGame: 30,
+    finalStageCheckpointTransition: 'IKUKAN_ONLY_IF_REACHED',
+    finalStageCheckpointEvidenceStatus: 'PUBLISHED_ANALYSIS',
     visibleStageLagRuleRequired: false
   }),
   lupinRush: Object.freeze({
@@ -135,7 +139,12 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     trigger: 'SET_GAMES_EXHAUSTED_WITHOUT_STOCK',
     lotteryBasis: 'HELD_TREASURE_POINTS',
     successEffect: 'NEXT_SET',
-    note: 'Treasure points are not a direct percentage conversion; published continuation expectations are used.'
+    publishedSetComposition: '30G_MAIN_PLUS_10G_CONTINUATION_BATTLE',
+    mainGames: 30,
+    presentationGames: 10,
+    compositionEvidenceStatus: 'PUBLISHED_ANALYSIS',
+    exactPerGameBattleFlow: null,
+    note: 'Treasure points are not a direct percentage conversion; published continuation expectations are used. The exact 10G battle presentation sequence remains unresolved.'
   }),
   evidence: Object.freeze({
     treasureMaxAndExtraBonusRoute: 'MULTI_SOURCE_MATCH',
@@ -147,8 +156,7 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     stageScenarioSelection: 'MULTI_SOURCE_MATCH',
     stageScenarioInitialStages: 'MULTI_SOURCE_MATCH',
     stageScenarioUpgradeRates: 'MULTI_SOURCE_MATCH',
-    stageResidenceWindow: 'INFERRED_HIGH_CONFIDENCE',
-    visibleStageLagRule: 'NOT_REQUIRED_BY_PUBLISHED_RESIDENCE_RECONCILIATION',
+    stageThirtyGameCheckpoint: 'PUBLISHED_ANALYSIS',
     lupinRushProfile: 'MULTI_SOURCE_MATCH',
     lupinRushPatternExpectationOrder: 'MULTI_SOURCE_MATCH',
     lupinRushPatternSelectionRates: 'PUBLISHED_ANALYSIS',
@@ -163,7 +171,9 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     extraBonusExactRates: 'PUBLISHED_ANALYSIS',
     goldRushCoreRoute: 'MULTI_SOURCE_MATCH',
     goldRushExactContinuation: 'PUBLISHED_ANALYSIS',
-    continuationBattleCore: 'MULTI_SOURCE_MATCH'
+    continuationBattleCore: 'MULTI_SOURCE_MATCH',
+    continuationBattleSetComposition: 'PUBLISHED_ANALYSIS',
+    continuationBattlePerGameFlow: 'UNRESOLVED'
   }),
   policy: Object.freeze({
     inferTreasurePointAwardAmounts: false,
@@ -173,6 +183,7 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     inferStageTransitionRates: false,
     inferRushPatternSelectionRates: false,
     inferRushPerPatternAwardsFromOverallAverage: false,
+    inferContinuationBattlePerGameFlow: false,
     interpolateUnlistedContinuationPoints: false
   })
 });
