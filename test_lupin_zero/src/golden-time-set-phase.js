@@ -11,7 +11,11 @@ export const GOLDEN_TIME_SET_PHASE_POLICY = Object.freeze({
   evidenceStatus: 'INFERRED_HIGH_CONFIDENCE',
   continuationBattlePerGameMechanics: 'UNRESOLVED',
   normalStageResidenceDuringBattle: false,
-  syntheticBattleLotteryImplemented: false
+  syntheticBattleLotteryImplemented: false,
+  continuationResolutionPipeline: 'REUSE_EXISTING_STOCK_TREASURE_BATTLE_REVENGE_PIPELINE',
+  stockPriorityResolverReused: true,
+  revengeChanceRuntimeReused: true,
+  duplicateContinuationResolverImplemented: false
 });
 
 export function getGoldenTimeSetPhase(gamesSettled, totalGames = GOLDEN_TIME_SET_PHASE_POLICY.totalApproxGames) {
