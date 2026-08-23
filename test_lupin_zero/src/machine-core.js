@@ -32,7 +32,10 @@ export class MachineCore extends EventTarget {
       raiunHighGamesRemaining: this.kernelState.raiunHighGamesRemaining,
       raiunHighRank: this.kernelState.raiunHighRank,
       raiunHighLastResult: this.kernelState.raiunHighLastResult ? { ...this.kernelState.raiunHighLastResult } : null,
-      raiunModeLastResult: this.kernelState.raiunModeLastResult ? { ...this.kernelState.raiunModeLastResult } : null
+      raiunModeLastResult: this.kernelState.raiunModeLastResult ? { ...this.kernelState.raiunModeLastResult } : null,
+      goldenTimeTreasure: this.kernelState.goldenTimeTreasure,
+      goldenTimeSetNumber: this.kernelState.goldenTimeSetNumber,
+      goldenTimeLastContinuation: this.kernelState.goldenTimeLastContinuation ? { ...this.kernelState.goldenTimeLastContinuation } : null
     });
   }
 
@@ -63,7 +66,11 @@ export class MachineCore extends EventTarget {
       if (event.type === 'RAIUN_HIGH_EXHAUSTED') this.emit('raiun-high-exhausted', { rank: event.rank, redUpgradeStatus: event.redUpgradeStatus });
       if (event.type === 'RAIUN_MODE_GAME_SETTLED') this.emit('raiun-mode-game-settled', { payoutCoins: event.payoutCoins, remaining: event.remaining, artHit: event.artHit, evidenceStatus: event.evidenceStatus });
       if (event.type === 'RAIUN_MODE_ART_SUCCESS') this.emit('raiun-mode-art-success', { successPresentation: event.successPresentation, destination: event.destination, evidenceStatus: event.evidenceStatus });
-      if (event.type === 'MODE_ENTER') this.emit('mode-enter', { mode: event.mode, games: event.games, evidenceStatus: event.evidenceStatus, sourceWindow: event.sourceWindow ?? null });
+      if (event.type === 'GOLDEN_TIME_GAME_SETTLED') this.emit('golden-time-game-settled', { payoutCoins: event.payoutCoins, remaining: event.remaining, treasure: event.treasure, evidenceStatus: event.evidenceStatus });
+      if (event.type === 'GOLDEN_TIME_BATTLE_READY') this.emit('golden-time-battle-ready', { treasure: event.treasure });
+      if (event.type === 'GOLDEN_TIME_CONTINUED') this.emit('golden-time-continued', { treasure: event.treasure, continuationPercent: event.continuationPercent, setNumber: event.setNumber, evidenceStatus: event.evidenceStatus });
+      if (event.type === 'GOLDEN_TIME_ENDED') this.emit('golden-time-ended', { treasure: event.treasure, continuationPercent: event.continuationPercent, setNumber: event.setNumber, evidenceStatus: event.evidenceStatus });
+      if (event.type === 'MODE_ENTER') this.emit('mode-enter', { mode: event.mode, games: event.games, evidenceStatus: event.evidenceStatus, sourceWindow: event.sourceWindow ?? null, treasure: event.treasure ?? null });
       if (event.type === 'MODE_EXIT') this.emit('mode-exit', { from: event.from, to: event.to });
       if (event.type === 'MODE_GAME_ADVANCED') this.emit('mode-game-advanced', { mode: event.mode, remaining: event.remaining });
       if (event.type === 'MODE_WINDOW_EXHAUSTED') this.emit('mode-window-exhausted', { mode: event.mode });
@@ -99,6 +106,9 @@ export class MachineCore extends EventTarget {
   resetRaiunCounter(points, evidenceStatus = 'UNRESOLVED') { return this.apply({ type: 'RESET_RAIUN_COUNTER', points, evidenceStatus }); }
   setRaiunHighRank(rank, evidenceStatus = 'UNRESOLVED') { return this.apply({ type: 'SET_RAIUN_HIGH_RANK', rank, evidenceStatus }); }
   settleRaiunModeGame(resolution) { return this.apply({ type: 'SETTLE_RAIUN_MODE_GAME', resolution }); }
+  enterGoldenTime(profile) { return this.apply({ type: 'ENTER_GOLDEN_TIME', profile }); }
+  settleGoldenTimeGame(payoutCoins, evidenceStatus = 'INFERRED_HIGH_CONFIDENCE') { return this.apply({ type: 'SETTLE_GOLDEN_TIME_GAME', payoutCoins, evidenceStatus }); }
+  resolveGoldenTimeContinuation(resolution, profile) { return this.apply({ type: 'RESOLVE_GOLDEN_TIME_CONTINUATION', resolution, profile }); }
   exitRaiunMode() { return this.apply({ type: 'EXIT_RAIUN_MODE' }); }
   exitWantedChance() { return this.apply({ type: 'EXIT_WANTED_CHANCE' }); }
   enterMode(mode, games, evidenceStatus = 'UNRESOLVED') { return this.apply({ type: 'ENTER_MODE', mode, games, evidenceStatus }); }
