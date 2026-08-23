@@ -12,9 +12,20 @@ const medalRandom = new SeededRandomSource(0x20160812);
 const message = document.querySelector('#message');
 const stateValue = document.querySelector('#stateValue');
 const phaseBadge = document.querySelector('#phaseBadge');
+const betBtn = document.querySelector('#betBtn');
+const maxBetBtn = document.querySelector('#maxBetBtn');
+const startBtn = document.querySelector('#startBtn');
 let armedEntry = null;
 let activeResolution = null;
 let specialMovieGameStarted = false;
+let storySequenceActive = false;
+
+function setStoryLock(locked) {
+  storySequenceActive = locked;
+  if (betBtn) betBtn.disabled = locked;
+  if (maxBetBtn) maxBetBtn.disabled = locked;
+  if (startBtn) startBtn.disabled = locked;
+}
 
 function currentTrigger() {
   const session = app.physicalRoleSession.snapshot();
@@ -56,7 +67,7 @@ function armLegendGateBeforeFinalStop(reelIndex) {
 }
 
 function enterGoldenTimeFromLegendGate() {
-  const s = core.snapshot();
+  setStoryLock(false);
   core.kernelState = Object.freeze({
     ...core.kernelState,
     modeResult: 'PENDING_GOLDEN_TIME',
@@ -75,6 +86,7 @@ function enterGoldenTimeFromLegendGate() {
 
 function finishStorySequence() {
   if (!activeResolution) return;
+  setStoryLock(false);
   const specialMovieGames = activeResolution.specialMovieGames;
   if (specialMovieGames > 0) {
     core.kernelState = Object.freeze({
@@ -98,6 +110,7 @@ function finishStorySequence() {
 }
 
 function playStorySequence(resolution) {
+  setStoryLock(true);
   const attempts = resolution.attempts;
   attempts.forEach((attempt, index) => {
     window.setTimeout(() => {
@@ -112,14 +125,13 @@ function playStorySequence(resolution) {
       if (message) message.textContent = attempt.success
         ? `${attempt.character} — ${attempt.label} GET`
         : `${attempt.character} — FAILED`;
-      if (index === attempts.length - 1) {
-        window.setTimeout(finishStorySequence, 650);
-      }
+      if (index === attempts.length - 1) window.setTimeout(finishStorySequence, 650);
     }, 650 * (index + 1));
   });
 }
 
 core.stop = (reelIndex) => {
+  if (storySequenceActive) return false;
   armLegendGateBeforeFinalStop(reelIndex);
   return originalStop(reelIndex);
 };
