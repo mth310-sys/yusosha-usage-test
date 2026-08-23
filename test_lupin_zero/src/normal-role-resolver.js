@@ -3,6 +3,9 @@ import { getNormalRoleDenominator, VERIFIED_SPEC } from './verified-spec.js';
 const ROLE_ORDER = Object.freeze([
   'PREMIUM',
   'LEGEND',
+  'RUPIN_REPLAY_A',
+  'RUPIN_REPLAY_B',
+  'RUPIN_REPLAY_C',
   'MB',
   'THREE_COIN',
   'REPLAY',
@@ -13,6 +16,7 @@ const ROLE_ORDER = Object.freeze([
 export const NORMAL_ROLE_RESOLVER_POLICY = Object.freeze({
   evidenceStatus: VERIFIED_SPEC.evidence.normalRoleDenominators,
   premiumLegendEvidenceStatus: VERIFIED_SPEC.evidence.premiumLegendDenominators,
+  rupinReplayEvidenceStatus: VERIFIED_SPEC.evidence.rupinReplayDenominators,
   unknownResidualStatus: 'UNRESOLVED',
   unknownResidualLabel: 'UNRESOLVED_OTHER',
   residualMayBeTreatedAsMiss: false,
@@ -21,9 +25,7 @@ export const NORMAL_ROLE_RESOLVER_POLICY = Object.freeze({
 });
 
 function validateSetting(setting) {
-  if (!Number.isInteger(setting) || setting < 1 || setting > 6) {
-    throw new RangeError('setting must be an integer from 1 to 6');
-  }
+  if (!Number.isInteger(setting) || setting < 1 || setting > 6) throw new RangeError('setting must be an integer from 1 to 6');
 }
 
 export function getKnownNormalRoleWeights(setting = 1) {
@@ -44,32 +46,19 @@ export function getUnresolvedProbabilityMass(setting = 1) {
 
 export function resolveNormalRole(randomSource, setting = 1) {
   validateSetting(setting);
-  if (!randomSource || typeof randomSource.nextFloat !== 'function') {
-    throw new TypeError('randomSource.nextFloat() is required');
-  }
-
+  if (!randomSource || typeof randomSource.nextFloat !== 'function') throw new TypeError('randomSource.nextFloat() is required');
   const draw = randomSource.nextFloat();
   let cursor = 0;
   for (const item of getKnownNormalRoleWeights(setting)) {
     cursor += item.probability;
     if (draw < cursor) {
-      return Object.freeze({
-        kind: 'KNOWN_ROLE',
-        role: item.role,
-        draw,
-        setting,
-        evidenceStatus: item.role === 'PREMIUM' || item.role === 'LEGEND'
+      const evidenceStatus = item.role.startsWith('RUPIN_REPLAY_')
+        ? VERIFIED_SPEC.evidence.rupinReplayDenominators
+        : (item.role === 'PREMIUM' || item.role === 'LEGEND'
           ? VERIFIED_SPEC.evidence.premiumLegendDenominators
-          : VERIFIED_SPEC.evidence.normalRoleDenominators
-      });
+          : VERIFIED_SPEC.evidence.normalRoleDenominators);
+      return Object.freeze({ kind: 'KNOWN_ROLE', role: item.role, draw, setting, evidenceStatus });
     }
   }
-
-  return Object.freeze({
-    kind: 'UNRESOLVED_OTHER',
-    role: null,
-    draw,
-    setting,
-    evidenceStatus: NORMAL_ROLE_RESOLVER_POLICY.unknownResidualStatus
-  });
+  return Object.freeze({ kind: 'UNRESOLVED_OTHER', role: null, draw, setting, evidenceStatus: NORMAL_ROLE_RESOLVER_POLICY.unknownResidualStatus });
 }
