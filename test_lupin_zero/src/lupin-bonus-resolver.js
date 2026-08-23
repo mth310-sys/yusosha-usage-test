@@ -12,7 +12,9 @@ export const LUPIN_BONUS_SPEC = Object.freeze({
   finalBattleOpponent: 'ZENIGATA',
   successDestination: 'GOLDEN_TIME',
   failureMayRouteToRevengeChance: true,
-  failureRevengeEntryRate: null,
+  failureRevengeEntryDenominator: 25,
+  failureRevengeEntryRatePercent: 4,
+  failureRevengeHitExpectationPercent: 39,
   evidenceStatus: ReuseEvidenceStatus.PUBLISHED_ANALYSIS
 });
 
