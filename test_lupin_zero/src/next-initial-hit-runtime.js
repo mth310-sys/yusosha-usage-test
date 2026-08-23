@@ -43,7 +43,7 @@ function enterReservedDestination(source = 'CHANCE_ZONE_SUCCESS') {
 
 function consumeConfirmedPresentation(source = 'CONFIRMED_PRESENTATION') {
   const s = core.snapshot();
-  if (s.mode !== GameMode.NORMAL || s.modeResult) return false;
+  if (![GameMode.NORMAL, GameMode.WANTED_CHANCE].includes(s.mode) || s.modeResult) return false;
   core.kernelState = Object.freeze({
     ...core.kernelState,
     modeResult: 'PENDING_BONUS_OR_ART',
