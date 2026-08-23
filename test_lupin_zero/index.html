@@ -10,52 +10,18 @@
 <body>
   <main class="app-shell">
     <section class="machine" aria-label="パチスロ ルパン三世 消されたルパン">
-      <header class="crown">
-        <div class="brand">LUPIN THE THIRD</div>
-        <div id="phaseBadge" class="phase-badge">SYSTEM</div>
-      </header>
-
-      <div id="prismMechanism" class="prism-mechanism" data-state="closed" aria-label="Prism mechanism">
-        <div class="prism-round-led" aria-hidden="true"><span></span></div>
-        <div class="prism-body" aria-hidden="true">
-          <span class="prism-face prism-face-a"></span>
-          <span class="prism-face prism-face-b"></span>
-          <span class="prism-face prism-face-c"></span>
-        </div>
-      </div>
-
-      <section class="lcd-shell">
-        <div id="game" class="game-host" aria-label="Main LCD"></div>
-        <div class="lcd-glass" aria-hidden="true"></div>
-      </section>
-
-      <section class="meter-row" aria-live="polite">
-        <div><span class="meter-label">CREDIT</span><strong id="creditValue">50</strong></div>
-        <div><span class="meter-label">BET</span><strong id="betValue">0</strong></div>
-        <div><span class="meter-label">STATE</span><strong id="stateValue">IDLE</strong></div>
-      </section>
-
-      <section class="controls" aria-label="Machine controls">
-        <button id="betBtn" type="button">BET</button>
-        <button id="maxBetBtn" type="button">MAX</button>
-        <button id="startBtn" class="start" type="button">START</button>
-      </section>
-
-      <section class="stop-row" aria-label="Stop buttons">
-        <button class="stop" data-reel="0" type="button">1</button>
-        <button class="stop" data-reel="1" type="button">2</button>
-        <button class="stop" data-reel="2" type="button">3</button>
-      </section>
-
-      <footer class="lower-panel">
-        <div class="panel-title">消されたルパン</div>
-        <div id="message" class="message">BETしてSTART</div>
-      </footer>
+      <header class="crown"><div class="brand">LUPIN THE THIRD</div><div id="phaseBadge" class="phase-badge">SYSTEM</div></header>
+      <div id="prismMechanism" class="prism-mechanism" data-state="closed" aria-label="Prism mechanism"><div class="prism-round-led" aria-hidden="true"><span></span></div><div class="prism-body" aria-hidden="true"><span class="prism-face prism-face-a"></span><span class="prism-face prism-face-b"></span><span class="prism-face prism-face-c"></span></div></div>
+      <section class="lcd-shell"><div id="game" class="game-host" aria-label="Main LCD"></div><div class="lcd-glass" aria-hidden="true"></div></section>
+      <section class="meter-row" aria-live="polite"><div><span class="meter-label">CREDIT</span><strong id="creditValue">50</strong></div><div><span class="meter-label">BET</span><strong id="betValue">0</strong></div><div><span class="meter-label">STATE</span><strong id="stateValue">IDLE</strong></div></section>
+      <section class="controls" aria-label="Machine controls"><button id="betBtn" type="button">BET</button><button id="maxBetBtn" type="button">MAX</button><button id="startBtn" class="start" type="button">START</button></section>
+      <section class="stop-row" aria-label="Stop buttons"><button class="stop" data-reel="0" type="button">1</button><button class="stop" data-reel="1" type="button">2</button><button class="stop" data-reel="2" type="button">3</button></section>
+      <footer class="lower-panel"><div class="panel-title">消されたルパン</div><div id="message" class="message">BETしてSTART</div></footer>
     </section>
   </main>
-
   <script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
   <script type="module" src="./src/main.js"></script>
+  <script type="module" src="./src/golden-time-stage-runtime.js"></script>
   <script type="module" src="./src/legend-gate-runtime.js"></script>
   <script type="module" src="./src/golden-time-stock-runtime.js"></script>
   <script type="module" src="./src/revenge-chance-runtime.js"></script>
