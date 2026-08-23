@@ -156,6 +156,8 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     stageScenarioSelection: 'MULTI_SOURCE_MATCH',
     stageScenarioInitialStages: 'MULTI_SOURCE_MATCH',
     stageScenarioUpgradeRates: 'MULTI_SOURCE_MATCH',
+    stageResidenceWindow: 'INFERRED_HIGH_CONFIDENCE',
+    visibleStageLagRule: 'NOT_REQUIRED_BY_PUBLISHED_RESIDENCE_RECONCILIATION',
     stageThirtyGameCheckpoint: 'PUBLISHED_ANALYSIS',
     lupinRushProfile: 'MULTI_SOURCE_MATCH',
     lupinRushPatternExpectationOrder: 'MULTI_SOURCE_MATCH',
