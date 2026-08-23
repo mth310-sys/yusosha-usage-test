@@ -16,6 +16,7 @@ import { resolveRaiunHighGame } from './raiun-high-resolver.js';
 import { resolveRaiunModeGame } from './raiun-mode-resolver.js';
 import { createGoldenTimeSetProfile, resolveGoldenTimeContinuation } from './golden-time-resolver.js';
 import { resolveGoldenTimeTreasureAcquisition } from './golden-time-treasure-resolver.js';
+import { createExtraBonusProfile, resolveExtraBonusGame } from './extra-bonus-resolver.js';
 import { GameMode } from './game-flow-spec.js';
 import { SeededRandomSource } from './random-source.js';
 
@@ -33,6 +34,7 @@ const raiunHighRandom = new SeededRandomSource(0x20160807);
 const raiunModeRandom = new SeededRandomSource(0x20160808);
 const goldenTimeContinuationRandom = new SeededRandomSource(0x20160809);
 const goldenTimeTreasureRandom = new SeededRandomSource(0x2016080a);
+const extraBonusRandom = new SeededRandomSource(0x2016080b);
 const physicalRoleSession = new PhysicalRoleSession({ randomSource: physicalRoleRandom, setting: MACHINE_SETTING });
 const machineRoot = document.querySelector('.machine');
 const lcdShell = document.querySelector('.lcd-shell');
@@ -87,28 +89,36 @@ function render(snapshot = core.snapshot()) {
     ? `MB ${snapshot.mbFollowupGamesRemaining}G`
     : snapshot.modeResult === 'PENDING_GOLDEN_TIME'
       ? 'GOLDEN TIME'
-      : snapshot.mode === GameMode.GOLDEN_TIME
-        ? snapshot.modeResult === 'PENDING_GT_CONTINUATION'
-          ? `GT BATTLE ${Math.round(snapshot.goldenTimeTreasure / 10000)}万T`
-          : `GT ${snapshot.modeGamesRemaining ?? 0}G / ${Math.round(snapshot.goldenTimeTreasure / 10000)}万T`
-        : snapshot.mode === GameMode.NORMAL
-          ? snapshot.raiunHighGamesRemaining > 0
-            ? `雷雲高確 ${snapshot.raiunHighGamesRemaining}G`
-            : snapshot.state
-          : snapshot.modeResult
-            ? `${snapshot.mode} SUCCESS`
-            : `${snapshot.mode} ${snapshot.modeGamesRemaining ?? '?'}G`;
+      : snapshot.modeResult === 'PENDING_GOLD_RUSH'
+        ? 'GOLD RUSH'
+        : snapshot.mode === GameMode.EXTRA_BONUS
+          ? `EXTRA BONUS ${snapshot.modeGamesRemaining ?? 0}G / STOCK ${snapshot.goldenTimeStockCount}`
+          : snapshot.mode === GameMode.GOLDEN_TIME
+            ? snapshot.modeResult === 'PENDING_GT_CONTINUATION'
+              ? `GT BATTLE ${Math.round(snapshot.goldenTimeTreasure / 10000)}万T`
+              : `GT ${snapshot.modeGamesRemaining ?? 0}G / ${Math.round(snapshot.goldenTimeTreasure / 10000)}万T`
+            : snapshot.mode === GameMode.NORMAL
+              ? snapshot.raiunHighGamesRemaining > 0
+                ? `雷雲高確 ${snapshot.raiunHighGamesRemaining}G`
+                : snapshot.state
+              : snapshot.modeResult
+                ? `${snapshot.mode} SUCCESS`
+                : `${snapshot.mode} ${snapshot.modeGamesRemaining ?? '?'}G`;
   ui.phaseBadge.textContent = snapshot.mbFollowupGamesRemaining > 0
     ? `MB ${snapshot.mbFollowupGamesRemaining}G`
     : snapshot.modeResult === 'PENDING_GOLDEN_TIME'
       ? 'GOLDEN TIME'
-      : snapshot.mode === GameMode.GOLDEN_TIME
-        ? `GT SET ${snapshot.goldenTimeSetNumber}`
-        : snapshot.mode === GameMode.NORMAL
-          ? snapshot.raiunHighGamesRemaining > 0
-            ? `雷雲高確 ${snapshot.raiunHighRank}`
-            : 'SYSTEM'
-          : snapshot.mode;
+      : snapshot.modeResult === 'PENDING_GOLD_RUSH'
+        ? 'GOLD RUSH'
+        : snapshot.mode === GameMode.EXTRA_BONUS
+          ? 'EXTRA BONUS'
+          : snapshot.mode === GameMode.GOLDEN_TIME
+            ? `GT SET ${snapshot.goldenTimeSetNumber}`
+            : snapshot.mode === GameMode.NORMAL
+              ? snapshot.raiunHighGamesRemaining > 0
+                ? `雷雲高確 ${snapshot.raiunHighRank}`
+                : 'SYSTEM'
+              : snapshot.mode;
 
   const busy = [MachineState.SPINNING, MachineState.STOPPING].includes(snapshot.state);
   const pendingModeResult = Boolean(snapshot.modeResult);
@@ -169,7 +179,22 @@ function settleCurrentGoldenTimeGame() {
   if (acquisition.hit) core.addGoldenTimeTreasure(acquisition);
   const profile = createGoldenTimeSetProfile();
   core.settleGoldenTimeGame(profile.payoutCoinsPerGame, profile.initialTreasureEvidenceStatus);
-  return Object.freeze({ profile, acquisition });
+
+  const afterSettlement = core.snapshot();
+  let extraBonus = null;
+  if (afterSettlement.mode === GameMode.GOLDEN_TIME && afterSettlement.goldenTimeTreasure >= 1000000) {
+    extraBonus = createExtraBonusProfile(afterSettlement.modeGamesRemaining ?? 0);
+    core.enterExtraBonus(extraBonus);
+  }
+  return Object.freeze({ profile, acquisition, extraBonus });
+}
+
+function settleCurrentExtraBonusGame() {
+  const snapshot = core.snapshot();
+  if (snapshot.mode !== GameMode.EXTRA_BONUS || snapshot.modeGamesRemaining <= 0 || snapshot.modeResult) return null;
+  const resolution = resolveExtraBonusGame(extraBonusRandom);
+  core.settleExtraBonusGame(resolution);
+  return resolution;
 }
 
 function resolveCurrentGoldenTimeBattle() {
@@ -275,6 +300,33 @@ core.addEventListener('golden-time-game-settled', (event) => {
   if (event.detail.remaining > 0 && !String(ui.message.textContent).startsWith('+')) ui.message.textContent = `GOLDEN TIME ${event.detail.remaining}G`;
 });
 
+core.addEventListener('extra-bonus-enter', (event) => {
+  render(event.detail.snapshot);
+  ui.message.textContent = `EXTRA BONUS ${event.detail.games}G`;
+});
+
+core.addEventListener('extra-bonus-game-settled', (event) => {
+  render(event.detail.snapshot);
+  if (event.detail.goldRushHit) return;
+  if (event.detail.oddAligned) ui.message.textContent = `奇数揃い — GT STOCK ${event.detail.stockCount}`;
+  else if (event.detail.remaining > 0) ui.message.textContent = `EXTRA BONUS ${event.detail.remaining}G`;
+});
+
+core.addEventListener('golden-time-stock-added', (event) => {
+  render(event.detail.snapshot);
+  ui.message.textContent = `GT STOCK +${event.detail.stockAdded}`;
+});
+
+core.addEventListener('extra-bonus-gold-rush-hit', (event) => {
+  render(event.detail.snapshot);
+  ui.message.textContent = '金7揃い — GOLD RUSH';
+});
+
+core.addEventListener('extra-bonus-ended', () => {
+  ui.message.textContent = 'EXTRA BONUS END';
+  render();
+});
+
 core.addEventListener('golden-time-battle-ready', () => {
   ui.message.textContent = '継続バトル';
   resolveCurrentGoldenTimeBattle();
@@ -299,6 +351,7 @@ core.addEventListener('mode-enter', (event) => {
   if (event.detail.mode === GameMode.WANTED_CHANCE) ui.message.textContent = 'WANTED CHANCE';
   else if (event.detail.mode === GameMode.RAIUN_MODE) ui.message.textContent = '雷雲モード';
   else if (event.detail.mode === GameMode.GOLDEN_TIME) ui.message.textContent = `GOLDEN TIME — ${Math.round((event.detail.treasure ?? 0) / 10000)}万T`;
+  else if (event.detail.mode === GameMode.EXTRA_BONUS) ui.message.textContent = `EXTRA BONUS ${event.detail.games}G`;
   else if (event.detail.mode === CHANCE_EYE_DESTINATION.FUJIKO_ZONE) ui.message.textContent = '不二子ゾーン';
   else if (event.detail.mode === CHANCE_EYE_DESTINATION.ODOROBO_ZONE) ui.message.textContent = '大泥棒ゾーン';
   else ui.message.textContent = event.detail.mode;
@@ -352,7 +405,9 @@ core.addEventListener('spin-start', (event) => {
           ? '雷雲モード'
           : snapshot.mode === GameMode.GOLDEN_TIME
             ? 'GOLDEN TIME'
-            : 'SPIN';
+            : snapshot.mode === GameMode.EXTRA_BONUS
+              ? 'EXTRA BONUS'
+              : 'SPIN';
   scene().startSpin();
 });
 
@@ -370,6 +425,8 @@ core.addEventListener('spin-end', (event) => {
 
   if (completedMbFollowup) {
     core.settleMbFollowupGame(getMbFollowupGameSettlement());
+  } else if (completedMode === GameMode.EXTRA_BONUS) {
+    settleCurrentExtraBonusGame();
   } else if (completedMode === GameMode.GOLDEN_TIME) {
     settleCurrentGoldenTimeGame();
   } else if (completedMode === GameMode.RAIUN_MODE) {
@@ -418,6 +475,7 @@ window.__LUPIN_ZERO__ = {
   resolveChanceZoneOddAlignment: () => core.resolveChanceZoneOddAlignment(),
   setRaiunPoints: (points, evidenceStatus) => core.setRaiunPoints(points, evidenceStatus),
   enterGoldenTime,
+  settleCurrentExtraBonusGame,
   chanceEyeOccurrenceRandom,
   chanceEyeRandom,
   chanceZoneRandom,
@@ -429,6 +487,7 @@ window.__LUPIN_ZERO__ = {
   raiunModeRandom,
   goldenTimeContinuationRandom,
   goldenTimeTreasureRandom,
+  extraBonusRandom,
   physicalRoleSession,
   machineSetting: MACHINE_SETTING
 };
