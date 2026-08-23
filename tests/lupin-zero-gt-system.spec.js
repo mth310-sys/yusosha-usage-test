@@ -49,6 +49,9 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
     REVOLVER_VISION: 5,
     ATTACK_VISION: 1
   });
+  expect(result.spec.lupinRush.patternSelectionRatesContext).toBe('UNRESOLVED_BETWEEN_INITIAL_AND_CONTINUATION_ENTRY');
+  expect(result.spec.lupinRush.patternSelectionRatesReferenceOnly).toBe(true);
+  expect(result.spec.lupinRush.automaticPatternSelectionAllowed).toBe(false);
   expect(result.spec.lupinRush.perPatternAwardDistribution).toBeNull();
 
   expect(result.spec.treasureHunt.exactOccurrenceTrigger).toBeNull();
@@ -100,7 +103,8 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.spec.continuationBattle.exactPerGameBattleFlow).toBeNull();
   expect(result.spec.evidence.exactTreasureAwardTable).toBe('UNRESOLVED');
   expect(result.spec.evidence.lupinRushPatternExpectationOrder).toBe('MULTI_SOURCE_MATCH');
-  expect(result.spec.evidence.lupinRushPatternSelectionRates).toBe('PUBLISHED_ANALYSIS');
+  expect(result.spec.evidence.lupinRushPatternSelectionRates).toBe('PUBLISHED_ANALYSIS_CONTEXT_UNRESOLVED');
+  expect(result.spec.evidence.lupinRushPatternSelectionContext).toBe('UNRESOLVED');
   expect(result.spec.evidence.lupinRushPerPatternAwardDistribution).toBe('UNRESOLVED');
   expect(result.spec.evidence.treasureHuntGuaranteedSuccessPresentations).toBe('PUBLISHED_ANALYSIS');
   expect(result.spec.evidence.treasureHuntOccurrenceTrigger).toBe('UNRESOLVED');
@@ -118,6 +122,7 @@ test('GOLDEN TIME treasure system keeps verified continuation structure exact', 
   expect(result.spec.policy.inferTreasureRushEntryOnHuntSuccess).toBe(false);
   expect(result.spec.policy.inferStageTransitionRates).toBe(false);
   expect(result.spec.policy.inferRushPatternSelectionRates).toBe(false);
+  expect(result.spec.policy.autoUseContextUnresolvedRushPatternRates).toBe(false);
   expect(result.spec.policy.inferRushPerPatternAwardsFromOverallAverage).toBe(false);
   expect(result.spec.policy.inferContinuationBattlePerGameFlow).toBe(false);
   expect(result.spec.policy.inferContinuationBattleEntryGameNumber).toBe(false);
