@@ -13,6 +13,7 @@ import { getMbFollowupGameSettlement } from './mb-followup.js';
 import { selectWantedWindow, WANTED_RESET_CONTEXT } from './normal-progression.js';
 import { resolveInitialRaiunPoints, resolveRaiunPointAcquisition } from './raiun-counter-resolver.js';
 import { resolveRaiunHighGame } from './raiun-high-resolver.js';
+import { resolveRaiunModeGame } from './raiun-mode-resolver.js';
 import { GameMode } from './game-flow-spec.js';
 import { SeededRandomSource } from './random-source.js';
 
@@ -27,6 +28,7 @@ const wantedWindowRandom = new SeededRandomSource(0x20160804);
 const raiunInitialRandom = new SeededRandomSource(0x20160805);
 const raiunPointRandom = new SeededRandomSource(0x20160806);
 const raiunHighRandom = new SeededRandomSource(0x20160807);
+const raiunModeRandom = new SeededRandomSource(0x20160808);
 const physicalRoleSession = new PhysicalRoleSession({ randomSource: physicalRoleRandom, setting: MACHINE_SETTING });
 const machineRoot = document.querySelector('.machine');
 const lcdShell = document.querySelector('.lcd-shell');
@@ -79,20 +81,24 @@ function render(snapshot = core.snapshot()) {
   ui.bet.textContent = snapshot.bet;
   ui.state.textContent = snapshot.mbFollowupGamesRemaining > 0
     ? `MB ${snapshot.mbFollowupGamesRemaining}G`
-    : snapshot.mode === GameMode.NORMAL
-      ? snapshot.raiunHighGamesRemaining > 0
-        ? `雷雲高確 ${snapshot.raiunHighGamesRemaining}G`
-        : snapshot.state
-      : snapshot.modeResult
-        ? `${snapshot.mode} SUCCESS`
-        : `${snapshot.mode} ${snapshot.modeGamesRemaining ?? '?'}G`;
+    : snapshot.modeResult === 'PENDING_GOLDEN_TIME'
+      ? 'GOLDEN TIME'
+      : snapshot.mode === GameMode.NORMAL
+        ? snapshot.raiunHighGamesRemaining > 0
+          ? `雷雲高確 ${snapshot.raiunHighGamesRemaining}G`
+          : snapshot.state
+        : snapshot.modeResult
+          ? `${snapshot.mode} SUCCESS`
+          : `${snapshot.mode} ${snapshot.modeGamesRemaining ?? '?'}G`;
   ui.phaseBadge.textContent = snapshot.mbFollowupGamesRemaining > 0
     ? `MB ${snapshot.mbFollowupGamesRemaining}G`
-    : snapshot.mode === GameMode.NORMAL
-      ? snapshot.raiunHighGamesRemaining > 0
-        ? `雷雲高確 ${snapshot.raiunHighRank}`
-        : 'SYSTEM'
-      : snapshot.mode;
+    : snapshot.modeResult === 'PENDING_GOLDEN_TIME'
+      ? 'GOLDEN TIME'
+      : snapshot.mode === GameMode.NORMAL
+        ? snapshot.raiunHighGamesRemaining > 0
+          ? `雷雲高確 ${snapshot.raiunHighRank}`
+          : 'SYSTEM'
+        : snapshot.mode;
 
   const busy = [MachineState.SPINNING, MachineState.STOPPING].includes(snapshot.state);
   const pendingModeResult = Boolean(snapshot.modeResult);
@@ -130,6 +136,14 @@ function resolveCurrentRaiunHighGame() {
   if (snapshot.mode !== GameMode.NORMAL || snapshot.raiunHighGamesRemaining <= 0) return null;
   const resolution = resolveRaiunHighGame(raiunHighRandom, snapshot.raiunHighRank);
   core.resolveRaiunHighGame(resolution);
+  return resolution;
+}
+
+function settleCurrentRaiunModeGame() {
+  const snapshot = core.snapshot();
+  if (snapshot.mode !== GameMode.RAIUN_MODE || snapshot.modeGamesRemaining <= 0 || snapshot.modeResult) return null;
+  const resolution = resolveRaiunModeGame(raiunModeRandom);
+  core.settleRaiunModeGame(resolution);
   return resolution;
 }
 
@@ -198,10 +212,20 @@ core.addEventListener('raiun-high-game-resolved', (event) => {
   else if (event.detail.remaining > 0) ui.message.textContent = `雷雲高確 ${event.detail.remaining}G`;
 });
 
-core.addEventListener('raiun-high-exhausted', (event) => {
+core.addEventListener('raiun-high-exhausted', () => {
   resetRaiunCounterAfterHigh();
   render();
   ui.message.textContent = '雷雲高確 END';
+});
+
+core.addEventListener('raiun-mode-game-settled', (event) => {
+  render(event.detail.snapshot);
+  if (!event.detail.artHit && event.detail.remaining > 0) ui.message.textContent = `雷雲モード ${event.detail.remaining}G`;
+});
+
+core.addEventListener('raiun-mode-art-success', (event) => {
+  render(event.detail.snapshot);
+  ui.message.textContent = event.detail.successPresentation === 'LCD_7_ALIGNED' ? '7揃い — GOLDEN TIME' : 'GOLDEN TIME';
 });
 
 core.addEventListener('mode-enter', (event) => {
@@ -220,7 +244,13 @@ core.addEventListener('mode-window-exhausted', (event) => {
     core.exitWantedChance();
     configureNextWanted(WANTED_RESET_CONTEXT.AFTER_WANTED);
     ui.message.textContent = 'WANTED CHANCE END';
-  } else ui.message.textContent = `${event.detail.mode} 終了`;
+  } else if (event.detail.mode === GameMode.RAIUN_MODE) {
+    core.exitRaiunMode();
+    resetRaiunCounterAfterHigh();
+    ui.message.textContent = '雷雲モード END';
+  } else {
+    ui.message.textContent = `${event.detail.mode} 終了`;
+  }
   render();
 });
 
@@ -251,7 +281,9 @@ core.addEventListener('spin-start', (event) => {
       ? '雷雲高確'
       : snapshot.mode === GameMode.WANTED_CHANCE
         ? 'WANTED CHANCE'
-        : 'SPIN';
+        : snapshot.mode === GameMode.RAIUN_MODE
+          ? '雷雲モード'
+          : 'SPIN';
   scene().startSpin();
 });
 
@@ -269,6 +301,8 @@ core.addEventListener('spin-end', (event) => {
 
   if (completedMbFollowup) {
     core.settleMbFollowupGame(getMbFollowupGameSettlement());
+  } else if (completedMode === GameMode.RAIUN_MODE) {
+    settleCurrentRaiunModeGame();
   } else if ([GameMode.NORMAL, GameMode.WANTED_CHANCE].includes(completedMode)) {
     const settlement = settlePendingPhysicalRole();
 
@@ -320,6 +354,7 @@ window.__LUPIN_ZERO__ = {
   raiunInitialRandom,
   raiunPointRandom,
   raiunHighRandom,
+  raiunModeRandom,
   physicalRoleSession,
   machineSetting: MACHINE_SETTING
 };
