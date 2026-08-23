@@ -73,7 +73,9 @@ export const GT_SYSTEM_SPEC = Object.freeze({
       C: Object.freeze({ oneStep:50.0, twoSteps:50.0 }),
       D: Object.freeze({ oneStep:25.0, twoSteps:75.0 })
     }),
-    visibleStageMayLagInternalStage: true
+    stageResidenceWindowGames: 30,
+    stageResidenceWindowEvidenceStatus: 'INFERRED_HIGH_CONFIDENCE',
+    visibleStageLagRuleRequired: false
   }),
   lupinRush: Object.freeze({
     timing: 'SET_START_AND_SOME_CONTINUATIONS',
@@ -145,6 +147,8 @@ export const GT_SYSTEM_SPEC = Object.freeze({
     stageScenarioSelection: 'MULTI_SOURCE_MATCH',
     stageScenarioInitialStages: 'MULTI_SOURCE_MATCH',
     stageScenarioUpgradeRates: 'MULTI_SOURCE_MATCH',
+    stageResidenceWindow: 'INFERRED_HIGH_CONFIDENCE',
+    visibleStageLagRule: 'NOT_REQUIRED_BY_PUBLISHED_RESIDENCE_RECONCILIATION',
     lupinRushProfile: 'MULTI_SOURCE_MATCH',
     lupinRushPatternExpectationOrder: 'MULTI_SOURCE_MATCH',
     lupinRushPatternSelectionRates: 'PUBLISHED_ANALYSIS',
