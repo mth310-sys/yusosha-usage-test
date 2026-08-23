@@ -4,13 +4,14 @@ import { evaluateReuseCandidate, ReuseEvidenceStatus } from './reuse-registry.js
 import { LUPIN_ZERO_TARGET } from './target-lock.js';
 
 const previousDestinations = Object.freeze([...PREVIOUS_B4_REVENGE_CHANCE_PROFILE.successDestinations]);
-const currentDestination = REVENGE_CHANCE_SPEC.destination;
-const destinationConflict = previousDestinations.length !== 1 || previousDestinations[0] !== currentDestination;
+const currentDestinations = Object.freeze([...REVENGE_CHANCE_SPEC.successDestinations]);
+const destinationSetMatches = previousDestinations.length === currentDestinations.length
+  && previousDestinations.every((destination) => currentDestinations.includes(destination));
 
 export const REVENGE_CHANCE_REUSE_EVALUATION = evaluateReuseCandidate({
   sourcePath: 'test_lupin_b4/js/revenge-chance-profile.js',
   targetIdentityKey: LUPIN_ZERO_TARGET.identityKey,
-  evidenceStatus: destinationConflict ? ReuseEvidenceStatus.CONFLICT : ReuseEvidenceStatus.PRESENTATION_ONLY,
+  evidenceStatus: destinationSetMatches ? ReuseEvidenceStatus.PUBLISHED_ANALYSIS : ReuseEvidenceStatus.CONFLICT,
   responsibility: 'RULES',
   productionBehavior: true,
   zeroYen: true,
@@ -23,11 +24,14 @@ export const REVENGE_CHANCE_REUSE_AUDIT = Object.freeze({
   sharedGames: PREVIOUS_B4_REVENGE_CHANCE_PROFILE.games === REVENGE_CHANCE_SPEC.games,
   sharedEntrySources: Object.freeze([...PREVIOUS_B4_REVENGE_CHANCE_PROFILE.entrySources]),
   previousSuccessDestinations: previousDestinations,
-  currentAutomaticDestination: currentDestination,
-  successDestinationStatus: destinationConflict ? 'CONFLICT' : 'MATCH',
-  reuseSharedStructureOnly: true,
-  reuseDestinationRule: false,
-  autoResolveDestinationConflict: false,
-  evidenceStatus: destinationConflict ? 'CONFLICT' : 'PRESENTATION_ONLY',
+  currentSuccessDestinations: currentDestinations,
+  currentAutomaticDestination: REVENGE_CHANCE_SPEC.automaticSuccessDestination,
+  successDestinationStatus: destinationSetMatches ? 'MATCH' : 'CONFLICT',
+  successDestinationSplitStatus: REVENGE_CHANCE_SPEC.successDestinationSplit == null ? 'UNRESOLVED' : 'RESOLVED',
+  reuseSharedStructure: destinationSetMatches,
+  reuseDestinationSet: destinationSetMatches,
+  reuseDestinationSplit: false,
+  autoSelectDestination: false,
+  evidenceStatus: destinationSetMatches ? 'PUBLISHED_ANALYSIS' : 'CONFLICT',
   reuseRegistryApprovedForProductionRules: REVENGE_CHANCE_REUSE_EVALUATION.reusable
 });
