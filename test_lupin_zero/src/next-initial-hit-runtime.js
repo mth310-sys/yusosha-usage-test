@@ -10,18 +10,40 @@ const core = app.core;
 const random = new SeededRandomSource(0x20160810);
 const setting = app.machineSetting ?? 1;
 let reserved = resolveNextInitialHit(random, setting, 'INITIAL_BOOT');
+let forcedNextDestination = null;
+
+function publishReservation() {
+  app.nextInitialHitReservation = forcedNextDestination
+    ? Object.freeze({ ...reserved, destination: forcedNextDestination, forced: true, forceReason: app.nextInitialHitForceReason ?? null, evidenceStatus: 'PUBLISHED_ANALYSIS' })
+    : reserved;
+  return app.nextInitialHitReservation;
+}
 
 function reserveNext(context = 'AFTER_BONUS_OR_ART') {
   reserved = resolveNextInitialHit(random, setting, context);
-  app.nextInitialHitReservation = reserved;
-  core.emit('next-initial-hit-reserved', { reservation: reserved });
-  return reserved;
+  forcedNextDestination = null;
+  app.nextInitialHitForceReason = null;
+  const published = publishReservation();
+  core.emit('next-initial-hit-reserved', { reservation: published });
+  return published;
+}
+
+function forceNextGoldenTime(reason = 'SEVEN_TENPAI_CONTINUOUS_FAILURE') {
+  forcedNextDestination = GameMode.GOLDEN_TIME;
+  app.nextInitialHitForceReason = reason;
+  const published = publishReservation();
+  core.emit('next-initial-hit-forced', { destination: GameMode.GOLDEN_TIME, reason, reservation: published, evidenceStatus: 'PUBLISHED_ANALYSIS' });
+  return published;
+}
+
+function selectedReservation() {
+  return publishReservation();
 }
 
 function enterReservedDestination(source = 'CHANCE_ZONE_SUCCESS') {
   const s = core.snapshot();
   if (s.modeResult !== 'PENDING_BONUS_OR_ART') return false;
-  const selected = reserved;
+  const selected = selectedReservation();
 
   if (selected.destination === GameMode.GOLDEN_TIME) {
     core.kernelState = Object.freeze({
@@ -31,7 +53,11 @@ function enterReservedDestination(source = 'CHANCE_ZONE_SUCCESS') {
     });
     const profile = createGoldenTimeSetProfile();
     const entered = core.enterGoldenTime(profile);
-    if (entered) core.emit('next-initial-hit-consumed', { source, destination: GameMode.GOLDEN_TIME, reservation: selected });
+    if (entered) {
+      core.emit('next-initial-hit-consumed', { source, destination: GameMode.GOLDEN_TIME, reservation: selected });
+      forcedNextDestination = null;
+      app.nextInitialHitForceReason = null;
+    }
     return entered;
   }
 
@@ -49,7 +75,7 @@ function consumeConfirmedPresentation(source = 'CONFIRMED_PRESENTATION') {
     modeResult: 'PENDING_BONUS_OR_ART',
     modeResultEvidenceStatus: 'PUBLISHED_ANALYSIS'
   });
-  core.emit('confirmed-initial-hit-ready', { source, reservation: reserved, evidenceStatus: 'PUBLISHED_ANALYSIS' });
+  core.emit('confirmed-initial-hit-ready', { source, reservation: selectedReservation(), evidenceStatus: 'PUBLISHED_ANALYSIS' });
   return enterReservedDestination(source);
 }
 
@@ -63,7 +89,8 @@ core.addEventListener('lupin-bonus-failed', () => reserveNext());
 core.addEventListener('golden-time-ended', () => reserveNext());
 
 app.nextInitialHitRandom = random;
-app.nextInitialHitReservation = reserved;
+publishReservation();
 app.reserveNextInitialHit = reserveNext;
+app.forceNextGoldenTime = forceNextGoldenTime;
 app.enterReservedInitialHit = enterReservedDestination;
 app.consumeConfirmedPresentation = consumeConfirmedPresentation;
