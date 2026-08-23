@@ -3,6 +3,9 @@ import { ReuseEvidenceStatus } from './reuse-registry.js';
 export const REVENGE_CHANCE_SPEC = Object.freeze({
   games: 10,
   averagePullbackPercent: 5.6,
+  gtBattlePullbackLotteryTiming: 'TREASURE_BATTLE_LOSS',
+  gtBattleRevengeChanceRole: 'PULLBACK_WIN_PRESENTATION_AFTER_LOTTERY_HIT',
+  rerollGtBattlePullbackInsideRevengeChance: false,
   successDestinations: Object.freeze(['LUPIN_BONUS', 'GOLDEN_TIME']),
   successDestinationSplit: null,
   automaticSuccessDestination: null,
