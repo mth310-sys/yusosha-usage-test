@@ -21,16 +21,19 @@ test('prior B4 Treasure Battle presentation is reusable through the common reuse
   expect(TREASURE_BATTLE_REUSE_POLICY.autoDriveBattleFromPreviousFourGameProfile).toBe(false);
 });
 
-test('prior B4 Revenge Chance destination conflict blocks production-rule reuse', () => {
+test('prior B4 Revenge Chance destination set is reused but unresolved split is not invented', () => {
   expect(REVENGE_CHANCE_REUSE_AUDIT.sameTargetMachine).toBe(true);
   expect(REVENGE_CHANCE_REUSE_AUDIT.sharedGames).toBe(true);
   expect(REVENGE_CHANCE_REUSE_AUDIT.previousSuccessDestinations).toEqual(['LUPIN_BONUS', 'GOLDEN_TIME']);
-  expect(REVENGE_CHANCE_REUSE_AUDIT.currentAutomaticDestination).toBe('LUPIN_BONUS');
-  expect(REVENGE_CHANCE_REUSE_AUDIT.successDestinationStatus).toBe('CONFLICT');
-  expect(REVENGE_CHANCE_REUSE_AUDIT.reuseSharedStructureOnly).toBe(true);
-  expect(REVENGE_CHANCE_REUSE_AUDIT.reuseDestinationRule).toBe(false);
-  expect(REVENGE_CHANCE_REUSE_AUDIT.autoResolveDestinationConflict).toBe(false);
-  expect(REVENGE_CHANCE_REUSE_AUDIT.evidenceStatus).toBe('CONFLICT');
-  expect(REVENGE_CHANCE_REUSE_EVALUATION.reusable).toBe(false);
-  expect(REVENGE_CHANCE_REUSE_EVALUATION.mode).toBe('REJECT_OR_RESEARCH_ONLY');
+  expect(REVENGE_CHANCE_REUSE_AUDIT.currentSuccessDestinations).toEqual(['LUPIN_BONUS', 'GOLDEN_TIME']);
+  expect(REVENGE_CHANCE_REUSE_AUDIT.currentAutomaticDestination).toBeNull();
+  expect(REVENGE_CHANCE_REUSE_AUDIT.successDestinationStatus).toBe('MATCH');
+  expect(REVENGE_CHANCE_REUSE_AUDIT.successDestinationSplitStatus).toBe('UNRESOLVED');
+  expect(REVENGE_CHANCE_REUSE_AUDIT.reuseSharedStructure).toBe(true);
+  expect(REVENGE_CHANCE_REUSE_AUDIT.reuseDestinationSet).toBe(true);
+  expect(REVENGE_CHANCE_REUSE_AUDIT.reuseDestinationSplit).toBe(false);
+  expect(REVENGE_CHANCE_REUSE_AUDIT.autoSelectDestination).toBe(false);
+  expect(REVENGE_CHANCE_REUSE_AUDIT.evidenceStatus).toBe('PUBLISHED_ANALYSIS');
+  expect(REVENGE_CHANCE_REUSE_EVALUATION.reusable).toBe(true);
+  expect(REVENGE_CHANCE_REUSE_EVALUATION.mode).toBe('ADAPT_OR_PORT');
 });
