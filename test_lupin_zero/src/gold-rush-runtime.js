@@ -87,6 +87,13 @@ function settleGoldRushGame() {
   });
 
   if (resolution.continued) {
+    core.emit('gold-rush-transition-presentation', {
+      route: 'CONTINUE_GOLD_RUSH',
+      stockAdded,
+      stockCount,
+      presentationOnly: true,
+      evidenceStatus: 'PRESENTATION_ONLY'
+    });
     if (message) message.textContent = breakthrough
       ? `${breakthrough.label} — STOCK +${stockAdded} / 計${stockCount}`
       : `赤図柄揃い — STOCK ${stockCount}`;
@@ -95,6 +102,14 @@ function settleGoldRushGame() {
   }
 
   if (returnExtraBonusGames > 0) {
+    core.emit('gold-rush-transition-presentation', {
+      route: 'RETURN_EXTRA_BONUS',
+      stockAdded,
+      stockCount,
+      returnExtraBonusGames,
+      presentationOnly: true,
+      evidenceStatus: 'PRESENTATION_ONLY'
+    });
     core.kernelState = Object.freeze({
       ...core.kernelState,
       mode: GameMode.EXTRA_BONUS,
@@ -113,6 +128,13 @@ function settleGoldRushGame() {
     return true;
   }
 
+  core.emit('gold-rush-transition-presentation', {
+    route: 'GT_CONTINUATION_BATTLE',
+    stockAdded,
+    stockCount,
+    presentationOnly: true,
+    evidenceStatus: 'PRESENTATION_ONLY'
+  });
   core.kernelState = Object.freeze({
     ...core.kernelState,
     mode: GameMode.GOLDEN_TIME,
