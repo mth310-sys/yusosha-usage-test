@@ -6,14 +6,27 @@ import { GameMode, GAME_FLOW_SPEC } from '../test_lupin_zero/src/game-flow-spec.
 
 const mainSource = readFileSync(new URL('../test_lupin_zero/src/main.js', import.meta.url), 'utf8');
 const coreSource = readFileSync(new URL('../test_lupin_zero/src/machine-core.js', import.meta.url), 'utf8');
+const indexSource = readFileSync(new URL('../test_lupin_zero/index.html', import.meta.url), 'utf8');
 
-test('Extra Bonus duration is fifteen games plus remaining Golden Time games', () => {
-  const profile = createExtraBonusProfile(14);
-  expect(profile.baseGames).toBe(15);
-  expect(profile.absorbedGoldenTimeGames).toBe(14);
-  expect(profile.games).toBe(29);
-  expect(profile.betCoinsPerGame).toBe(3);
-  expect(profile.payoutCoinsPerGame).toBe(5);
+test('Extra Bonus keeps 15G as a minimum and does not synthesize the unresolved added-game distribution', () => {
+  const unresolved = createExtraBonusProfile(14);
+  expect(EXTRA_BONUS_SPEC.minimumAddedGames).toBe(15);
+  expect(EXTRA_BONUS_SPEC.averageAddedGames).toBe(18.2);
+  expect(EXTRA_BONUS_SPEC.addedGameDistribution).toBeNull();
+  expect(EXTRA_BONUS_SPEC.automaticDurationRollAllowed).toBe(false);
+  expect(unresolved.games).toBeNull();
+  expect(unresolved.minimumGames).toBe(29);
+  expect(unresolved.minimumAddedGames).toBe(15);
+  expect(unresolved.durationResolved).toBe(false);
+  expect(unresolved.durationEvidenceStatus).toBe('UNRESOLVED');
+  expect(unresolved.betCoinsPerGame).toBe(3);
+  expect(unresolved.payoutCoinsPerGame).toBe(5);
+
+  const verified = createExtraBonusProfile(14, 18);
+  expect(verified.games).toBe(32);
+  expect(verified.verifiedAddedGames).toBe(18);
+  expect(verified.durationResolved).toBe(true);
+  expect(verified.durationEvidenceStatus).toBe('VERIFIED');
 });
 
 test('published Extra Bonus odd and Gold Rush denominators are preserved', () => {
@@ -41,11 +54,47 @@ test('verified Golden Time special-zone links are represented without inventing 
   expect(treasureRush.treasureHuntSuccessRate).toBeNull();
 });
 
-test('production runtime automatically enters Extra Bonus at one million treasure and settles its games', () => {
+test('production runtime holds at one million treasure until an Extra Bonus added-game count is verified', async ({ page }) => {
   expect(mainSource).toContain('createExtraBonusProfile(afterSettlement.modeGamesRemaining ?? 0)');
   expect(mainSource).toContain('core.enterExtraBonus(extraBonus)');
-  expect(mainSource).toContain('completedMode === GameMode.EXTRA_BONUS');
-  expect(mainSource).toContain('settleCurrentExtraBonusGame()');
+  expect(indexSource).toContain('./src/extra-bonus-duration-boundary-runtime.js');
+
+  await page.goto('/test_lupin_zero/');
+  await page.waitForLoadState('networkidle');
+  const state = await page.evaluate(async () => {
+    const app = window.__LUPIN_ZERO__;
+    const { createExtraBonusProfile } = await import('/test_lupin_zero/src/extra-bonus-resolver.js');
+    app.enterGoldenTime();
+    app.core.kernelState = Object.freeze({
+      ...app.core.kernelState,
+      goldenTimeTreasure: 1000000,
+      modeGamesRemaining: 14,
+      modeResult: null,
+      modeResultEvidenceStatus: null
+    });
+    const unresolvedProfile = createExtraBonusProfile(14);
+    const automaticEntry = app.core.enterExtraBonus(unresolvedProfile);
+    const held = app.core.snapshot();
+    const manualProfile = app.enterExtraBonusWithVerifiedAddedGames(18);
+    const entered = app.core.snapshot();
+    return { automaticEntry, unresolvedProfile, held, manualProfile, entered, policy: app.extraBonusDurationPolicy };
+  });
+
+  expect(state.automaticEntry).toBe(false);
+  expect(state.held.mode).toBe(GameMode.GOLDEN_TIME);
+  expect(state.held.modeResult).toBe('PENDING_EXTRA_BONUS_DURATION');
+  expect(state.held.modeResultEvidenceStatus).toBe('UNRESOLVED');
+  expect(state.policy.minimumAddedGames).toBe(15);
+  expect(state.policy.averageAddedGames).toBe(18.2);
+  expect(state.policy.exactAddedGameDistribution).toBeNull();
+  expect(state.policy.automaticDurationRollAllowed).toBe(false);
+  expect(state.manualProfile.games).toBe(32);
+  expect(state.manualProfile.verifiedAddedGames).toBe(18);
+  expect(state.entered.mode).toBe(GameMode.EXTRA_BONUS);
+  expect(state.entered.modeGamesRemaining).toBe(32);
+});
+
+test('Extra Bonus core still preserves verified stock and Gold Rush consequences once duration is explicitly supplied', () => {
   expect(coreSource).toContain("mode: GameMode.EXTRA_BONUS");
   expect(coreSource).toContain("source: 'EXTRA_BONUS_ODD_ALIGNMENT'");
   expect(coreSource).toContain("modeResult: 'PENDING_GOLD_RUSH'");
