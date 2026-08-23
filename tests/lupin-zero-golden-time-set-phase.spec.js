@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('GT set phase stays main through 29 settled games and enters battle after 30', async ({ page }) => {
+test('GT 30G boundary is stage-residence only and does not assert continuation battle entry', async ({ page }) => {
   await page.goto('/test_lupin_zero/');
   await page.waitForLoadState('networkidle');
 
@@ -16,16 +16,20 @@ test('GT set phase stays main through 29 settled games and enters battle after 3
     };
   });
 
-  expect(result.p0).toBe('MAIN');
-  expect(result.p29).toBe('MAIN');
-  expect(result.p30).toBe('CONTINUATION_BATTLE');
-  expect(result.p39).toBe('CONTINUATION_BATTLE');
+  expect(result.p0).toBe('MAIN_STAGE_WINDOW');
+  expect(result.p29).toBe('MAIN_STAGE_WINDOW');
+  expect(result.p30).toBe('POST_STAGE_WINDOW_UNRESOLVED');
+  expect(result.p39).toBe('POST_STAGE_WINDOW_UNRESOLVED');
   expect(result.p40).toBe('COMPLETE');
-  expect(result.policy.mainGames).toBe(30);
+  expect(result.policy.stageResidenceWindowGames).toBe(30);
   expect(result.policy.totalApproxGames).toBe(40);
-  expect(result.policy.evidenceStatus).toBe('INFERRED_HIGH_CONFIDENCE');
+  expect(result.policy.stageResidenceWindowEvidenceStatus).toBe('INFERRED_HIGH_CONFIDENCE');
+  expect(result.policy.continuationBattleExactEntryGame).toBeNull();
+  expect(result.policy.continuationBattleExactEntryGameEvidenceStatus).toBe('UNRESOLVED');
+  expect(result.policy.thirtyGameResidenceMustNotImplyBattleEntry).toBe(true);
+  expect(result.policy.previousB4BattlePresentationGamesCandidate).toBe(4);
+  expect(result.policy.previousB4BattlePresentationEvidenceStatus).toBe('REUSED_PREVIOUS_VERIFIED_PARTIAL_REQUIRES_ZERO_RECONFIRMATION');
   expect(result.policy.continuationBattlePerGameMechanics).toBe('UNRESOLVED');
-  expect(result.policy.normalStageResidenceDuringBattle).toBe(false);
   expect(result.policy.syntheticBattleLotteryImplemented).toBe(false);
   expect(result.policy.continuationResolutionPipeline).toBe('REUSE_EXISTING_STOCK_TREASURE_BATTLE_REVENGE_PIPELINE');
   expect(result.policy.stockPriorityResolverReused).toBe(true);
@@ -33,7 +37,7 @@ test('GT set phase stays main through 29 settled games and enters battle after 3
   expect(result.policy.duplicateContinuationResolverImplemented).toBe(false);
 });
 
-test('GT production profile separates 30G main from unresolved battle window without changing total length', async ({ page }) => {
+test('GT production profile keeps approximate 40G total while battle timing remains unresolved', async ({ page }) => {
   await page.goto('/test_lupin_zero/');
   await page.waitForLoadState('networkidle');
 
@@ -43,15 +47,20 @@ test('GT production profile separates 30G main from unresolved battle window wit
   });
 
   expect(result.profile.games).toBe(40);
-  expect(result.profile.mainGames).toBe(30);
-  expect(result.profile.continuationBattleGames).toBe(10);
-  expect(result.profile.setCompositionEvidenceStatus).toBe('INFERRED_HIGH_CONFIDENCE');
-  expect(result.policy.setComposition).toBe('30G_MAIN_PLUS_REMAINING_CONTINUATION_BATTLE_WINDOW');
+  expect(result.profile.stageResidenceValidationGames).toBe(30);
+  expect(result.profile.continuationBattleEntryGame).toBeNull();
+  expect(result.profile.continuationBattlePresentationGames).toBeNull();
+  expect(result.profile.setCompositionEvidenceStatus).toBe('UNRESOLVED');
+  expect(result.profile.previousB4BattlePresentationGamesCandidate).toBe(4);
+  expect(result.policy.stageResidenceValidationGames).toBe(30);
+  expect(result.policy.stageResidenceValidationMustNotDefineBattleEntry).toBe(true);
+  expect(result.policy.continuationBattleExactEntryGame).toBeNull();
+  expect(result.policy.continuationBattleExactPresentationGames).toBeNull();
+  expect(result.policy.continuationBattleTimingEvidenceStatus).toBe('UNRESOLVED');
   expect(result.policy.continuationBattlePerGameMechanics).toBe('UNRESOLVED');
-  expect(result.policy.continuationBattleDoesNotCreateFourthNormalStageResidenceBlock).toBe(true);
 });
 
-test('GT set phase runtime is loaded by the production page before stage presentation', async ({ page }) => {
+test('GT set phase runtime exposes unresolved post-stage boundary without fake battle label', async ({ page }) => {
   await page.goto('/test_lupin_zero/');
   await page.waitForLoadState('networkidle');
 
@@ -62,8 +71,9 @@ test('GT set phase runtime is loaded by the production page before stage present
   }));
 
   expect(runtime.hasGetter).toBe(true);
-  expect(runtime.policy.mainGames).toBe(30);
+  expect(runtime.policy.stageResidenceWindowGames).toBe(30);
+  expect(runtime.policy.continuationBattleExactEntryGame).toBeNull();
   expect(runtime.policy.continuationBattlePerGameMechanics).toBe('UNRESOLVED');
   expect(runtime.policy.continuationResolutionPipeline).toBe('REUSE_EXISTING_STOCK_TREASURE_BATTLE_REVENGE_PIPELINE');
-  expect(runtime.state.phase).toBe('MAIN');
+  expect(runtime.state.phase).toBe('MAIN_STAGE_WINDOW');
 });
