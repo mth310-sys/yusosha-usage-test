@@ -3,7 +3,8 @@ import { SequenceRandomSource } from '../test_lupin_zero/src/random-source.js';
 import {
   REVENGE_CHANCE_SPEC,
   getRevengePullbackPercent,
-  resolveRevengePullback
+  resolveRevengePullback,
+  resolveKnownRevengeDestination
 } from '../test_lupin_zero/src/revenge-chance-resolver.js';
 import { GameMode, getVerifiedFlowLinks } from '../test_lupin_zero/src/game-flow-spec.js';
 
@@ -17,11 +18,32 @@ test('published Revenge Chance pullback table and timing semantics are preserved
   expect(REVENGE_CHANCE_SPEC.successDestinations).toEqual(['LUPIN_BONUS', 'GOLDEN_TIME']);
   expect(REVENGE_CHANCE_SPEC.successDestinationSplit).toBeNull();
   expect(REVENGE_CHANCE_SPEC.automaticSuccessDestination).toBeNull();
+  expect(REVENGE_CHANCE_SPEC.characterCollectionDestination).toBe('LUPIN_BONUS');
+  expect(REVENGE_CHANCE_SPEC.directGoldenTimeRouteExists).toBe(true);
+  expect(REVENGE_CHANCE_SPEC.directGoldenTimeRouteTrigger).toBeNull();
+  expect(REVENGE_CHANCE_SPEC.directGoldenTimeRoutePercent).toBeNull();
   expect(getRevengePullbackPercent(50000).percent).toBe(2.3);
   expect(getRevengePullbackPercent(350000).percent).toBe(1.6);
   expect(getRevengePullbackPercent(750000).percent).toBe(12.5);
   expect(getRevengePullbackPercent(950000).percent).toBe(50.0);
   expect(getRevengePullbackPercent(950000).evidenceStatus).toBe('PUBLISHED_ANALYSIS');
+});
+
+test('known Revenge success mechanisms resolve destinations without inventing their occurrence split', () => {
+  const collection = resolveKnownRevengeDestination('COLLECT_FOUR_CHARACTERS');
+  expect(collection.resolved).toBe(true);
+  expect(collection.destination).toBe('LUPIN_BONUS');
+  expect(collection.evidenceStatus).toBe('PUBLISHED_ANALYSIS');
+
+  const directGt = resolveKnownRevengeDestination('DIRECT_GOLDEN_TIME');
+  expect(directGt.resolved).toBe(true);
+  expect(directGt.destination).toBe('GOLDEN_TIME');
+  expect(directGt.evidenceStatus).toBe('PUBLISHED_ANALYSIS');
+
+  const unknown = resolveKnownRevengeDestination(null);
+  expect(unknown.resolved).toBe(false);
+  expect(unknown.destination).toBeNull();
+  expect(unknown.destinationCandidates).toEqual(['LUPIN_BONUS', 'GOLDEN_TIME']);
 });
 
 test('only exact midpoint needed by current 50k production treasure model is inferred', () => {
@@ -32,7 +54,7 @@ test('only exact midpoint needed by current 50k production treasure model is inf
   expect(getRevengePullbackPercent(425000)).toBeNull();
 });
 
-test('pullback hit preserves both destinations without inventing the split', () => {
+test('pullback hit preserves both possible mechanisms without inventing the split', () => {
   const hit = resolveRevengePullback(new SequenceRandomSource([0]), 350000);
   expect(hit.hit).toBe(true);
   expect(hit.percent).toBe(1.6);
