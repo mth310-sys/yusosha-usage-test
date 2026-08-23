@@ -1,5 +1,6 @@
 import { GameMode } from './game-flow-spec.js';
 import { createLupinBonusProfile, resolveLupinBonusOutcome } from './lupin-bonus-resolver.js';
+import { createLupinBonusBattleState, advanceLupinBonusBattle } from './lupin-bonus-battle-resolver.js';
 import { SeededRandomSource } from './random-source.js';
 
 const app = window.__LUPIN_ZERO__;
@@ -11,6 +12,7 @@ const message = document.querySelector('#message');
 const stateValue = document.querySelector('#stateValue');
 const phaseBadge = document.querySelector('#phaseBadge');
 let hiddenOutcome = null;
+let battleState = null;
 let bonusGameStarted = false;
 
 function renderLupinBonus() {
@@ -26,6 +28,7 @@ function renderLupinBonus() {
 function enterLupinBonus(source = 'UNKNOWN') {
   const profile = createLupinBonusProfile();
   hiddenOutcome = resolveLupinBonusOutcome(random);
+  battleState = null;
   core.kernelState = Object.freeze({
     ...core.kernelState,
     mode: GameMode.LUPIN_BONUS,
@@ -46,6 +49,7 @@ function finishLupinBonus() {
   const profile = createLupinBonusProfile();
   const outcome = hiddenOutcome ?? resolveLupinBonusOutcome(random);
   hiddenOutcome = null;
+  battleState = null;
 
   if (outcome.artHit) {
     core.kernelState = Object.freeze({
@@ -103,7 +107,8 @@ core.addEventListener('spin-end', (event) => {
   if (!bonusGameStarted || event.detail.snapshot.mode !== GameMode.LUPIN_BONUS) return;
   const profile = createLupinBonusProfile();
   const s = core.snapshot();
-  const remaining = Math.max(0, (s.modeGamesRemaining ?? 0) - 1);
+  const beforeRemaining = s.modeGamesRemaining ?? 0;
+  const remaining = Math.max(0, beforeRemaining - 1);
   core.kernelState = Object.freeze({
     ...core.kernelState,
     credit: s.credit + profile.payoutCoinsPerGame,
@@ -112,8 +117,27 @@ core.addEventListener('spin-end', (event) => {
     modeGamesRemaining: remaining
   });
   core.emit('lupin-bonus-game-settled', { remaining, payoutCoins: profile.payoutCoinsPerGame, evidenceStatus: profile.evidenceStatus });
-  if (remaining === profile.finalBattleGames && message) message.textContent = '銭形バトル';
-  else if (remaining > 0 && message) message.textContent = `LUPIN BONUS ${remaining}G`;
+
+  if (remaining === profile.finalBattleGames && !battleState) {
+    battleState = createLupinBonusBattleState(hiddenOutcome);
+    core.emit('lupin-bonus-battle-enter', { games: battleState.totalGames, opponent: 'ZENIGATA', evidenceStatus: battleState.evidenceStatus });
+    if (message) message.textContent = '銭形バトル';
+  } else if (beforeRemaining <= profile.finalBattleGames && battleState) {
+    battleState = advanceLupinBonusBattle(battleState);
+    core.emit('lupin-bonus-battle-step', {
+      step: battleState.step,
+      remaining: battleState.gamesRemaining,
+      revealed: battleState.revealed,
+      result: battleState.result,
+      destination: battleState.destination,
+      evidenceStatus: battleState.evidenceStatus
+    });
+    if (message && !battleState.revealed) message.textContent = `銭形バトル STEP ${battleState.step}`;
+    if (message && battleState.revealed) message.textContent = battleState.result === 'WIN' ? '銭形撃破!' : '銭形バトル 敗北';
+  } else if (remaining > 0 && message) {
+    message.textContent = `LUPIN BONUS ${remaining}G`;
+  }
+
   if (remaining === 0) finishLupinBonus();
   bonusGameStarted = false;
   renderLupinBonus();
@@ -126,3 +150,4 @@ core.addEventListener('mode-enter', (event) => {
 app.lupinBonusRandom = random;
 app.enterLupinBonus = enterLupinBonus;
 app.createLupinBonusProfile = createLupinBonusProfile;
+app.getLupinBonusBattleState = () => battleState;
