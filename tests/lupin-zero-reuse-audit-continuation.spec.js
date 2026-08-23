@@ -14,11 +14,18 @@ test('prior B4 Treasure Battle presentation is reusable through the common reuse
   expect(TREASURE_BATTLE_REUSE_EVALUATION.reusable).toBe(true);
   expect(TREASURE_BATTLE_REUSE_EVALUATION.mode).toBe('ADAPT_PRESENTATION');
   expect(TREASURE_BATTLE_REUSE_POLICY.reuseRegistryApproved).toBe(true);
+  expect(TREASURE_BATTLE_REUSE_POLICY.setEndWithoutStockTriggerStatus).toBe('MULTI_SOURCE_MATCH');
+  expect(TREASURE_BATTLE_REUSE_POLICY.exactBattleEntryGameNumberStatus).toBe('UNRESOLVED');
+  expect(TREASURE_BATTLE_REUSE_POLICY.opponentListStatus).toBe('MULTI_SOURCE_MATCH');
+  expect(TREASURE_BATTLE_REUSE_POLICY.opponentExpectationOrderStatus).toBe('MULTI_SOURCE_MATCH');
+  expect(TREASURE_BATTLE_REUSE_POLICY.opponentDistributionStatus).toBe('UNRESOLVED');
   expect(profile.totalGames).toBe(4);
   expect(profile.opponents).toHaveLength(5);
   expect(profile.opponentDistribution).toBeNull();
   expect(profile.chanceUpDistribution).toBeNull();
   expect(TREASURE_BATTLE_REUSE_POLICY.autoDriveBattleFromPreviousFourGameProfile).toBe(false);
+  expect(TREASURE_BATTLE_REUSE_POLICY.noSyntheticEntryGameNumber).toBe(true);
+  expect(TREASURE_BATTLE_REUSE_POLICY.noSyntheticOpponentDistribution).toBe(true);
 });
 
 test('prior B4 Revenge Chance destination set is reused but unresolved split is not invented', () => {
