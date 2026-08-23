@@ -11,6 +11,9 @@ import { GameMode, getVerifiedFlowLinks } from '../test_lupin_zero/src/game-flow
 test('published Revenge Chance pullback table is preserved', () => {
   expect(REVENGE_CHANCE_SPEC.games).toBe(10);
   expect(REVENGE_CHANCE_SPEC.averagePullbackPercent).toBe(5.6);
+  expect(REVENGE_CHANCE_SPEC.successDestinations).toEqual(['LUPIN_BONUS', 'GOLDEN_TIME']);
+  expect(REVENGE_CHANCE_SPEC.successDestinationSplit).toBeNull();
+  expect(REVENGE_CHANCE_SPEC.automaticSuccessDestination).toBeNull();
   expect(getRevengePullbackPercent(50000).percent).toBe(2.3);
   expect(getRevengePullbackPercent(350000).percent).toBe(1.6);
   expect(getRevengePullbackPercent(750000).percent).toBe(12.5);
@@ -26,15 +29,19 @@ test('only exact midpoint needed by current 50k production treasure model is inf
   expect(getRevengePullbackPercent(425000)).toBeNull();
 });
 
-test('pullback hit and miss use the selected treasure rate deterministically', () => {
+test('pullback hit preserves both destinations without inventing the split', () => {
   const hit = resolveRevengePullback(new SequenceRandomSource([0]), 350000);
   expect(hit.hit).toBe(true);
   expect(hit.percent).toBe(1.6);
   expect(hit.games).toBe(10);
-  expect(hit.destination).toBe('LUPIN_BONUS');
+  expect(hit.destination).toBeNull();
+  expect(hit.destinationCandidates).toEqual(['LUPIN_BONUS', 'GOLDEN_TIME']);
+  expect(hit.destinationSplit).toBeNull();
+  expect(hit.evidenceStatus).toBe('UNRESOLVED');
 
   const miss = resolveRevengePullback(new SequenceRandomSource([0.99]), 350000);
   expect(miss.hit).toBe(false);
+  expect(miss.destinationCandidates).toEqual([]);
 });
 
 test('unsupported treasure values stay unresolved rather than inventing a rate', () => {
@@ -45,9 +52,10 @@ test('unsupported treasure values stay unresolved rather than inventing a rate',
   expect(result.evidenceStatus).toBe('UNRESOLVED');
 });
 
-test('flow graph exposes GT loss pullback to Revenge Chance and then Lupin Bonus', () => {
+test('flow graph exposes GT loss pullback and both published Revenge success destinations', () => {
   const gtLinks = getVerifiedFlowLinks(GameMode.GOLDEN_TIME);
   expect(gtLinks.some((link) => link.trigger === 'TREASURE_BATTLE_LOSS_PULLBACK_HIT' && link.to === GameMode.REVENGE_CHANCE)).toBe(true);
   const revengeLinks = getVerifiedFlowLinks(GameMode.REVENGE_CHANCE);
   expect(revengeLinks.some((link) => link.to === GameMode.LUPIN_BONUS)).toBe(true);
+  expect(revengeLinks.some((link) => link.to === GameMode.GOLDEN_TIME)).toBe(true);
 });
