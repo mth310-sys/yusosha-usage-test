@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('LUPIN RUSH uses published pattern selection and does not invent per-pattern treasure', async ({ page }) => {
+test('LUPIN RUSH keeps the published 63/31/5/1 split as context-unresolved reference only', async ({ page }) => {
   await page.goto('/test_lupin_zero/');
   await page.waitForLoadState('networkidle');
   const result = await page.evaluate(async () => {
@@ -19,26 +19,47 @@ test('LUPIN RUSH uses published pattern selection and does not invent per-patter
   expect(result.silhouette.pattern).toBe('SILHOUETTE');
   expect(result.revolver.pattern).toBe('REVOLVER_VISION');
   expect(result.attack.pattern).toBe('ATTACK_VISION');
+  for (const reference of [result.walther, result.silhouette, result.revolver, result.attack]) {
+    expect(reference.referenceOnly).toBe(true);
+    expect(reference.evidenceStatus).toBe('UNRESOLVED');
+    expect(reference.selectionContext).toBe('UNRESOLVED_BETWEEN_INITIAL_AND_CONTINUATION_ENTRY');
+  }
+  expect(result.profile.pattern).toBeNull();
+  expect(result.profile.draw).toBeNull();
+  expect(result.profile.automaticPatternSelectionAllowed).toBe(false);
+  expect(result.profile.evidenceStatus).toBe('UNRESOLVED');
   expect(result.profile.games).toBe(4);
   expect(result.profile.publishedAverageTreasure).toBe(342000);
   expect(result.profile.productionTreasureFallback).toBe(350000);
   expect(result.profile.exactPatternAwardDistributionKnown).toBe(false);
   expect(result.profile.relationToGoldenTimeSet).toBe('FIRST_4_GAMES_OF_EXISTING_40G_WORKING_MODEL');
   expect(result.policy.patternRates).toEqual({ WALTHER:63, SILHOUETTE:31, REVOLVER_VISION:5, ATTACK_VISION:1 });
+  expect(result.policy.patternSelectionRatesVerified).toBe(false);
+  expect(result.policy.patternSelectionContextResolved).toBe(false);
+  expect(result.policy.automaticPatternSelectionAllowed).toBe(false);
+  expect(result.policy.patternRatesReferenceOnly).toBe(true);
   expect(result.policy.addExtraGamesOutsideGoldenTimeSet).toBe(false);
   expect(result.policy.synthesizePerPatternAwards).toBe(false);
 });
 
-test('LUPIN RUSH runtime arms immediately when GOLDEN TIME begins', async ({ page }) => {
+test('LUPIN RUSH runtime arms generically when GOLDEN TIME begins without inventing a pattern', async ({ page }) => {
   await page.goto('/test_lupin_zero/');
   await page.waitForLoadState('networkidle');
   const state = await page.evaluate(() => {
     const app = window.__LUPIN_ZERO__;
     app.enterGoldenTime();
-    return { rush: app.getLupinRushState?.(), gt: app.core.snapshot() };
+    return {
+      rush: app.getLupinRushState?.(),
+      gt: app.core.snapshot(),
+      phaseBadge: document.querySelector('#phaseBadge')?.textContent,
+      message: document.querySelector('#message')?.textContent
+    };
   });
   expect(state.gt.mode).toBe('GOLDEN_TIME');
   expect(state.rush.active).toBe(true);
   expect(state.rush.remaining).toBe(4);
-  expect(['WALTHER','SILHOUETTE','REVOLVER_VISION','ATTACK_VISION']).toContain(state.rush.pattern);
+  expect(state.rush.pattern).toBeNull();
+  expect(state.rush.profile.automaticPatternSelectionAllowed).toBe(false);
+  expect(state.phaseBadge).toBe('LUPIN RUSH');
+  expect(state.message).toContain('LUPIN RUSH');
 });
