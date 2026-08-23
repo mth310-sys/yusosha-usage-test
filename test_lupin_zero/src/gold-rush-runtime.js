@@ -61,6 +61,16 @@ function settleGoldRushGame() {
   pendingBreakthroughType = null;
   const stockAdded = Math.max(1, breakthrough?.minimumGtStockAward ?? 1);
   const stockCount = (s.goldenTimeStockCount ?? 0) + stockAdded;
+  const presentationRank = breakthrough?.type ?? 'NORMAL_RED_ALIGNMENT';
+
+  core.emit('gold-rush-red-alignment-presentation', {
+    presentationRank,
+    breakthroughType: breakthrough?.type ?? null,
+    breakthroughLabel: breakthrough?.label ?? null,
+    stockAdded,
+    evidenceStatus: breakthrough?.evidenceStatus ?? resolution.evidenceStatus,
+    presentationOnly: true
+  });
 
   core.kernelState = Object.freeze({
     ...core.kernelState,
@@ -79,7 +89,7 @@ function settleGoldRushGame() {
   if (resolution.continued) {
     if (message) message.textContent = breakthrough
       ? `${breakthrough.label} — STOCK +${stockAdded} / 計${stockCount}`
-      : `奇数揃い — STOCK ${stockCount}`;
+      : `赤図柄揃い — STOCK ${stockCount}`;
     renderGoldRush();
     return true;
   }
