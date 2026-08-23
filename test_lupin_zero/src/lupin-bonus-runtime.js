@@ -1,6 +1,7 @@
 import { GameMode } from './game-flow-spec.js';
 import { createLupinBonusProfile, resolveLupinBonusOutcome } from './lupin-bonus-resolver.js';
 import { createLupinBonusBattleState, advanceLupinBonusBattle } from './lupin-bonus-battle-resolver.js';
+import { LUPIN_BONUS_TYPEWRITER_SPEC, applyLupinBonusTypewriterGuarantee } from './lupin-bonus-typewriter-resolver.js';
 import { SeededRandomSource } from './random-source.js';
 
 const app = window.__LUPIN_ZERO__;
@@ -14,6 +15,7 @@ const phaseBadge = document.querySelector('#phaseBadge');
 let hiddenOutcome = null;
 let battleState = null;
 let bonusGameStarted = false;
+let typewriterHighChance = false;
 
 function renderLupinBonus() {
   const s = core.snapshot();
@@ -21,7 +23,7 @@ function renderLupinBonus() {
   if (phaseBadge) phaseBadge.textContent = 'LUPIN BONUS';
   if (stateValue) {
     const remain = s.modeGamesRemaining ?? 0;
-    stateValue.textContent = remain <= 5 ? `銭形バトル ${remain}G` : `LUPIN BONUS ${remain}G`;
+    stateValue.textContent = remain <= 5 ? `銭形バトル ${remain}G` : typewriterHighChance ? `タイプラ高確 ${remain}G` : `LUPIN BONUS ${remain}G`;
   }
 }
 
@@ -29,6 +31,7 @@ function enterLupinBonus(source = 'UNKNOWN') {
   const profile = createLupinBonusProfile();
   hiddenOutcome = resolveLupinBonusOutcome(random);
   battleState = null;
+  typewriterHighChance = false;
   core.kernelState = Object.freeze({
     ...core.kernelState,
     mode: GameMode.LUPIN_BONUS,
@@ -45,11 +48,40 @@ function enterLupinBonus(source = 'UNKNOWN') {
   return true;
 }
 
+function enterTypewriterHighChance(source = 'VERIFIED_EXTERNAL_TRIGGER') {
+  const s = core.snapshot();
+  if (s.mode !== GameMode.LUPIN_BONUS || (s.modeGamesRemaining ?? 0) <= 5) return false;
+  typewriterHighChance = true;
+  core.emit('lupin-bonus-typewriter-high-chance-enter', {
+    source,
+    naturalEntryRateKnown: LUPIN_BONUS_TYPEWRITER_SPEC.highChanceEntryRateKnown,
+    evidenceStatus: LUPIN_BONUS_TYPEWRITER_SPEC.evidenceStatus
+  });
+  if (message) message.textContent = 'タイプラ高確率';
+  renderLupinBonus();
+  return true;
+}
+
+function triggerTypewriter(source = 'LUPIN_BONUS_TYPEWRITER') {
+  const s = core.snapshot();
+  if (s.mode !== GameMode.LUPIN_BONUS || !hiddenOutcome) return false;
+  hiddenOutcome = applyLupinBonusTypewriterGuarantee(hiddenOutcome);
+  core.emit('lupin-bonus-typewriter', {
+    source,
+    artGuaranteed: true,
+    destination: GameMode.GOLDEN_TIME,
+    evidenceStatus: hiddenOutcome.evidenceStatus
+  });
+  if (message) message.textContent = 'TYPEWRITER — GOLDEN TIME確定';
+  return true;
+}
+
 function finishLupinBonus() {
   const profile = createLupinBonusProfile();
   const outcome = hiddenOutcome ?? resolveLupinBonusOutcome(random);
   hiddenOutcome = null;
   battleState = null;
+  typewriterHighChance = false;
 
   if (outcome.artHit) {
     core.kernelState = Object.freeze({
@@ -143,7 +175,7 @@ core.addEventListener('spin-end', (event) => {
     if (message && !battleState.revealed) message.textContent = `銭形の攻撃 — 回避せよ ${battleState.step}/5`;
     if (message && battleState.revealed) message.textContent = battleState.result === 'WIN' ? '攻撃回避 — 銭形撃破!' : '回避失敗 — 銭形バトル敗北';
   } else if (remaining > 0 && message) {
-    message.textContent = `LUPIN BONUS ${remaining}G`;
+    message.textContent = typewriterHighChance ? `タイプラ高確率 ${remaining}G` : `LUPIN BONUS ${remaining}G`;
   }
 
   if (remaining === 0) finishLupinBonus();
@@ -158,4 +190,7 @@ core.addEventListener('mode-enter', (event) => {
 app.lupinBonusRandom = random;
 app.enterLupinBonus = enterLupinBonus;
 app.createLupinBonusProfile = createLupinBonusProfile;
+app.enterLupinBonusTypewriterHighChance = enterTypewriterHighChance;
+app.triggerLupinBonusTypewriter = triggerTypewriter;
+app.lupinBonusTypewriterSpec = LUPIN_BONUS_TYPEWRITER_SPEC;
 app.getLupinBonusBattleState = () => battleState;
