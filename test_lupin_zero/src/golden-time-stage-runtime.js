@@ -75,6 +75,7 @@ core.addEventListener('golden-time-game-settled', (event) => {
     configureSet(snapshot, { preserveScenario: scenario != null });
   }
   gamesInSet += 1;
+  if (gamesInSet > GOLDEN_TIME_STAGE_POLICY.stageResidenceWindowGames) return;
 
   const checkpoint = stageIndex == null
     ? null
