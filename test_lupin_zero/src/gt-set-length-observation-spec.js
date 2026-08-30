@@ -1,7 +1,7 @@
 // Observed-play evidence for the 2016 Olympia machine.
-// This does not define the internal battle entry game. It only constrains models
-// that would incorrectly turn the published "about 40G" set description into a
-// fixed 40G / fixed post-30G battle boundary.
+// IMPORTANT: the published practical-play table is a data-counter timeline, not
+// an internal machine trace. These intervals constrain fixed-length models, but
+// must not be promoted to exact machine set lengths or exact battle entry games.
 export const GT_SET_LENGTH_OBSERVATION_SPEC = Object.freeze({
   source: Object.freeze({
     publisher: '1geki',
@@ -11,31 +11,53 @@ export const GT_SET_LENGTH_OBSERVATION_SPEC = Object.freeze({
   }),
   publishedNominalSetGames: 40,
   publishedNominalSetGamesMeaning: 'APPROXIMATE',
-  // Consecutive set-start / END deltas recoverable directly from the published
-  // practical-play timeline when no intervening EXTRA BONUS / Treasure RUSH
-  // makes the interval unsuitable as a plain set-length observation.
-  plainObservedSetIntervalsGames: Object.freeze([
-    42, 37, 38, 38, // 1 -> 2 -> 3 -> 4 -> 5 in one run
-    42, 42, 37,     // another 1 -> 2 -> 3 -> END run
-    45, 43, 39, 39, 40, 43, // long run, early plain intervals
-    42              // single-set run ending at 42G
+  observationUnit: 'PUBLISHED_DATA_COUNTER_INTERVAL',
+  exactMachineSetLengthObservation: false,
+  counterBoundarySemanticsResolved: false,
+  counterBoundarySemanticsEvidenceStatus: 'UNRESOLVED',
+  plainObservedCounterIntervalsGames: Object.freeze([
+    42, 37, 38, 38,
+    42, 42, 37,
+    45, 43, 39, 39, 40, 43,
+    42
   ]),
-  observation: 'PLAIN_SET_INTERVALS_ARE_NOT_FIXED_AT_40_GAMES',
+  // Backward-compatible alias only. Consumers must not interpret these counter
+  // intervals as exact internal GT set lengths.
+  plainObservedSetIntervalsGames: Object.freeze([
+    42, 37, 38, 38,
+    42, 42, 37,
+    45, 43, 39, 39, 40, 43,
+    42
+  ]),
+  observation: 'PUBLISHED_COUNTER_INTERVALS_AROUND_GT_SET_BOUNDARIES_ARE_NOT_FIXED_AT_40',
   exactContinuationBattleEntryGame: null,
   exactContinuationBattleEntryGameEvidenceStatus: 'UNRESOLVED',
+  lupinRushGames: 4,
+  lupinRushDurationEvidenceStatus: 'PUBLISHED_ANALYSIS',
+  lupinRushCountedInsideCounterInterval: null,
+  lupinRushCounterInclusionEvidenceStatus: 'UNRESOLVED',
+  treasureBattlePresentationGamesCandidate: 4,
+  treasureBattlePresentationGamesCandidateEvidenceStatus: 'PRIOR_B4_VERIFIED_PRESENTATION_STRUCTURE_EXTERNAL_RECONFIRMATION_PENDING',
+  treasureBattleCountedInsideCounterInterval: null,
+  treasureBattleCounterInclusionEvidenceStatus: 'UNRESOLVED',
   fixedThirtyPlusTenRuntimeModelAllowed: false,
   fixedFortyGameRuntimeModelAllowed: false,
+  inferVariableInternalSetLengthFromCounterIntervalsAllowed: false,
   evidenceStatus: 'PUBLISHED_OBSERVED_PLAY_DATA',
-  productionEffect: 'CONSTRAINT_ONLY_DO_NOT_SYNTHESIZE_UNKNOWN_BATTLE_TIMING'
+  productionEffect: 'CONSTRAINT_ONLY_DO_NOT_SYNTHESIZE_UNKNOWN_BATTLE_TIMING_OR_VARIABLE_SET_LENGTH'
 });
 
 export function summarizeGtSetLengthObservations() {
-  const xs = GT_SET_LENGTH_OBSERVATION_SPEC.plainObservedSetIntervalsGames;
+  const xs = GT_SET_LENGTH_OBSERVATION_SPEC.plainObservedCounterIntervalsGames;
   return Object.freeze({
     count: xs.length,
     min: Math.min(...xs),
     max: Math.max(...xs),
     hasNonFortyInterval: xs.some((value) => value !== 40),
+    observationUnit: GT_SET_LENGTH_OBSERVATION_SPEC.observationUnit,
+    exactMachineSetLengthObservation: false,
+    counterBoundarySemanticsResolved: false,
+    inferVariableInternalSetLengthFromCounterIntervalsAllowed: false,
     exactContinuationBattleEntryGame: null
   });
 }
