@@ -33,11 +33,13 @@ export function createGoldenTimeSetProfile() {
   const games = VERIFIED_SPEC.modeProfiles.goldenTime.setGamesApprox;
   return Object.freeze({
     games,
+    gamesMeaning: 'APPROXIMATE_PUBLISHED_NOMINAL',
+    fixedSetLengthAllowed: false,
     stageResidenceValidationGames: 30,
     continuationBattleEntryGame: null,
     continuationBattlePresentationGames: null,
     setCompositionEvidenceStatus: ReuseEvidenceStatus.UNRESOLVED,
-    setCompositionNote: 'The 30G value is a stage-residence validation window, not a confirmed continuation-battle entry point. Published sources confirm an approximately 40G set and battle after regulation games; exact battle entry timing remains unresolved.',
+    setCompositionNote: 'The 30G value is a stage-residence validation window, not a confirmed continuation-battle entry point. Published sources describe the set as approximately 40G, while observed play intervals vary around 40G; exact terminal timing remains unresolved.',
     previousB4BattlePresentationGamesCandidate: 4,
     previousB4BattlePresentationEvidenceStatus: 'PRIOR_B4_VERIFIED_PRESENTATION_STRUCTURE_EXTERNAL_RECONFIRMATION_PENDING',
     pureIncreaseCoinsPerGame: VERIFIED_SPEC.modeProfiles.goldenTime.pureIncreaseCoinsPerGame,
@@ -86,7 +88,10 @@ export function resolveGoldenTimeContinuation(randomSource, treasure) {
 }
 
 export const GOLDEN_TIME_PRODUCTION_POLICY = Object.freeze({
-  setGamesApproxUsedAs40Games: true,
+  publishedSetGamesApprox: 40,
+  publishedSetGamesMeaning: 'APPROXIMATE',
+  fixedFortyGameRuntimeModelAllowed: false,
+  fixedThirtyPlusTenRuntimeModelAllowed: false,
   stageResidenceValidationGames: 30,
   stageResidenceValidationMustNotDefineBattleEntry: true,
   continuationBattleExactEntryGame: null,
