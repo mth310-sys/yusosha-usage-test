@@ -30,10 +30,15 @@ test('EXTRA BONUS reveal keeps published outcomes distinct', () => {
   assert.match(runtime, /GOLD RUSH/);
 });
 
-test('published EXTRA BONUS probabilities remain authoritative', () => {
-  assert.match(resolver, /oddAlignmentDenominator: 202\.6/);
+test('EXTRA BONUS probability evidence boundaries remain authoritative', () => {
+  assert.match(resolver, /oddAlignmentDenominator: null/);
+  assert.match(resolver, /oddAlignmentPreferredReferenceDenominator: 202\.6/);
+  assert.match(resolver, /oddAlignmentConflictingReferenceDenominator: 4924\.3/);
+  assert.match(resolver, /oddAlignmentRateStatus: 'CONFLICT'/);
+  assert.match(resolver, /automaticOddAlignmentLotteryAllowed: false/);
   assert.match(resolver, /goldRushDenominator: 4924\.3/);
-  assert.match(resolver, /oddAlignmentConsequence: 'GOLDEN_TIME_SET_STOCK_PLUS_1'/);
+  assert.match(resolver, /goldRushRateStatus: 'PUBLISHED_ANALYSIS_MULTI_SOURCE_MATCH'/);
+  assert.match(resolver, /oddAlignmentConsequence: 'GOLDEN_TIME_SET_STOCK_PLUS_1_IF_ODD_ALIGNMENT_OCCURS'/);
   assert.match(resolver, /goldRushDestination: 'GOLD_RUSH'/);
 });
 
