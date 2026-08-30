@@ -7,17 +7,4 @@ const topColors=[['#ff4d72','#8b0c2a'],['#ff9c35','#883900'],['#ffe34f','#7a6000
 const applySideState=open=>{sideOpen=Boolean(open);document.querySelectorAll('.f9-side-mech').forEach(el=>el.classList.toggle('open',sideOpen));sideToggle.textContent=sideOpen?'SIDE CLOSE':'SIDE OPEN'};
 sideToggle.addEventListener('click',()=>applySideState(!sideOpen));
 new MutationObserver(()=>{const state=sideUnits.dataset.state;if(state==='reveal')applySideState(true);else if(state==='closed')applySideState(false)}).observe(sideUnits,{attributes:true,attributeFilter:['data-state']});
-
-// BODY is the canonical cabinet. Map its physical controls to the integrated ZERO system.
-const bodyControls=[...document.querySelectorAll('.control-button')];
-const zeroSelectors=['#maxBetBtn','#startBtn','#stop1','#stop2','#stop3'];
-const roles=['MAX_BET','START','STOP_1','STOP_2','STOP_3'];
-const forward=(selector)=>{const target=document.querySelector(selector);if(!(target instanceof HTMLButtonElement)||target.disabled)return false;target.click();return true};
-if(bodyControls.length>=5){
- bodyControls.slice(0,5).forEach((button,index)=>{button.dataset.bodyRole=roles[index];button.addEventListener('click',()=>forward(zeroSelectors[index]))});
- const syncControls=()=>bodyControls.slice(0,5).forEach((button,index)=>{const target=document.querySelector(zeroSelectors[index]);const ready=target instanceof HTMLButtonElement&&!target.disabled;button.classList.toggle('is-ready',ready);button.setAttribute('aria-disabled',ready?'false':'true')});
- const integration=document.getElementById('systemIntegration');
- if(integration)new MutationObserver(syncControls).observe(integration,{subtree:true,attributes:true,attributeFilter:['disabled'],childList:true,characterData:true});
- syncControls();cabinet.dataset.systemIntegration='connected';
-}else cabinet.dataset.systemIntegration='control-map-missing';
 })();
