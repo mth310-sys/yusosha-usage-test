@@ -1,18 +1,22 @@
 import { test, expect } from '@playwright/test';
 
-const MODULE_URL = '/test_lupin_zero/src/gt-set-length-observation-spec.js';
+const OBSERVATION_MODULE_URL = '/test_lupin_zero/src/gt-set-length-observation-spec.js';
+const RESOLVER_MODULE_URL = '/test_lupin_zero/src/golden-time-resolver.js';
 
 test('published observed play data forbids treating GT as a fixed 40G or fixed 30+10 runtime', async ({ page }) => {
   await page.goto('/test_lupin_zero/');
   await page.waitForLoadState('networkidle');
 
-  const result = await page.evaluate(async (url) => {
-    const mod = await import(url);
+  const result = await page.evaluate(async ({ observationUrl, resolverUrl }) => {
+    const observation = await import(observationUrl);
+    const resolver = await import(resolverUrl);
     return {
-      spec: mod.GT_SET_LENGTH_OBSERVATION_SPEC,
-      summary: mod.summarizeGtSetLengthObservations()
+      spec: observation.GT_SET_LENGTH_OBSERVATION_SPEC,
+      summary: observation.summarizeGtSetLengthObservations(),
+      profile: resolver.createGoldenTimeSetProfile(),
+      policy: resolver.GOLDEN_TIME_PRODUCTION_POLICY
     };
-  }, MODULE_URL);
+  }, { observationUrl: OBSERVATION_MODULE_URL, resolverUrl: RESOLVER_MODULE_URL });
 
   expect(result.spec.publishedNominalSetGames).toBe(40);
   expect(result.spec.publishedNominalSetGamesMeaning).toBe('APPROXIMATE');
@@ -27,4 +31,16 @@ test('published observed play data forbids treating GT as a fixed 40G or fixed 3
   expect(result.summary.min).toBeLessThan(40);
   expect(result.summary.max).toBeGreaterThan(40);
   expect(result.summary.exactContinuationBattleEntryGame).toBeNull();
+
+  expect(result.profile.games).toBe(40);
+  expect(result.profile.gamesMeaning).toBe('APPROXIMATE_PUBLISHED_NOMINAL');
+  expect(result.profile.fixedSetLengthAllowed).toBe(false);
+  expect(result.profile.continuationBattleEntryGame).toBeNull();
+
+  expect(result.policy.publishedSetGamesApprox).toBe(40);
+  expect(result.policy.publishedSetGamesMeaning).toBe('APPROXIMATE');
+  expect(result.policy.fixedFortyGameRuntimeModelAllowed).toBe(false);
+  expect(result.policy.fixedThirtyPlusTenRuntimeModelAllowed).toBe(false);
+  expect(result.policy.continuationBattleExactEntryGame).toBeNull();
+  expect(result.policy.continuationBattleTimingEvidenceStatus).toBe('UNRESOLVED');
 });
