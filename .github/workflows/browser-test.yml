@@ -23,6 +23,8 @@ jobs:
             echo "CHECK $f"
             node --input-type=module --check < "$f"
           done
+      - name: Check Lupin BODY module syntax
+        run: node --check test_lupin_body/main.js
       - name: Check Lupin ZERO module syntax
         run: |
           set -e
@@ -33,5 +35,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Run Lupin B4 browser tests
         run: npx playwright test tests/lupin-b4-*.spec.js
+      - name: Run Lupin BODY integration test
+        run: npx playwright test tests/lupin-body-system-integration.spec.js
       - name: Run Lupin ZERO browser tests
         run: npx playwright test tests/lupin-zero-*.spec.js
