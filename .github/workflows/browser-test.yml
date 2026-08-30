@@ -31,9 +31,7 @@ jobs:
             node --input-type=module --check < "$f"
           done
       - run: npx playwright install --with-deps chromium
-      - name: Diagnose B4 browser tests
-        continue-on-error: true
+      - name: Run Lupin B4 browser tests
         run: npx playwright test tests/lupin-b4-*.spec.js
-      - name: Diagnose ZERO browser tests
-        continue-on-error: true
+      - name: Run Lupin ZERO browser tests
         run: npx playwright test tests/lupin-zero-*.spec.js
