@@ -31,4 +31,6 @@ jobs:
             node --input-type=module --check < "$f"
           done
       - run: npx playwright install --with-deps chromium
+      - name: Diagnose GT counter semantics regression
+        run: npx playwright test tests/lupin-zero-gt-set-length-observation.spec.js
       - run: npm run test:browser
