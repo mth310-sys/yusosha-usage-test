@@ -1,6 +1,7 @@
 {
   "name": "yusosha-usage-test",
   "private": true,
+  "type": "module",
   "scripts": {
     "test:browser": "playwright test"
   },
